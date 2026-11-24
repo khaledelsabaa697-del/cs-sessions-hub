@@ -84,13 +84,12 @@ export async function middleware(request: NextRequest) {
   const isLogin = path === "/login";
   const isSignup = path === "/signup";
   const isVerifyEmail = path === "/verify-email";
-  const isResetPassword = path === "/reset-password";
 
   // Determine role from profiles table
   const role = await getUserRole(supabaseUrl, supabaseAnonKey, request.cookies);
 
   // Redirect unauthenticated users to login
-  if (!role && !isLogin && !isSignup && !isVerifyEmail && !isResetPassword) {
+  if (!role && !isLogin && !isSignup && !isVerifyEmail) {
     const url = new URL(`/${locale}/login`, request.url);
     if (path !== "/") url.searchParams.set("next", `${pathname}${search}`);
     return copyCookies(NextResponse.redirect(url), response);
