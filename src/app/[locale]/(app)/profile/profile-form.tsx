@@ -11,10 +11,12 @@ const initialState: ProfileState = { status: "idle" };
 
 export function ProfileForm({
   locale,
+  fullName,
   displayName,
   optedOut,
 }: {
   locale: string;
+  fullName: string;
   displayName: string;
   optedOut: boolean;
 }) {
@@ -24,6 +26,22 @@ export function ProfileForm({
   return (
     <form action={formAction} className="space-y-5 p-5">
       <input type="hidden" name="locale" value={locale} />
+
+      <div>
+        <label htmlFor="full_name" className={labelClass}>
+          {t("fullName")}
+        </label>
+        <input
+          id="full_name"
+          name="full_name"
+          type="text"
+          required
+          minLength={2}
+          maxLength={80}
+          defaultValue={fullName}
+          className={inputClass}
+        />
+      </div>
 
       <div>
         <label htmlFor="display_name" className={labelClass}>

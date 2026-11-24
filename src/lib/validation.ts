@@ -39,6 +39,7 @@ export const resetPasswordSchema = z.object({
 });
 
 export const profileSchema = z.object({
+  full_name: fullNameSchema,
   display_name: z.string().trim().min(2).max(40),
   opted_out_of_leaderboard: z.boolean(),
 });

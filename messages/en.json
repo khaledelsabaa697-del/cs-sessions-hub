@@ -185,6 +185,7 @@
     "memberSince": "Member since",
     "leaderboard": "Leaderboard",
     "displayName": "Leaderboard name",
+    "fullName": "Full name",
     "displayNameHint": "Shown on the leaderboard instead of your full name.",
     "optOut": "Hide me from the leaderboard",
     "optOutHint": "Your scores and attendance stay private either way.",
@@ -210,6 +211,7 @@
       "weakPassword": "Password must be at least 8 characters.",
       "rateLimited": "Too many attempts. Please wait and try again.",
       "reauthFailed": "Could not send the verification code. Please try again.",
+      "full_name": "Enter your full name (2–80 characters).",
       "display_name": "Enter a display name between 2 and 40 characters.",
       "generic": "Could not save your changes. Please try again."
     }
@@ -306,7 +308,8 @@
         "tooMany": "Import at most 200 students at a time.",
         "duplicate": "Duplicate username in this file.",
         "forbidden": "Only the teacher can do that.",
-        "updateFailed": "Could not update the password. Please try again."
+        "updateFailed": "Could not update the password. Please try again.",
+      "roleChangeFailed": "Could not change the role. Please try again."
       },
       "colAttendance": "Attendance",
       "colAverage": "Average",
@@ -314,7 +317,16 @@
       "noSessions": "No sessions yet",
       "never": "Not yet",
       "metricsError": "Could not load class metrics. Apply the latest database migration and refresh.",
-      "exportCsv": "Export CSV"
+      "exportCsv": "Export CSV",
+      "changeRole": "Change role",
+      "changeRoleTitle": "Change role",
+      "changeRoleHint": "Upgrade {name} to a teacher or admin account.",
+      "roleStudent": "Student",
+      "roleTeacher": "Teacher",
+      "roleAdmin": "Admin",
+      "updateRole": "Update role",
+      "updatingRole": "Updating…",
+      "roleChanged": "Role updated."
     },
     "sessions": {
       "title": "Sessions & attendance",

@@ -21,6 +21,7 @@ export async function updateProfileAction(
   }
 
   const parsed = profileSchema.safeParse({
+    full_name: String(formData.get("full_name") ?? "").trim(),
     display_name: String(formData.get("display_name") ?? "").trim(),
     opted_out_of_leaderboard:
       formData.get("opted_out_of_leaderboard") === "on",
@@ -30,7 +31,13 @@ export async function updateProfileAction(
     const field = fieldFromZodError(parsed.error);
     return {
       status: "error",
-      error: t(field === "display_name" ? "errors.display_name" : "errors.generic"),
+      error: t(
+        field === "full_name"
+          ? "errors.full_name"
+          : field === "display_name"
+            ? "errors.display_name"
+            : "errors.generic",
+      ),
     };
   }
 
@@ -38,6 +45,7 @@ export async function updateProfileAction(
   const { error } = await supabase
     .from("profiles")
     .update({
+      full_name: parsed.data.full_name,
       display_name: parsed.data.display_name,
       opted_out_of_leaderboard: parsed.data.opted_out_of_leaderboard,
     })

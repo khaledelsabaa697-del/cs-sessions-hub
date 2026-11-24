@@ -281,3 +281,36 @@ export async function resetPasswordAction(
 
   return { status: "success", message: t("resetDone") };
 }
+
+export async function changeUserRoleAction(
+  _previous: ResetPasswordState,
+  formData: FormData,
+): Promise<ResetPasswordState> {
+  const locale = toLocale(formData.get("locale"));
+  const t = await getTranslations({ locale, namespace: "admin.students" });
+
+  if (!(await isCurrentUserAdmin())) {
+    return { status: "error", error: t("errors.forbidden") };
+  }
+
+  const studentId = String(formData.get("student_id") ?? "").trim();
+  const newRole = String(formData.get("new_role") ?? "").trim();
+
+  if (!studentId || !["student", "teacher", "admin"].includes(newRole)) {
+    return { status: "error", error: t("errors.invalid") };
+  }
+
+  const admin = createAdminClient();
+  const { error } = await admin
+    .from("profiles")
+    .update({ role: newRole })
+    .eq("id", studentId);
+
+  if (error) {
+    console.error("changeUserRoleAction failed:", error.message);
+    return { status: "error", error: t("errors.roleChangeFailed") };
+  }
+
+  revalidatePath(`/${locale}/admin/students`);
+  return { status: "success", message: t("roleChanged") };
+}

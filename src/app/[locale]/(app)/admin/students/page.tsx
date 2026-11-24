@@ -4,6 +4,7 @@ import { CreateStudentForm } from "@/components/admin/create-student-form";
 import { CsvDownloadButton } from "@/components/admin/csv-download-button";
 import { CsvImportForm } from "@/components/admin/csv-import-form";
 import { ResetPasswordDialog } from "@/components/admin/reset-password-dialog";
+import { ChangeRoleDialog } from "@/components/admin/change-role-dialog";
 import {
   Alert,
   Card,
@@ -205,11 +206,19 @@ export default async function AdminStudentsPage({
                             : t("never")}
                         </td>
                         <td className="px-5 py-3.5 text-end">
-                          <ResetPasswordDialog
-                            studentId={student.id}
-                            studentName={student.full_name}
-                            locale={locale}
-                          />
+                          <div className="flex flex-wrap justify-end gap-2">
+                            <ResetPasswordDialog
+                              studentId={student.id}
+                              studentName={student.full_name}
+                              locale={locale}
+                            />
+                            <ChangeRoleDialog
+                              studentId={student.id}
+                              studentName={student.full_name}
+                              currentRole="student"
+                              locale={locale}
+                            />
+                          </div>
                         </td>
                       </tr>
                     );

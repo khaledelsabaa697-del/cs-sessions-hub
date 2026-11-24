@@ -28,6 +28,7 @@ export default async function ProfilePage({
           <CardHeader title={t("leaderboard")} description={t("displayNameHint")} />
           <ProfileForm
             locale={locale}
+            fullName={profile.full_name}
             displayName={profile.display_name}
             optedOut={profile.opted_out_of_leaderboard}
           />
