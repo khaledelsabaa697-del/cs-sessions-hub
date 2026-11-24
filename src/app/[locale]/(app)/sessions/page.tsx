@@ -55,6 +55,7 @@ export default async function StudentSessionsPage({
       .from("session_materials")
       .select("id, session_id, type, title, content, file_path, mime_type, language")
       .order("created_at", { ascending: true })
+      .limit(500)
       .returns<MaterialRow[]>(),
   ]);
 

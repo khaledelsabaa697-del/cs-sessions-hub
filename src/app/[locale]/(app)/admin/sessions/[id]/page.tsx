@@ -82,6 +82,7 @@ export default async function AdminSessionPage({
       .select("id, type, title, content, file_path, language")
       .eq("session_id", sessionId.data)
       .order("created_at", { ascending: true })
+      .limit(100)
       .returns<MaterialRow[]>(),
   ]);
 
