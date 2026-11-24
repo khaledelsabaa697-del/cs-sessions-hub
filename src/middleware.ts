@@ -10,7 +10,11 @@ function copyCookies(target: NextResponse, source: NextResponse): NextResponse {
   return target;
 }
 
-async function getUserRole(supabaseUrl: string, supabaseAnonKey: string, cookies: NextRequest["cookies"]): Promise<"student" | "teacher" | "admin" | null> {
+async function getAuthContext(
+  supabaseUrl: string,
+  supabaseAnonKey: string,
+  cookies: NextRequest["cookies"],
+): Promise<{ role: "student" | "teacher" | "admin" | null; verified: boolean }> {
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -24,38 +28,18 @@ async function getUserRole(supabaseUrl: string, supabaseAnonKey: string, cookies
 
   const { data } = await supabase.auth.getUser();
   const user = data.user;
-  if (!user) return null;
+  if (!user) return { role: null, verified: false };
 
-  // Fetch role from profiles table
   const { data: profile } = await supabase
     .from("profiles")
     .select("role")
     .eq("id", user.id)
     .maybeSingle();
 
-  return (profile?.role as "student" | "teacher" | "admin") ?? "student";
-}
-
-async function isEmailVerified(supabaseUrl: string, supabaseAnonKey: string, cookies: NextRequest["cookies"]): Promise<boolean> {
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      getAll() {
-        return cookies.getAll();
-      },
-      setAll() {
-        // no-op in middleware read
-      },
-    },
-  });
-
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
-  if (!user) return false;
-
-  // @cshub.local accounts are legacy and don't require email verification
-  if (user.email?.endsWith("@cshub.local")) return true;
-
-  return !!user.email_confirmed_at;
+  const role = (profile?.role as "student" | "teacher" | "admin") ?? "student";
+  const verified =
+    user.email?.endsWith("@cshub.local") === true || !!user.email_confirmed_at;
+  return { role, verified };
 }
 
 export async function middleware(request: NextRequest) {
@@ -85,8 +69,7 @@ export async function middleware(request: NextRequest) {
   const isSignup = path === "/signup";
   const isVerifyEmail = path === "/verify-email";
 
-  // Determine role from profiles table
-  const role = await getUserRole(supabaseUrl, supabaseAnonKey, request.cookies);
+  const { role, verified } = await getAuthContext(supabaseUrl, supabaseAnonKey, request.cookies);
 
   // Redirect unauthenticated users to login
   if (!role && !isLogin && !isSignup && !isVerifyEmail) {
@@ -112,7 +95,6 @@ export async function middleware(request: NextRequest) {
 
   // Require email verification for student pages (except @cshub.local legacy accounts)
   if (role === "student" && !isLogin && !isSignup && !isVerifyEmail) {
-    const verified = await isEmailVerified(supabaseUrl, supabaseAnonKey, request.cookies);
     if (!verified) {
       const url = new URL(`/${locale}/verify-email`, request.url);
       url.searchParams.set("next", `${pathname}${search}`);

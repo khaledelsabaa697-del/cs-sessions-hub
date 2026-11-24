@@ -62,16 +62,18 @@ export default async function StudentSessionsPage({
   const sessions = sessionsResult.data ?? [];
   const materials = materialsResult.data ?? [];
 
-  // Generate signed URLs for file-based materials.
+  // Generate signed URLs for file-based materials (in parallel).
   const signedUrls = new Map<string, string>();
-  for (const m of materials) {
-    if (m.file_path) {
-      const { data } = await supabase.storage
-        .from("session-materials")
-        .createSignedUrl(m.file_path, 3600);
-      if (data?.signedUrl) signedUrls.set(m.id, data.signedUrl);
-    }
-  }
+  await Promise.all(
+    materials
+      .filter((m) => m.file_path)
+      .map(async (m) => {
+        const { data } = await supabase.storage
+          .from("session-materials")
+          .createSignedUrl(m.file_path as string, 3600);
+        if (data?.signedUrl) signedUrls.set(m.id, data.signedUrl);
+      }),
+  );
 
   const materialsBySession = new Map<string, MaterialRow[]>();
   for (const m of materials) {
