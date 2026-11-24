@@ -132,10 +132,20 @@
       "turnstileFailed": "فشل التحقق من CAPTCHA. حاول مرة أخرى.",
       "captchaNotConfigured": "لم يتم إعداد التحقق من CAPTCHA. يرجى التواصل مع مسؤول الموقع.",
       "invalidOrExpiredCode": "الرمز غير صحيح أو منتهي الصلاحية. اطلب رمزاً جديداً.",
+      "invalidResetLink": "رابط إعادة تعيين كلمة المرور غير صالح أو منتهي.",
+      "resetFailed": "تعذّر تحديث كلمة المرور. حاول مرة أخرى.",
       "invalid": "تحقّق من الحقول وحاول مرة أخرى."
     },
     "showPassword": "إظهار كلمة المرور",
-    "hidePassword": "إخفاء كلمة المرور"
+    "hidePassword": "إخفاء كلمة المرور",
+    "resetPasswordTitle": "تعيين كلمة مرور جديدة",
+    "resetPasswordSubtitle": "اختر كلمة مرور جديدة لحسابك.",
+    "newPassword": "كلمة المرور الجديدة",
+    "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
+    "resetPassword": "تحديث كلمة المرور",
+    "resetting": "جارٍ التحديث…",
+    "passwordUpdated": "تم تحديث كلمة المرور. يمكنك الآن تسجيل الدخول.",
+    "verifying": "جارٍ التحقق من الرابط"
   },
   "dashboard": {
     "greeting": "أهلًا بعودتك، {name}",
@@ -182,6 +192,10 @@
     "save": "حفظ التغييرات",
     "saving": "جارٍ الحفظ…",
     "passwordNote": "تغيير كلمة المرور يتم عن طريق المعلّم.",
+    "changePassword": "تغيير كلمة المرور",
+    "changePasswordHint": "سنرسل لك رابطًا آمنًا لتعيين كلمة مرور جديدة.",
+    "changePasswordSent": "تحقق من بريدك الإلكتروني للحصول على رابط تغيير كلمة المرور.",
+    "changePasswordButton": "إرسال بريد التحقق",
     "errors": {
       "display_name": "أدخل اسمًا من 2 إلى 40 حرفًا.",
       "generic": "تعذّر حفظ التغييرات. حاول مرة أخرى."

@@ -132,10 +132,20 @@
       "turnstileFailed": "CAPTCHA verification failed. Please try again.",
       "captchaNotConfigured": "CAPTCHA is not configured. Please contact the site administrator.",
       "invalidOrExpiredCode": "The code is invalid or has expired. Request a new code.",
+      "invalidResetLink": "This password reset link is invalid or has expired.",
+      "resetFailed": "Could not update your password. Please try again.",
       "invalid": "Check the fields and try again."
     },
     "showPassword": "Show password",
-    "hidePassword": "Hide password"
+    "hidePassword": "Hide password",
+    "resetPasswordTitle": "Set a new password",
+    "resetPasswordSubtitle": "Choose a new password for your account.",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
+    "resetPassword": "Update password",
+    "resetting": "Updating…",
+    "passwordUpdated": "Your password has been updated. You can now sign in.",
+    "verifying": "Verifying your link"
   },
   "dashboard": {
     "greeting": "Welcome back, {name}",
@@ -182,6 +192,10 @@
     "save": "Save changes",
     "saving": "Saving…",
     "passwordNote": "Password changes are handled by your teacher.",
+    "changePassword": "Change password",
+    "changePasswordHint": "We'll email you a secure link to set a new password.",
+    "changePasswordSent": "Check your email for a link to change your password.",
+    "changePasswordButton": "Send verification email",
     "errors": {
       "display_name": "Enter a display name between 2 and 40 characters.",
       "generic": "Could not save your changes. Please try again."

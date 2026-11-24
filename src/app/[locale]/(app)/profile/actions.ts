@@ -55,3 +55,41 @@ export async function updateProfileAction(
 
   return { status: "success", message: t("saved") };
 }
+
+export async function requestPasswordChangeAction(
+  _previous: ProfileState,
+  formData: FormData,
+): Promise<ProfileState> {
+  const locale = toLocale(formData.get("locale"));
+  const t = await getTranslations({ locale, namespace: "profile" });
+
+  const profile = await getCurrentProfile();
+  if (!profile) {
+    return { status: "error", error: t("errors.generic") };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const email = user?.email;
+  if (!email) {
+    return { status: "error", error: t("errors.generic") };
+  }
+
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ||
+    "http://localhost:3000";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${siteUrl}/${locale}/reset-password`,
+  });
+
+  if (error) {
+    console.error("requestPasswordChangeAction failed:", error.message);
+    return { status: "error", error: t("errors.generic") };
+  }
+
+  return { status: "success", message: t("changePasswordSent") };
+}

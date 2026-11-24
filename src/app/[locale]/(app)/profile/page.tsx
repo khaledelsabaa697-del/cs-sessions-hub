@@ -4,6 +4,7 @@ import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { formatDate } from "@/lib/utils";
 import { ProfileForm } from "./profile-form";
+import { PasswordChangeForm } from "./password-change-form";
 
 export default async function ProfilePage({
   params,
@@ -58,9 +59,12 @@ export default async function ProfilePage({
               </dd>
             </div>
           </dl>
-          <p className="border-t border-slate-100 px-5 py-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
-            {t("passwordNote")}
-          </p>
+          <div className="border-t border-slate-100 px-5 py-4 dark:border-slate-800">
+            <h3 className="mb-3 text-sm font-semibold text-slate-900 dark:text-white">
+              {t("changePassword")}
+            </h3>
+            <PasswordChangeForm locale={locale} />
+          </div>
         </Card>
       </div>
     </div>
