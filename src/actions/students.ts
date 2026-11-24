@@ -314,3 +314,42 @@ export async function changeUserRoleAction(
   revalidatePath(`/${locale}/admin/students`);
   return { status: "success", message: t("roleChanged") };
 }
+
+export async function deleteStudentAccountAction(
+  _previous: ResetPasswordState,
+  formData: FormData,
+): Promise<ResetPasswordState> {
+  const locale = toLocale(formData.get("locale"));
+  const t = await getTranslations({ locale, namespace: "admin.students" });
+
+  if (!(await isCurrentUserAdmin())) {
+    return { status: "error", error: t("errors.forbidden") };
+  }
+
+  const studentId = String(formData.get("student_id") ?? "").trim();
+  if (!studentId) {
+    return { status: "error", error: t("errors.invalid") };
+  }
+
+  const admin = createAdminClient();
+
+  // Only allow deleting student accounts.
+  const { data: profile } = await admin
+    .from("profiles")
+    .select("role")
+    .eq("id", studentId)
+    .maybeSingle();
+
+  if (!profile || profile.role !== "student") {
+    return { status: "error", error: t("errors.notFound") };
+  }
+
+  const { error } = await admin.auth.admin.deleteUser(studentId);
+  if (error) {
+    console.error("deleteStudentAccountAction failed:", error.message);
+    return { status: "error", error: t("errors.deleteFailed") };
+  }
+
+  revalidatePath(`/${locale}/admin/students`);
+  return { status: "success", message: t("accountDeleted") };
+}

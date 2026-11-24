@@ -5,6 +5,7 @@ import { CsvDownloadButton } from "@/components/admin/csv-download-button";
 import { CsvImportForm } from "@/components/admin/csv-import-form";
 import { ResetPasswordDialog } from "@/components/admin/reset-password-dialog";
 import { ChangeRoleDialog } from "@/components/admin/change-role-dialog";
+import { DeleteAccountDialog } from "@/components/admin/delete-account-dialog";
 import {
   Alert,
   Card,
@@ -26,6 +27,7 @@ type StudentRow = {
   student_code: string;
   full_name: string;
   display_name: string;
+  role: string;
   created_at: string;
   opted_out_of_leaderboard: boolean;
 };
@@ -54,9 +56,8 @@ export default async function AdminStudentsPage({
   let request = supabase
     .from("profiles")
     .select(
-      "id, username, student_code, full_name, display_name, created_at, opted_out_of_leaderboard",
+      "id, username, student_code, full_name, display_name, role, created_at, opted_out_of_leaderboard",
     )
-    .eq("role", "student")
     .order("created_at", { ascending: false })
     .limit(200);
 
@@ -140,6 +141,7 @@ export default async function AdminStudentsPage({
                   <tr>
                     <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStudent")}</th>
                     <th scope="col" className="px-5 py-3 text-start font-medium">{t("colCode")}</th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("role")}</th>
                     <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAttendance")}</th>
                     <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAverage")}</th>
                     <th scope="col" className="px-5 py-3 text-start font-medium">{t("colLastAttended")}</th>
@@ -169,6 +171,11 @@ export default async function AdminStudentsPage({
                         <td className="px-5 py-3.5">
                           <span className="font-mono text-xs text-slate-600 dark:text-slate-300">
                             {student.student_code}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5">
+                          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                            {student.role}
                           </span>
                         </td>
                         <td className="whitespace-nowrap px-5 py-3.5">
@@ -215,9 +222,16 @@ export default async function AdminStudentsPage({
                             <ChangeRoleDialog
                               studentId={student.id}
                               studentName={student.full_name}
-                              currentRole="student"
+                              currentRole={student.role}
                               locale={locale}
                             />
+                            {student.role === "student" ? (
+                              <DeleteAccountDialog
+                                studentId={student.id}
+                                studentName={student.full_name}
+                                locale={locale}
+                              />
+                            ) : null}
                           </div>
                         </td>
                       </tr>

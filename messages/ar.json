@@ -309,7 +309,8 @@
         "duplicate": "اسم مستخدم مكرر في هذا الملف.",
         "forbidden": "هذا الإجراء للمعلّم فقط.",
         "updateFailed": "تعذّر تحديث كلمة المرور. حاول مرة أخرى.",
-        "roleChangeFailed": "تعذّر تغيير الدور. حاول مرة أخرى."
+        "roleChangeFailed": "تعذّر تغيير الدور. حاول مرة أخرى.",
+      "deleteFailed": "تعذّر حذف الحساب. حاول مرة أخرى."
       },
       "colAttendance": "الحضور",
       "colAverage": "المعدل",
@@ -326,7 +327,12 @@
       "roleAdmin": "مسؤول",
       "updateRole": "تحديث الدور",
       "updatingRole": "جارٍ التحديث…",
-      "roleChanged": "تم تحديث الدور."
+      "roleChanged": "تم تحديث الدور.",
+      "deleteAccount": "حذف الحساب",
+      "deleteAccountTitle": "حذف الحساب",
+      "deleteConfirm": "سيتم حذف {name} وجميع بياناته نهائيًا. لا يمكن التراجع عن هذا.",
+      "deleting": "جارٍ الحذف…",
+      "accountDeleted": "تم حذف الحساب."
     },
     "sessions": {
       "title": "الجلسات والحضور",
