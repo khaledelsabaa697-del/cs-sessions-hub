@@ -114,6 +114,7 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 | `src/app/[locale]/(app)/dashboard/page.tsx` | Check-in link in active-session card. |
 | `messages/en.json`, `messages/ar.json` | Nav key `checkIn`; GEMINI wording → `AI_API_KEY`/`AI_BASE_URL`. |
 | `README.md`, `src/lib/grading/mock.ts` | GEMINI wording → AI_* wording. |
+| `src/app/[locale]/(app)/profile/*`, `src/app/[locale]/reset-password/*`, `src/middleware.ts` | Self-service password change via verification email (requestPasswordChangeAction + reset-password page). |
 
 ---
 
