@@ -1,10 +1,7 @@
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import QRCode from "qrcode";
 import { Link } from "@/i18n/navigation";
 import { AttendanceForm } from "@/components/admin/attendance-form";
-import { CodePanel } from "@/components/admin/code-panel";
 import { CsvDownloadButton } from "@/components/admin/csv-download-button";
 import { DeleteSessionForm } from "@/components/admin/delete-session-form";
 import { EditSessionForm } from "@/components/admin/edit-session-form";
@@ -96,37 +93,6 @@ export default async function AdminSessionPage({
     (attendanceResult.data ?? []).map((row) => [row.student_id, row.status]),
   ) as Record<string, AttendanceStatus>;
 
-  const active = Boolean(
-    session.attendance_code &&
-      session.code_expires_at &&
-      new Date(session.code_expires_at).getTime() > Date.now(),
-  );
-
-  let checkInUrl: string | null = null;
-  let qrDataUrl: string | null = null;
-
-  if (active && session.attendance_code) {
-    const headerList = await headers();
-    const host =
-      headerList.get("x-forwarded-host") ?? headerList.get("host") ?? "localhost:3000";
-    const forwardedProto = headerList.get("x-forwarded-proto")?.split(",")[0]?.trim();
-    const proto = forwardedProto || (host.startsWith("localhost") ? "http" : "https");
-    checkInUrl = new URL(
-      `/${locale}/check-in?code=${encodeURIComponent(session.attendance_code)}`,
-      `${proto}://${host}`,
-    ).toString();
-
-    try {
-      qrDataUrl = await QRCode.toDataURL(checkInUrl, {
-        margin: 1,
-        width: 400,
-        errorCorrectionLevel: "M",
-      });
-    } catch (error) {
-      console.error("QR generation failed:", error);
-    }
-  }
-
   const hasError = Boolean(
     sessionsResult.error || studentsResult.error || attendanceResult.error,
   );
@@ -152,16 +118,6 @@ export default async function AdminSessionPage({
       />
 
       {hasError ? <Alert>{tc("errorBody")}</Alert> : null}
-
-      <CodePanel
-        locale={locale}
-        sessionId={session.id}
-        code={session.attendance_code}
-        expiresAt={session.code_expires_at}
-        active={active}
-        qrDataUrl={qrDataUrl}
-        checkInUrl={checkInUrl}
-      />
 
       <AttendanceForm
         locale={locale}

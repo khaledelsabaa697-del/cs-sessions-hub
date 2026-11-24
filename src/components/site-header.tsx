@@ -41,7 +41,6 @@ export function SiteHeader({ profile }: { profile: Profile }) {
       ]
     : [
         { href: "/dashboard", label: t("dashboard"), exact: true },
-        { href: "/check-in", label: t("checkIn") },
         { href: "/sessions", label: t("sessions") },
         { href: "/assignments", label: t("assignments") },
         { href: "/attendance", label: t("attendance") },

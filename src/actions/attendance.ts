@@ -6,8 +6,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { rateLimit } from "@/lib/rate-limit";
 import { createClient } from "@/lib/supabase/server";
-import { checkInSchema } from "@/lib/validation";
-import type { AttendanceStatus, CheckInState } from "@/lib/types";
+import type { AttendanceStatus } from "@/lib/types";
 
 type MarkAttendanceRow = {
   session_id: string;
@@ -25,66 +24,6 @@ type RecordAttendanceResult =
       alreadyRecorded: string[];
       notFound: string[];
     };
-
-export async function checkInAction(
-  _previous: CheckInState,
-  formData: FormData,
-): Promise<CheckInState> {
-  const locale = toLocale(formData.get("locale"));
-  const t = await getTranslations({ locale, namespace: "checkIn" });
-
-  const profile = await getCurrentProfile();
-  if (!profile) {
-    return { status: "error", error: t("errors.signedOut") };
-  }
-  if (profile.role !== "student") {
-    return { status: "error", error: t("errors.studentsOnly") };
-  }
-
-  const parsed = checkInSchema.safeParse({
-    code: String(formData.get("code") ?? ""),
-  });
-
-  if (!parsed.success) {
-    return { status: "error", error: t("errors.invalidFormat") };
-  }
-
-  const limit = rateLimit(`checkin:${profile.id}`, 10, 5 * 60_000);
-  if (!limit.ok) {
-    return { status: "error", error: t("errors.tooMany") };
-  }
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("mark_attendance", {
-    p_code: parsed.data.code,
-  });
-
-  if (error) {
-    const message = error.message ?? "";
-    if (message.includes("invalid_code")) {
-      return { status: "error", error: t("errors.invalidCode") };
-    }
-    console.error("checkInAction failed:", message);
-    return { status: "error", error: t("errors.generic") };
-  }
-
-  const rows = (data ?? []) as MarkAttendanceRow[];
-  const row = rows[0];
-  if (!row) {
-    return { status: "error", error: t("errors.generic") };
-  }
-
-  revalidatePath(`/${locale}/dashboard`);
-  revalidatePath(`/${locale}/check-in`);
-  revalidatePath(`/${locale}/attendance`);
-
-  return {
-    status: "success",
-    message: t("checkedIn"),
-    sessionTitle: row.session_title,
-    attendanceStatus: row.status,
-  };
-}
 
 export async function recordAttendanceAction(
   _previous: RecordAttendanceResult,

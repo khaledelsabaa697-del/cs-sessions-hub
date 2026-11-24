@@ -65,7 +65,6 @@ export default async function StudentDashboard({
 
   const profile = await requireProfile(locale);
   const t = await getTranslations("dashboard");
-  const tCheckIn = await getTranslations("checkIn");
 
   const supabase = await createClient();
   const [attendanceResult, sessionCountResult, submissionsResult, badgesResult, upcomingResult, announcementsResult, activeSessionResult, breakdownResult] =
@@ -195,9 +194,6 @@ export default async function StudentDashboard({
               </p>
             ) : null}
           </div>
-          <Link href="/check-in" className={buttonSecondary}>
-            {tCheckIn("submit")}
-          </Link>
         </Card>
       ) : null}
 
