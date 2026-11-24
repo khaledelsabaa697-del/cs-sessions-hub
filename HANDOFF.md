@@ -47,7 +47,7 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 3. **Theme**: Egypt navy `#0B3C6F` and bronze `#B58A5B`, dark and light. No purple.
 4. **Logos**: `public/brand/logo-dark-*` in dark mode, `logo-light-*` in light mode.
 5. **Assignments** accept file upload, pasted code text, or both; one shared grading function; student code is treated as data, never executed.
-6. **Self-signup**: 6-digit email code; `student_code` (CS-XXXX) auto-generated; role always `student`; teachers/admins created only by admin; username login still works for legacy `@cshub.local` accounts.
+6. **Self-signup**: 8-digit email code; `student_code` (CS-XXXX) auto-generated; role always `student`; teachers/admins created only by admin; username login still works for legacy `@cshub.local` accounts.
 7. **i18n**: no `.` inside key names (nested objects only); every key in BOTH `en.json` and `ar.json`.
 8. **AI grading**: provider-agnostic, OpenAI-compatible (`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`), server-side only, structured JSON output, clamps score 0..max_score.
 9. **Teacher access**: teachers can grade, review, view analytics, manage sessions/assignments/announcements, record attendance. Admin-only: student management (`/admin/students`), points config (`/admin/points`).

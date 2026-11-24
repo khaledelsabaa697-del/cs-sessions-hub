@@ -78,7 +78,7 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
     e.preventDefault();
     setError(null);
 
-    if (code.trim().length !== 6) {
+    if (code.trim().length !== 8) {
       setError(t("errors.invalidCode"));
       return;
     }
@@ -115,7 +115,7 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
     setCooldown(0);
   }
 
-  const codeComplete = code.trim().length === 6;
+  const codeComplete = code.trim().length === 8;
 
   return (
     <div className="space-y-4">
@@ -146,12 +146,12 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
               id="verification_code"
               type="text"
               inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
+              pattern="[0-9]{8}"
+              maxLength={8}
               autoComplete="one-time-code"
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="000000"
+              onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 8))}
+              placeholder="00000000"
               className={`${inputClass} text-center font-mono text-lg tracking-[0.4em]`}
             />
             <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
