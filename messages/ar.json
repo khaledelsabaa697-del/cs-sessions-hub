@@ -319,6 +319,7 @@
       "never": "لم يحضر بعد",
       "metricsError": "تعذّر تحميل مؤشرات الصف. طبّق أحدث ترحيل لقاعدة البيانات ثم حدّث الصفحة.",
       "exportCsv": "تصدير CSV",
+      "role": "الدور",
       "changeRole": "تغيير الدور",
       "changeRoleTitle": "تغيير الدور",
       "changeRoleHint": "ترقية {name} إلى حساب معلّم أو مسؤول.",
@@ -406,12 +407,27 @@
         "saveFailed": "تعذّر حفظ التغييرات. حاول مرة أخرى.",
         "notFound": "لم تعد هذه الجلسة موجودة.",
         "codeFailed": "تعذّر إنشاء الرمز. حاول مرة أخرى.",
-        "noStudents": "لا يوجد طلاب لحفظ حضورهم."
+        "noStudents": "لا يوجد طلاب لحفظ حضورهم.",
+        "fileMissing": "الرجاء اختيار ملف.",
+        "fileSize": "الملف كبير جدًا (الحد الأقصى 50 ميجابايت).",
+        "uploadFailed": "فشل الرفع. حاول مرة أخرى."
       },
       "saveDetails": "حفظ التفاصيل",
       "savingDetails": "جارٍ الحفظ…",
       "expiresLabel": "ينتهي خلال",
-      "exportAttendance": "تصدير الحضور"
+      "exportAttendance": "تصدير الحضور",
+      "materialsTitle": "مواد الجلسة",
+      "materialsSubtitle": "شارك ملفات ومقاطع فيديو ونصوص وصور ودفاتر كود مع الطلاب.",
+      "addMaterial": "إضافة مادة",
+      "materialType": "النوع",
+      "materialTitle": "العنوان",
+      "materialContent": "نص / كود",
+      "materialLanguage": "اللغة (للكود)",
+      "materialFile": "ملف",
+      "materialAdded": "تمت إضافة المادة.",
+      "materialDeleted": "تمت إزالة المادة.",
+      "noMaterials": "لا توجد مواد بعد.",
+      "deleteMaterial": "إزالة"
     },
     "assignments": {
       "title": "الواجبات والتصحيح",
@@ -994,6 +1010,12 @@
     "points": "النقاط",
     "you": "أنت",
     "privacyNote": "تظهر أسماء لوحة الصدارة فقط. ويمكن لكل طالب إخفاء نفسه من ملفه الشخصي."
+  },
+  "sessions": {
+    "title": "مواد الجلسات",
+    "subtitle": "مواد شاركها المعلّم لكل جلسة.",
+    "noMaterials": "لا توجد مواد بعد.",
+    "noSessions": "لا توجد جلسات بعد."
   },
   "csv": {
     "preparing": "جارٍ التحضير…",

@@ -131,6 +131,11 @@ export type AssignmentFormState =
   | { status: "error"; error: string }
   | { status: "success"; message: string };
 
+export type MaterialState =
+  | { status: "idle" }
+  | { status: "error"; error: string }
+  | { status: "success"; message: string };
+
 export type SubmissionReviewState =
   | { status: "idle" }
   | { status: "error"; error: string }

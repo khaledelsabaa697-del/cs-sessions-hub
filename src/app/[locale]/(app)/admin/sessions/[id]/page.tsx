@@ -8,6 +8,7 @@ import { CodePanel } from "@/components/admin/code-panel";
 import { CsvDownloadButton } from "@/components/admin/csv-download-button";
 import { DeleteSessionForm } from "@/components/admin/delete-session-form";
 import { EditSessionForm } from "@/components/admin/edit-session-form";
+import { MaterialsPanel } from "@/components/admin/materials-panel";
 import { Alert, Card, PageHeader, buttonSecondary } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
@@ -36,6 +37,15 @@ type AttendanceRow = {
   status: AttendanceStatus;
 };
 
+type MaterialRow = {
+  id: string;
+  type: string;
+  title: string;
+  content: string | null;
+  file_path: string | null;
+  language: string | null;
+};
+
 export default async function AdminSessionPage({
   params,
 }: {
@@ -54,7 +64,7 @@ export default async function AdminSessionPage({
   const tc = await getTranslations("common");
 
   const supabase = await createClient();
-  const [sessionsResult, studentsResult, attendanceResult] = await Promise.all([
+  const [sessionsResult, studentsResult, attendanceResult, materialsResult] = await Promise.all([
     supabase.rpc("admin_list_sessions"),
     supabase
       .from("profiles")
@@ -67,6 +77,12 @@ export default async function AdminSessionPage({
       .select("student_id, status")
       .eq("session_id", sessionId.data)
       .returns<AttendanceRow[]>(),
+    supabase
+      .from("session_materials")
+      .select("id, type, title, content, file_path, language")
+      .eq("session_id", sessionId.data)
+      .order("created_at", { ascending: true })
+      .returns<MaterialRow[]>(),
   ]);
 
   const session = ((sessionsResult.data ?? []) as AdminSessionRow[]).find(
@@ -151,6 +167,12 @@ export default async function AdminSessionPage({
         sessionId={session.id}
         students={students}
         existing={existing}
+      />
+
+      <MaterialsPanel
+        locale={locale}
+        sessionId={session.id}
+        materials={materialsResult.data ?? []}
       />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">

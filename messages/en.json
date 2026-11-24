@@ -319,6 +319,7 @@
       "never": "Not yet",
       "metricsError": "Could not load class metrics. Apply the latest database migration and refresh.",
       "exportCsv": "Export CSV",
+      "role": "Role",
       "changeRole": "Change role",
       "changeRoleTitle": "Change role",
       "changeRoleHint": "Upgrade {name} to a teacher or admin account.",
@@ -406,12 +407,27 @@
         "saveFailed": "Could not save the changes. Please try again.",
         "notFound": "This session no longer exists.",
         "codeFailed": "Could not generate a code. Please try again.",
-        "noStudents": "There are no students to mark."
+        "noStudents": "There are no students to mark.",
+      "fileMissing": "Please choose a file.",
+      "fileSize": "File is too large (max 50 MB).",
+      "uploadFailed": "Upload failed. Please try again."
       },
       "saveDetails": "Save details",
       "savingDetails": "Saving…",
       "expiresLabel": "Expires in",
-      "exportAttendance": "Export attendance"
+      "exportAttendance": "Export attendance",
+      "materialsTitle": "Session materials",
+      "materialsSubtitle": "Share files, videos, text, images, notebooks and code with students.",
+      "addMaterial": "Add material",
+      "materialType": "Type",
+      "materialTitle": "Title",
+      "materialContent": "Text / code content",
+      "materialLanguage": "Language (for code)",
+      "materialFile": "File",
+      "materialAdded": "Material added.",
+      "materialDeleted": "Material removed.",
+      "noMaterials": "No materials yet.",
+      "deleteMaterial": "Remove"
     },
     "assignments": {
       "title": "Assignments & grading",
@@ -994,6 +1010,12 @@
     "points": "Points",
     "you": "You",
     "privacyNote": "Only leaderboard names are shown. Every student can hide themselves from their profile."
+  },
+  "sessions": {
+    "title": "Session materials",
+    "subtitle": "Materials shared by your teacher for each session.",
+    "noMaterials": "No materials yet.",
+    "noSessions": "No sessions yet."
   },
   "csv": {
     "preparing": "Preparing…",
