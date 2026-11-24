@@ -44,9 +44,9 @@ type SubmissionExportRow = {
   similarity_score: number | string | null;
 };
 
-async function isCurrentUserAdmin(): Promise<boolean> {
+async function isCurrentUserStaff(): Promise<boolean> {
   const profile = await getCurrentProfile();
-  return profile?.role === "admin";
+  return profile?.role === "admin" || profile?.role === "teacher";
 }
 
 function failed(error: string): CsvExportResult {
@@ -59,7 +59,7 @@ export async function exportStudentsCsvAction(
   const locale = toLocale(localeRaw);
   const t = await getTranslations({ locale, namespace: "csv" });
 
-  if (!(await isCurrentUserAdmin())) return failed(t("forbidden"));
+  if (!(await isCurrentUserStaff())) return failed(t("forbidden"));
 
   const supabase = await createClient();
   const [studentsResult, metricsResult, pointsResult] = await Promise.all([
@@ -136,7 +136,7 @@ export async function exportSessionCsvAction(
   const locale = toLocale(localeRaw);
   const t = await getTranslations({ locale, namespace: "csv" });
 
-  if (!(await isCurrentUserAdmin())) return failed(t("forbidden"));
+  if (!(await isCurrentUserStaff())) return failed(t("forbidden"));
 
   const sessionId = idSchema.safeParse(sessionIdRaw);
   if (!sessionId.success) return failed(t("failed"));
@@ -191,7 +191,7 @@ export async function exportAssignmentCsvAction(
   const locale = toLocale(localeRaw);
   const t = await getTranslations({ locale, namespace: "csv" });
 
-  if (!(await isCurrentUserAdmin())) return failed(t("forbidden"));
+  if (!(await isCurrentUserStaff())) return failed(t("forbidden"));
 
   const assignmentId = idSchema.safeParse(assignmentIdRaw);
   if (!assignmentId.success) return failed(t("failed"));

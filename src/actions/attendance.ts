@@ -134,17 +134,39 @@ export async function recordAttendanceAction(
     return { status: "error", error: t("errors.noIds") };
   }
 
-  // Find matching students by student_code OR id
-  const { data: students, error: studentsError } = await supabase
-    .from("profiles")
-    .select("id, student_code, full_name")
-    .eq("role", "student")
-    .or(`id.in.(${uniqueIds.map((id) => `"${id}"`).join(",")}),student_code.in.(${uniqueIds.map((id) => `"${id}"`).join(",")})`);
+  // Find matching students by student_code OR id. Only real UUIDs may go into
+  // the `id` filter — casting a code like "CS-0002" to uuid aborts the query.
+  const uuidPattern =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const uuidIds = uniqueIds.filter((id) => uuidPattern.test(id));
+  const codeIds = uniqueIds.filter(
+    (id) => !uuidPattern.test(id) && /^[A-Za-z0-9_-]{1,64}$/.test(id),
+  );
+  const filters: string[] = [];
+  if (uuidIds.length > 0) {
+    filters.push(`id.in.(${uuidIds.map((id) => `"${id}"`).join(",")})`);
+  }
+  if (codeIds.length > 0) {
+    filters.push(`student_code.in.(${codeIds.map((id) => `"${id}"`).join(",")})`);
+  }
 
-  if (studentsError) {
-    console.error("recordAttendanceAction student lookup failed:", studentsError.message);
+  const studentsResult = filters.length
+    ? await supabase
+        .from("profiles")
+        .select("id, student_code, full_name")
+        .eq("role", "student")
+        .or(filters.join(","))
+    : {
+        data: [] as Array<{ id: string; student_code: string; full_name: string }>,
+        error: null,
+      };
+
+  if (studentsResult.error) {
+    console.error("recordAttendanceAction student lookup failed:", studentsResult.error.message);
     return { status: "error", error: t("errors.lookupFailed") };
   }
+
+  const students = studentsResult.data ?? [];
 
   const foundIds = new Set(students?.map((s) => s.id) ?? []);
   const foundCodes = new Set(students?.map((s) => s.student_code) ?? []);

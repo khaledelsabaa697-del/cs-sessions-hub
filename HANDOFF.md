@@ -1,6 +1,6 @@
 # HANDOFF — CS Sessions Hub (Teacher-Side Fixes)
 
-Generated 2026-11-21. Branch `feature/self-signup`, working tree **clean**.  
+Generated 2026-11-21, updated 2026-11-24. Branch `feature/self-signup`, working tree **dirty** (UI-only teacher access, check-in, RLS fixes).  
 Last commit `2a0be93 fix: three production bugs`; previous `136e0f4 fix: allow teachers to review submissions`.  
 `npx tsc --noEmit` passes; `npm run check:i18n` passes; `npm run build` passes. **No secret values are included here.**
 
@@ -23,7 +23,7 @@ src/lib/{auth,validation,rate-limit,turnstile,env,env-client,types}.ts
 src/lib/supabase/{client,server,admin}.ts
 src/lib/grading/{provider,service,schema,prompt,mock}.ts  # AI grading pipeline
 src/middleware.ts                                       # locale + role + verification gate
-messages/{en,ar}.json (858 keys each) · supabase/migrations/ (18 files)
+messages/{en,ar}.json (859 keys each) · supabase/migrations/ (17 files)
 ```
 
 **Run locally**:
@@ -97,6 +97,23 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 | `20261121000002_fix_teacher_similarity_access.sql` | `admin_similarity_pairs` → `is_teacher_or_admin` |
 | `20261121000003_fix_teacher_profile_access.sql` | Profiles SELECT policy → `is_teacher_or_admin` |
 | `20261121000004_fix_remaining_admin_rpcs.sql` | `admin_session_overview`, `admin_student_metrics`, `admin_analytics`, `admin_points_overview` → `is_teacher_or_admin` (drop + create with unique delimiters) |
+| `20261124000001_fix_staff_rls_and_rpcs.sql` | **New.** Corrects `admin_analytics` (`av.avg_percent`), corrects `admin_points_overview` ambiguity, teacher SELECT on `submissions`, staff policies on `submission_similarity` and storage, staff `generate_attendance_code`, announcements staff RLS. |
+| *(renamed)* `20260615000000_text_submission.sql` → `20260615000001_text_submission.sql`; `20261121000002_fix_teacher_similarity_access.sql` → `20261121000005_...` | Duplicate migration version numbers fixed. |
+
+### 2026-11-24 follow-up (UI-only)
+
+| File | Change |
+|------|--------|
+| `src/actions/sessions.ts`, `assignments.ts`, `announcements.ts`, `similarity.ts`, `exports.ts` | Gate changed from admin-only to staff (admin \| teacher). |
+| `src/actions/attendance.ts` | Bulk lookup splits UUIDs vs student codes (no uuid cast error). |
+| `src/app/[locale]/(app)/admin/attendance/page.tsx` | Loads attendance for the default session. |
+| `src/app/[locale]/(app)/admin/admin-attendance-client.tsx` | Textarea moved inside the record form. |
+| `src/app/[locale]/(app)/check-in/page.tsx` + `check-in-form.tsx` | **New** check-in page + form using `checkInAction`. |
+| `src/components/site-header.tsx` | Students/Points nav hidden from teachers; Check in link for students. |
+| `src/app/[locale]/(app)/admin/page.tsx` | Admin-only cards hidden from teachers. |
+| `src/app/[locale]/(app)/dashboard/page.tsx` | Check-in link in active-session card. |
+| `messages/en.json`, `messages/ar.json` | Nav key `checkIn`; GEMINI wording → `AI_API_KEY`/`AI_BASE_URL`. |
+| `README.md`, `src/lib/grading/mock.ts` | GEMINI wording → AI_* wording. |
 
 ---
 

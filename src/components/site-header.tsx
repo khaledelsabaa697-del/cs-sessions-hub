@@ -19,27 +19,34 @@ export function SiteHeader({ profile }: { profile: Profile }) {
   const tr = useTranslations("roles");
 
   const isTeacherOrAdmin = profile.role === "teacher" || profile.role === "admin";
+  const isAdmin = profile.role === "admin";
   const home = isTeacherOrAdmin ? "/admin" : "/dashboard";
 
-  const links: NavItem[] =
-    isTeacherOrAdmin
-      ? [
-          { href: "/admin", label: t("overview"), exact: true },
-          { href: "/admin/sessions", label: t("sessions") },
-          { href: "/admin/assignments", label: t("assignments") },
-          { href: "/admin/attendance", label: t("attendance") },
-          { href: "/admin/students", label: t("students") },
-          { href: "/admin/analytics", label: t("analytics") },
-          { href: "/admin/points", label: t("points") },
-          { href: "/admin/announcements", label: t("announcements") },
-        ]
-      : [
-          { href: "/dashboard", label: t("dashboard"), exact: true },
-          { href: "/assignments", label: t("assignments") },
-          { href: "/attendance", label: t("attendance") },
-          { href: "/progress", label: t("progress") },
-          { href: "/leaderboard", label: t("leaderboard") },
-        ];
+  const links: NavItem[] = isTeacherOrAdmin
+    ? [
+        { href: "/admin", label: t("overview"), exact: true },
+        { href: "/admin/sessions", label: t("sessions") },
+        { href: "/admin/assignments", label: t("assignments") },
+        { href: "/admin/attendance", label: t("attendance") },
+        // Students and points are admin-only pages; hide them for teachers so
+        // the nav never sends them to a redirect.
+        ...(isAdmin
+          ? [
+              { href: "/admin/students", label: t("students") },
+              { href: "/admin/analytics", label: t("analytics") },
+              { href: "/admin/points", label: t("points") },
+            ]
+          : [{ href: "/admin/analytics", label: t("analytics") }]),
+        { href: "/admin/announcements", label: t("announcements") },
+      ]
+    : [
+        { href: "/dashboard", label: t("dashboard"), exact: true },
+        { href: "/check-in", label: t("checkIn") },
+        { href: "/assignments", label: t("assignments") },
+        { href: "/attendance", label: t("attendance") },
+        { href: "/progress", label: t("progress") },
+        { href: "/leaderboard", label: t("leaderboard") },
+      ];
 
   const isActive = (item: NavItem) =>
     item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);

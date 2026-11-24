@@ -5,7 +5,7 @@
 -- Run after 20260101000000_init.sql and 20260101000100_reference_data.sql.
 -- Safe to re-run: functions are replaced.
 -- ============================================================================
-
+                                                        
 -- ---------------------------------------------------------------------------
 -- Admin session list with attendance counts.
 -- Students already read sessions (without attendance_code); this RPC exists so

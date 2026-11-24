@@ -23,7 +23,8 @@ export default async function AdminOverviewPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireStaff(locale);
+  const profile = await requireStaff(locale);
+  const isAdmin = profile.role === "admin";
   const t = await getTranslations("admin.overview");
 
   const supabase = await createClient();
@@ -59,8 +60,11 @@ export default async function AdminOverviewPage({
         title={t("title")}
         description={t("subtitle")}
         action={
-          <Link href="/admin/students" className={buttonPrimary}>
-            {t("manageStudents")}
+          <Link
+            href={isAdmin ? "/admin/students" : "/admin/sessions"}
+            className={buttonPrimary}
+          >
+            {isAdmin ? t("manageStudents") : t("manageSessions")}
           </Link>
         }
       />
@@ -114,12 +118,14 @@ export default async function AdminOverviewPage({
           <CardHeader
             title={t("recentStudents")}
             action={
-              <Link
-                href="/admin/students"
-                className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
-              >
-                {t("viewAllStudents")}
-              </Link>
+              isAdmin ? (
+                <Link
+                  href="/admin/students"
+                  className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+                >
+                  {t("viewAllStudents")}
+                </Link>
+              ) : undefined
             }
           />
           {recent.data && recent.data.length > 0 ? (
@@ -158,17 +164,19 @@ export default async function AdminOverviewPage({
         <Card>
           <CardHeader title={t("teacherTools")} />
           <div className="space-y-3 p-5">
-            <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                {t("studentsCardTitle")}
-              </h3>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {t("studentsCardBody")}
-              </p>
-              <Link href="/admin/students" className={`${buttonPrimary} mt-4`}>
-                {t("manageStudents")}
-              </Link>
-            </div>
+            {isAdmin ? (
+              <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {t("studentsCardTitle")}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("studentsCardBody")}
+                </p>
+                <Link href="/admin/students" className={`${buttonPrimary} mt-4`}>
+                  {t("manageStudents")}
+                </Link>
+              </div>
+            ) : null}
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                 {t("sessionsCardTitle")}
@@ -191,17 +199,19 @@ export default async function AdminOverviewPage({
                 {t("manageAssignments")}
               </Link>
             </div>
-            <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                {t("pointsCardTitle")}
-              </h3>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {t("pointsCardBody")}
-              </p>
-              <Link href="/admin/points" className={`${buttonPrimary} mt-4`}>
-                {t("managePoints")}
-              </Link>
-            </div>
+            {isAdmin ? (
+              <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {t("pointsCardTitle")}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {t("pointsCardBody")}
+                </p>
+                <Link href="/admin/points" className={`${buttonPrimary} mt-4`}>
+                  {t("managePoints")}
+                </Link>
+              </div>
+            ) : null}
             <div className="rounded-xl border border-slate-200 p-4 dark:border-slate-800">
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
                 {t("analyticsCardTitle")}

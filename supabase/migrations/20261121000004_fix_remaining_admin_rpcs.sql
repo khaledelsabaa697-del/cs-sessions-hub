@@ -45,7 +45,7 @@ begin
   group by s.id
   order by s.session_date desc, s.created_at desc;
 end;
-$$;
+$session_overview$;
 
 -- 2. Update admin_student_metrics() to allow teachers
 drop function if exists public.admin_student_metrics();
@@ -112,7 +112,7 @@ begin
     where p.role = 'student'
     order by p.full_name;
 end;
-$$;
+$student_metrics$;
 
 -- 3. Update admin_analytics() to allow teachers
 drop function if exists public.admin_analytics();
@@ -220,7 +220,7 @@ begin
 
   return v_totals;
 end;
-$$;
+$analytics$;
 
 -- 4. Update admin_points_overview() to allow teachers
 drop function if exists public.admin_points_overview();
@@ -361,7 +361,7 @@ begin
   where p.role = 'student'
   order by total_points desc, p.full_name;
 end;
-$$;
+$points_overview$;
 
 -- 5. Notify PostgREST to reload schema
 notify pgrst, 'reload schema';

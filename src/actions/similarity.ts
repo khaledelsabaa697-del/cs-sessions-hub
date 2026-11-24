@@ -26,9 +26,9 @@ type PairRef = {
   submission_b: string;
 };
 
-async function isCurrentUserAdmin(): Promise<boolean> {
+async function isCurrentUserStaff(): Promise<boolean> {
   const profile = await getCurrentProfile();
-  return profile?.role === "admin";
+  return profile?.role === "admin" || profile?.role === "teacher";
 }
 
 export async function runSimilarityCheckAction(
@@ -38,7 +38,7 @@ export async function runSimilarityCheckAction(
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "admin.similarity" });
 
-  if (!(await isCurrentUserAdmin())) {
+  if (!(await isCurrentUserStaff())) {
     return { status: "error", error: t("errors.forbidden") };
   }
 
@@ -195,7 +195,7 @@ export async function markSimilarityReviewedAction(
   const locale = toLocale(localeRaw);
   const t = await getTranslations({ locale, namespace: "admin.similarity" });
 
-  if (!(await isCurrentUserAdmin())) return { ok: false, error: t("errors.forbidden") };
+  if (!(await isCurrentUserStaff())) return { ok: false, error: t("errors.forbidden") };
 
   const pair = await loadPair(pairId);
   if (!pair) return { ok: false, error: t("errors.invalid") };
@@ -222,7 +222,7 @@ export async function flagSimilarPairAction(
   const locale = toLocale(localeRaw);
   const t = await getTranslations({ locale, namespace: "admin.similarity" });
 
-  if (!(await isCurrentUserAdmin())) return { ok: false, error: t("errors.forbidden") };
+  if (!(await isCurrentUserStaff())) return { ok: false, error: t("errors.forbidden") };
 
   const pair = await loadPair(pairId);
   if (!pair) return { ok: false, error: t("errors.invalid") };

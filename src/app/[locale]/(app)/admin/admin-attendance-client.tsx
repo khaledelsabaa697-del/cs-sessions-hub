@@ -121,27 +121,28 @@ export function AdminAttendanceClient({
 
             {selectedSession ? (
               <>
-                <div>
-                  <label htmlFor="student-ids" className={labelClass}>
-                    {t("idsLabel")}
-                  </label>
-                  <textarea
-                    id="student-ids"
-                    name="student_ids"
-                    rows={6}
-                    placeholder={t("idsPlaceholder")}
-                    className={inputClass}
-                    value={studentIds}
-                    onChange={(e) => setStudentIds(e.target.value)}
-                  />
-                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                    {t("idsHint")}
-                  </p>
-                </div>
-
                 <form action={recordAction} className="space-y-4">
                   <input type="hidden" name="locale" value={locale} />
                   <input type="hidden" name="session_id" value={selectedSession.id} />
+
+                  <div>
+                    <label htmlFor="student-ids" className={labelClass}>
+                      {t("idsLabel")}
+                    </label>
+                    <textarea
+                      id="student-ids"
+                      name="student_ids"
+                      rows={6}
+                      placeholder={t("idsPlaceholder")}
+                      className={inputClass}
+                      value={studentIds}
+                      onChange={(e) => setStudentIds(e.target.value)}
+                    />
+                    <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
+                      {t("idsHint")}
+                    </p>
+                  </div>
+
                   <button type="submit" disabled={recordState.status === "success"} className={buttonPrimary}>
                     {t("recordBtn")}
                   </button>

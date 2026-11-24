@@ -60,24 +60,25 @@ export default async function AdminAttendancePage({
       .returns<StudentRow[]>(),
   ]);
 
-  // Only query attendance if a session is selected
-  let attendanceResult: QueryResult<AttendanceRow> = { data: null, error: null };
-  if (sessionIdParam) {
-    attendanceResult = await supabase
-      .from("attendance")
-      .select("student_id, status")
-      .eq("session_id", sessionIdParam)
-      .returns<AttendanceRow[]>();
-  }
-
   const sessions = sessionsResult.data ?? [];
   const allStudents = studentsResult.data ?? [];
-  const attendance = attendanceResult.data ?? [];
 
-  // Default to first session if none selected
+  // Default to the newest session when the URL has no ?session= — and load its
+  // existing marks too, otherwise the panel looks empty despite recorded rows.
   const selectedSession = sessionIdParam
     ? sessions.find((s) => s.id === sessionIdParam) ?? null
     : sessions[0] ?? null;
+
+  let attendanceResult: QueryResult<AttendanceRow> = { data: null, error: null };
+  if (selectedSession) {
+    attendanceResult = await supabase
+      .from("attendance")
+      .select("student_id, status")
+      .eq("session_id", selectedSession.id)
+      .returns<AttendanceRow[]>();
+  }
+
+  const attendance = attendanceResult.data ?? [];
 
   const statusByStudent = new Map(attendance.map((row) => [row.student_id, row.status]));
 
@@ -99,14 +100,14 @@ export default async function AdminAttendancePage({
   if (process.env.NODE_ENV !== "production") {
     if (sessionsResult.error) console.error("[AdminAttendance] sessions query error:", sessionsResult.error);
     if (studentsResult.error) console.error("[AdminAttendance] students query error:", studentsResult.error);
-    if (sessionIdParam && attendanceResult.error) console.error("[AdminAttendance] attendance query error:", attendanceResult.error);
+    if (selectedSession && attendanceResult.error) console.error("[AdminAttendance] attendance query error:", attendanceResult.error);
   }
 
   // Pass actual error messages to client in development
   const errorMessages: string[] = [];
   if (sessionsResult.error) errorMessages.push(sessionsResult.error.message);
   if (studentsResult.error) errorMessages.push(studentsResult.error.message);
-  if (sessionIdParam && attendanceResult.error) errorMessages.push(attendanceResult.error.message);
+  if (selectedSession && attendanceResult.error) errorMessages.push(attendanceResult.error.message);
 
   const hasError = errorMessages.length > 0;
 

@@ -140,7 +140,7 @@ Override passwords with `SEED_ADMIN_PASSWORD` / `SEED_STUDENT_PASSWORD`.
 npm install
 cp .env.example .env.local
 # fill in NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY,
-# SUPABASE_SERVICE_ROLE_KEY, and (for automatic grading) GEMINI_API_KEY
+# SUPABASE_SERVICE_ROLE_KEY, and (for automatic grading) AI_API_KEY + AI_BASE_URL
 npm run dev
 ```
 
@@ -189,7 +189,7 @@ npm run seed        # demo data (requires .env.local)
    rubric and optional deadline (deadline input is UTC; the label says so).
 2. Sign in as a student, open the assignment and upload a small `.cpp` file
    (`#include <iostream>` + `int main()` is enough to exercise the flow).
-3. With `GEMINI_API_KEY` set, the attempt is graded immediately: score, English
+3. With `AI_API_KEY` and `AI_BASE_URL` set, the attempt is graded immediately: score, English
    and Arabic feedback and issues appear under **Your attempts**. Without a key,
    set `GEMINI_MOCK=1` in development for a deterministic structural grade.
 4. Back as the teacher, open the assignment → **Submissions** → **Review**.
@@ -276,14 +276,15 @@ Notes:
 | `NEXT_PUBLIC_SUPABASE_URL`      | client + server        | Supabase project URL                                 |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | client + server        | Public key, RLS enforced                             |
 | `SUPABASE_SERVICE_ROLE_KEY`     | **server only**        | Admin user creation/reset; bypasses RLS              |
-| `GEMINI_API_KEY`                | **server only**        | Google Gemini grading; leave empty to grade manually |
-| `GEMINI_MODEL`                  | **server only**        | Defaults to `gemini-2.5-flash`                       |
-| `GEMINI_MOCK`                   | development only       | `1` = deterministic fake grader when no key is set   |
+| `AI_API_KEY`                    | **server only**        | OpenAI-compatible grading key; empty = grade manually |
+| `AI_BASE_URL`                   | **server only**        | Provider base URL, e.g. `https://api.openai.com/v1`  |
+| `AI_MODEL`                      | **server only**        | Model id, defaults to `gpt-4o-mini`                  |
+| `AI_MOCK`                       | development only       | `1` = deterministic fake grader when no key is set   |
 | `SEED_ADMIN_PASSWORD`           | seed script            | Teacher password for `npm run seed`                  |
 | `SEED_STUDENT_PASSWORD`         | seed script            | Demo student password                                |
 
-Never prefix secrets with `NEXT_PUBLIC_`. The service role and Gemini keys are only
-read inside `src/lib/env.ts` → `serviceEnv()` and server route handlers.
+Never prefix secrets with `NEXT_PUBLIC_`. The service role and AI provider keys are
+only read inside server-side code and server route handlers.
 
 ---
 
@@ -448,7 +449,7 @@ dynamic rendering everywhere (all pages depend on auth cookies).
    Site URL + redirect URLs point at the production domain; storage bucket `submissions`
    exists (private, 100 KB limit).
 2. **Secrets**: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY` (server-only) and `GEMINI_API_KEY` set in Vercel; no
+   `SUPABASE_SERVICE_ROLE_KEY` (server-only) and `AI_API_KEY` + `AI_BASE_URL` set in Vercel; no
    secrets in the client bundle (`NEXT_PUBLIC_` prefix only for the first two).
 3. **First login**: create the teacher account (seed or manually through Supabase
    Auth), sign in, and change the demo password immediately from **Profile**.
