@@ -4,11 +4,58 @@ import { revalidatePath } from "next/cache";
 import { getTranslations } from "next-intl/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
+import { MATERIAL_BUCKET, sanitizeMaterialFileName } from "@/lib/materials";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
 import type { MaterialState } from "@/lib/types";
 
-const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const ALLOWED_TYPES = ["text", "file", "image", "video", "notebook", "code"];
+
+export type MaterialUploadUrlResult =
+  | { status: "ok"; path: string; token: string }
+  | { status: "error"; error: string };
+
+/**
+ * Creates a short-lived signed upload URL so the browser can send large files
+ * straight to Supabase Storage. Server Actions are capped by Next.js
+ * (2 MB here) and by Vercel (~4.5 MB), so routing file bytes through an action
+ * makes normal PDF/PPTX uploads fail with a 413.
+ */
+export async function createMaterialUploadUrlAction(
+  sessionId: string,
+  fileName: string,
+): Promise<MaterialUploadUrlResult> {
+  const profile = await getCurrentProfile();
+  if (!profile || (profile.role !== "admin" && profile.role !== "teacher")) {
+    return { status: "error", error: "forbidden" };
+  }
+
+  const parsed = idSchema.safeParse(sessionId);
+  if (!parsed.success) {
+    return { status: "error", error: "invalid" };
+  }
+
+  const supabase = await createClient();
+  const path = `${parsed.data}/${Date.now()}-${crypto
+    .randomUUID()
+    .slice(0, 8)}-${sanitizeMaterialFileName(fileName)}`;
+
+  const { data, error } = await supabase.storage
+    .from(MATERIAL_BUCKET)
+    .createSignedUploadUrl(path);
+
+  if (error || !data?.token) {
+    console.error("createMaterialUploadUrlAction failed:", {
+      message: error?.message,
+      status: error?.status,
+      name: error?.name,
+      path,
+    });
+    return { status: "error", error: "uploadUrlFailed" };
+  }
+
+  return { status: "ok", path: data.path || path, token: data.token };
+}
 
 export async function addMaterialAction(
   _previous: MaterialState,
@@ -32,41 +79,19 @@ export async function addMaterialAction(
   if (!title) {
     return { status: "error", error: t("errors.invalid") };
   }
-  const allowedTypes = ["text", "file", "image", "video", "notebook", "code"];
-  if (!allowedTypes.includes(type)) {
+  if (!ALLOWED_TYPES.includes(type)) {
     return { status: "error", error: t("errors.invalid") };
   }
 
-  const supabase = await createClient();
   const content = String(formData.get("content") ?? "").trim() || null;
   const language = String(formData.get("language") ?? "").trim() || null;
+  const mimeType = String(formData.get("mime_type") ?? "").trim() || null;
 
-  let filePath: string | null = null;
-  let mimeType: string | null = null;
-
-  const file = formData.get("file");
-  if (file instanceof File && file.size > 0) {
-    if (file.size > MAX_FILE_BYTES) {
-      return { status: "error", error: t("errors.fileSize") };
-    }
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    filePath = `${sessionId.data}/${Date.now()}-${crypto
-      .randomUUID()
-      .slice(0, 8)}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    mimeType = file.type || null;
-
-    const { error: uploadError } = await supabase.storage
-      .from("session-materials")
-      .upload(filePath, bytes, {
-        contentType: mimeType || "application/octet-stream",
-        upsert: false,
-      });
-
-    if (uploadError) {
-      console.error("addMaterial upload failed:", uploadError.message);
-      return { status: "error", error: t("errors.uploadFailed") };
-    }
-  }
+  const uploadPath = String(formData.get("file_path") ?? "").trim();
+  const filePath =
+    uploadPath.startsWith(`${sessionId.data}/`) && !uploadPath.includes("..")
+      ? uploadPath
+      : null;
 
   if (type === "text" || type === "code") {
     if (!content) {
@@ -76,13 +101,14 @@ export async function addMaterialAction(
     return { status: "error", error: t("errors.fileMissing") };
   }
 
+  const supabase = await createClient();
   const { error: insertError } = await supabase.from("session_materials").insert({
     session_id: sessionId.data,
     type,
     title,
-    content,
-    file_path: filePath,
-    mime_type: mimeType,
+    content: type === "text" || type === "code" ? content : null,
+    file_path: type === "text" || type === "code" ? null : filePath,
+    mime_type: type === "text" || type === "code" ? null : mimeType,
     language,
     created_by: profile.id,
   });
@@ -90,7 +116,7 @@ export async function addMaterialAction(
   if (insertError) {
     console.error("addMaterial insert failed:", insertError.message);
     if (filePath) {
-      await supabase.storage.from("session-materials").remove([filePath]);
+      await supabase.storage.from(MATERIAL_BUCKET).remove([filePath]);
     }
     return { status: "error", error: t("errors.saveFailed") };
   }
@@ -114,7 +140,7 @@ export async function deleteMaterialAction(formData: FormData): Promise<void> {
   const supabase = await createClient();
   await supabase.from("session_materials").delete().eq("id", materialId);
   if (filePath) {
-    await supabase.storage.from("session-materials").remove([filePath]);
+    await supabase.storage.from(MATERIAL_BUCKET).remove([filePath]);
   }
   if (sessionId) {
     revalidatePath(`/${locale}/admin/sessions/${sessionId}`);

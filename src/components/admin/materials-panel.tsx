@@ -2,7 +2,13 @@
 
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
-import { addMaterialAction, deleteMaterialAction } from "@/actions/materials";
+import {
+  addMaterialAction,
+  createMaterialUploadUrlAction,
+  deleteMaterialAction,
+} from "@/actions/materials";
+import { MATERIAL_BUCKET, MAX_MATERIAL_FILE_BYTES } from "@/lib/materials";
+import { createClient } from "@/lib/supabase/client";
 import type { MaterialState } from "@/lib/types";
 import {
   Alert,
@@ -38,12 +44,60 @@ export function MaterialsPanel({
   materials: MaterialRow[];
 }) {
   const t = useTranslations("admin.session");
-  const [state, formAction] = useActionState(addMaterialAction, initialState);
+  const [state, formAction] = useActionState(submitMaterial, initialState);
   const [type, setType] = useState<string>("text");
 
   const needsFile = type !== "text" && type !== "code";
   const needsContent = type === "text" || type === "code";
   const needsLanguage = type === "code" || type === "notebook";
+
+  async function submitMaterial(
+    previous: MaterialState,
+    formData: FormData,
+  ): Promise<MaterialState> {
+    const selectedType = String(formData.get("type") ?? "");
+    const file = formData.get("file");
+
+    if (
+      selectedType !== "text" &&
+      selectedType !== "code" &&
+      file instanceof File &&
+      file.size > 0
+    ) {
+      if (file.size > MAX_MATERIAL_FILE_BYTES) {
+        return { status: "error", error: t("errors.fileSize") };
+      }
+
+      const upload = await createMaterialUploadUrlAction(sessionId, file.name);
+      if (upload.status !== "ok") {
+        const errorKey =
+          upload.error === "forbidden" ? "errors.forbidden" : "errors.uploadUrlFailed";
+        return { status: "error", error: t(errorKey) };
+      }
+
+      const supabase = createClient();
+      const { error } = await supabase.storage
+        .from(MATERIAL_BUCKET)
+        .uploadToSignedUrl(upload.path, upload.token, file, {
+          contentType: file.type || "application/octet-stream",
+        });
+
+      if (error) {
+        console.error("material upload failed:", {
+          message: error.message,
+          name: error.name,
+          path: upload.path,
+        });
+        return { status: "error", error: t("errors.uploadFailed") };
+      }
+
+      formData.set("file_path", upload.path);
+      formData.set("mime_type", file.type || "");
+      formData.delete("file");
+    }
+
+    return addMaterialAction(previous, formData);
+  }
 
   return (
     <Card>

@@ -410,7 +410,8 @@
         "noStudents": "There are no students to mark.",
       "fileMissing": "Please choose a file.",
       "fileSize": "File is too large (max 50 MB).",
-      "uploadFailed": "Upload failed. Please try again."
+      "uploadFailed": "Upload failed. Please try again.",
+      "uploadUrlFailed": "Could not start the upload. Please try again."
       },
       "saveDetails": "Save details",
       "savingDetails": "Saving…",
