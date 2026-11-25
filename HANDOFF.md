@@ -121,7 +121,7 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 | File | Change |
 |------|--------|
 | `src/actions/materials.ts` | **New** `createMaterialUploadUrlAction` (staff-gated signed upload URL). `addMaterialAction` no longer reads file bytes; it accepts `file_path` + `mime_type` and validates the path belongs to the session. |
-| `src/components/admin/materials-panel.tsx` | Browser uploads directly with `uploadToSignedUrl`, bypassing the 2 MB Server Action / ~4.5 MB Vercel body cap (PDF/PPTX now work up to 50 MB). |
+| `src/components/admin/materials-panel.tsx` | Browser uploads via `supabase.storage.upload()` (standard multipart endpoint). Signed-URL PUTs were observed to land the file but never return a response for larger payloads, leaving the form stuck on "Saving…". |
 | `src/lib/materials.ts` | **New** shared bucket name, 50 MB limit, filename sanitizer. |
 | `src/actions/students.ts` | Delete now logs the full auth error (`message/status/name/code`), verifies the profile cascade ran, and cleans up a leftover profile. |
 | `supabase/migrations/20261125000002_harden_handle_new_user.sql` | **New** `handle_new_user` requires `username` + `full_name` metadata. Stops silent `"Student"` placeholder profiles when `generateLink`/dashboard creates a user without metadata. |
