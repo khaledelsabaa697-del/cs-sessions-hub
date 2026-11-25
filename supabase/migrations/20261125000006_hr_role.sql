@@ -44,6 +44,8 @@ create table if not exists public.attendance_audit_log (
 
 alter table public.attendance_audit_log enable row level security;
 
+drop policy if exists "audit_hr_admin_select" on public.attendance_audit_log;
+drop policy if exists "audit_hr_admin_insert" on public.attendance_audit_log;
 create policy "audit_hr_admin_select" on public.attendance_audit_log
   for select to authenticated
   using (public.is_hr() or public.is_admin());
@@ -64,6 +66,8 @@ create table if not exists public.student_warnings (
 
 alter table public.student_warnings enable row level security;
 
+drop policy if exists "warnings_hr_admin_all" on public.student_warnings;
+drop policy if exists "warnings_student_select_own" on public.student_warnings;
 create policy "warnings_hr_admin_all" on public.student_warnings
   for all to authenticated
   using (public.is_hr() or public.is_admin())
@@ -83,6 +87,8 @@ create table if not exists public.app_settings (
 
 alter table public.app_settings enable row level security;
 
+drop policy if exists "settings_authenticated_read" on public.app_settings;
+drop policy if exists "settings_admin_write" on public.app_settings;
 create policy "settings_authenticated_read" on public.app_settings
   for select to authenticated
   using (true);
@@ -450,6 +456,10 @@ drop policy if exists "attendance_teacher_select_all" on public.attendance;
 drop policy if exists "attendance_teacher_insert" on public.attendance;
 drop policy if exists "attendance_teacher_update" on public.attendance;
 drop policy if exists "attendance_teacher_delete" on public.attendance;
+drop policy if exists "attendance_staff_select_all" on public.attendance;
+drop policy if exists "attendance_staff_insert" on public.attendance;
+drop policy if exists "attendance_staff_update" on public.attendance;
+drop policy if exists "attendance_staff_delete" on public.attendance;
 
 create policy "attendance_staff_select_all" on public.attendance
   for select to authenticated
