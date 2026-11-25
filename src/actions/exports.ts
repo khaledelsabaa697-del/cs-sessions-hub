@@ -200,10 +200,10 @@ export async function exportAssignmentCsvAction(
   const [assignmentResult, studentsResult, submissionsResult] = await Promise.all([
     supabase
       .from("assignments")
-      .select("id, title, max_score")
+      .select("id, title, max_score, deadline")
       .eq("id", assignmentId.data)
       .maybeSingle()
-      .returns<{ id: string; title: string; max_score: number | string } | null>(),
+      .returns<{ id: string; title: string; max_score: number | string; deadline: string | null } | null>(),
     supabase
       .from("profiles")
       .select("id, student_code, username, full_name, opted_out_of_leaderboard")
@@ -238,16 +238,31 @@ export async function exportAssignmentCsvAction(
     byStudent.set(row.student_id, list);
   }
 
+  const deadlineMs = assignment.deadline ? Date.parse(assignment.deadline) : null;
+
   const rows: CsvCell[][] = (studentsResult.data ?? []).map((student) => {
-    const attempts = byStudent.get(student.id) ?? [];
+    const attempts = (byStudent.get(student.id) ?? [])
+      .slice()
+      .sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
     const graded = attempts
       .map((row) => (row.final_score === null ? null : Number(row.final_score)))
       .filter((score): score is number => score !== null);
     const bestScore = graded.length > 0 ? Math.max(...graded) : null;
-    const last = attempts[attempts.length - 1];
+    const last = attempts.length > 0 ? attempts[attempts.length - 1] : null;
     const similarities = attempts
       .map((row) => (row.similarity_score === null ? null : Number(row.similarity_score)))
       .filter((score): score is number => score !== null);
+
+    const onTime =
+      deadlineMs === null || last === null
+        ? "yes"
+        : Date.parse(last.created_at) <= deadlineMs
+          ? "yes"
+          : "no";
+    const lateByMinutes =
+      deadlineMs === null || last === null
+        ? 0
+        : Math.max(0, Math.round((Date.parse(last.created_at) - deadlineMs) / 60000));
 
     return [
       student.student_code,
@@ -258,6 +273,8 @@ export async function exportAssignmentCsvAction(
       bestScore === null ? "" : ((bestScore / maxScore) * 100).toFixed(1),
       last?.status ?? "not_submitted",
       similarities.length > 0 ? Math.max(...similarities).toFixed(2) : "",
+      onTime,
+      String(lateByMinutes),
     ];
   });
 
@@ -274,6 +291,8 @@ export async function exportAssignmentCsvAction(
         "best_percent",
         "last_status",
         "similarity_percent",
+        "on_time",
+        "late_by_minutes",
       ],
       rows,
     ),
