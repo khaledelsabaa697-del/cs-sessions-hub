@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { StudentWarningsCard, type StudentWarning } from "@/components/student-warnings-card";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { formatDate, formatNumber } from "@/lib/utils";
@@ -54,6 +55,25 @@ type ActiveSession = {
   code_expires_at: string | null;
 };
 
+type SessionWarnRow = {
+  id: string;
+  title: string;
+  session_date: string;
+  created_at: string;
+};
+
+type AssignmentWarnRow = {
+  id: string;
+  title: string;
+  deadline: string | null;
+  created_at: string;
+};
+
+type SubmissionWarnRow = {
+  assignment_id: string;
+  created_at: string;
+};
+
 export default async function StudentDashboard({
   params,
 }: {
@@ -67,7 +87,7 @@ export default async function StudentDashboard({
   const t = await getTranslations("dashboard");
 
   const supabase = await createClient();
-  const [attendanceResult, sessionCountResult, submissionsResult, badgesResult, upcomingResult, announcementsResult, activeSessionResult, breakdownResult] =
+  const [attendanceResult, sessionCountResult, submissionsResult, badgesResult, upcomingResult, announcementsResult, activeSessionResult, breakdownResult, pastSessionsResult, allAssignmentsResult, studentSubmissionsResult] =
     await Promise.all([
       supabase.from("attendance").select("status").eq("student_id", profile.id),
       supabase
@@ -108,6 +128,24 @@ export default async function StudentDashboard({
         .maybeSingle()
         .returns<ActiveSession | null>(),
       supabase.rpc("my_breakdown"),
+      supabase
+        .from("sessions")
+        .select("id, title, session_date, created_at")
+        .order("session_date", { ascending: false })
+        .limit(200)
+        .returns<SessionWarnRow[]>(),
+      supabase
+        .from("assignments")
+        .select("id, title, deadline, created_at")
+        .not("deadline", "is", null)
+        .order("deadline", { ascending: false })
+        .limit(200)
+        .returns<AssignmentWarnRow[]>(),
+      supabase
+        .from("submissions")
+        .select("assignment_id, created_at")
+        .eq("student_id", profile.id)
+        .returns<SubmissionWarnRow[]>(),
     ]);
 
   if (attendanceResult.error) console.error("[dashboard] attendance error:", attendanceResult.error);
@@ -118,6 +156,9 @@ export default async function StudentDashboard({
   if (announcementsResult.error) console.error("[dashboard] announcements error:", announcementsResult.error);
   if (activeSessionResult.error) console.error("[dashboard] activeSession error:", activeSessionResult.error);
   if (breakdownResult.error) console.error("[dashboard] my_breakdown error:", breakdownResult.error);
+  if (pastSessionsResult.error) console.error("[dashboard] past sessions error:", pastSessionsResult.error);
+  if (allAssignmentsResult.error) console.error("[dashboard] assignments error:", allAssignmentsResult.error);
+  if (studentSubmissionsResult.error) console.error("[dashboard] student submissions error:", studentSubmissionsResult.error);
 
   const hasError = [
     attendanceResult.error,
@@ -128,6 +169,9 @@ export default async function StudentDashboard({
     announcementsResult.error,
     activeSessionResult.error,
     breakdownResult.error,
+    pastSessionsResult.error,
+    allAssignmentsResult.error,
+    studentSubmissionsResult.error,
   ].some(Boolean);
 
   const breakdown = ((breakdownResult.data ?? [])[0] ?? null) as PointsBreakdown | null;
@@ -163,9 +207,98 @@ export default async function StudentDashboard({
   const announcements = announcementsResult.data ?? [];
   const activeSession = activeSessionResult.data ?? null;
 
+  // Warnings (students only). Computed on every load, nothing stored.
+  type WarnItem = StudentWarning & { sortKey: number };
+  const warnItems: WarnItem[] = [];
+  if (profile.role === "student") {
+    const accountCreatedMs = Date.parse(profile.created_at);
+    const todayUtc = new Date();
+    todayUtc.setUTCHours(0, 0, 0, 0);
+    const todayMs = todayUtc.getTime();
+    const nowMs = Date.now();
+
+    const attendedSessionIds = new Set<string>();
+    const attRes = await supabase
+      .from("attendance")
+      .select("session_id")
+      .eq("student_id", profile.id);
+    for (const r of (attRes.data ?? []) as { session_id: string }[]) {
+      attendedSessionIds.add(r.session_id);
+    }
+
+    const pastSessions = (pastSessionsResult.data ?? []) as SessionWarnRow[];
+    for (const sess of pastSessions) {
+      const sessionDateMs = Date.parse(sess.session_date + "T00:00:00Z");
+      if (sessionDateMs >= todayMs) continue;
+      if (sessionDateMs < accountCreatedMs) continue;
+      if (attendedSessionIds.has(sess.id)) continue;
+      warnItems.push({
+        id: `absence-${sess.id}`,
+        kind: "absence",
+        href: "/sessions",
+        text: t("warningAbsence", {
+          session: sess.title,
+          date: formatDate(sess.session_date, locale, { dateStyle: "medium" }),
+        }),
+        badgeLabel: t("badgeAbsent"),
+        sortKey: sessionDateMs,
+      });
+    }
+
+    const allAssignments = (allAssignmentsResult.data ?? []) as AssignmentWarnRow[];
+    const studentSubs = (studentSubmissionsResult.data ?? []) as SubmissionWarnRow[];
+    const earliestByAssignment = new Map<string, number>();
+    for (const sub of studentSubs) {
+      const ms = Date.parse(sub.created_at);
+      const prev = earliestByAssignment.get(sub.assignment_id);
+      if (prev === undefined || ms < prev) earliestByAssignment.set(sub.assignment_id, ms);
+    }
+    for (const a of allAssignments) {
+      if (!a.deadline) continue;
+      const deadlineMs = Date.parse(a.deadline);
+      if (deadlineMs >= nowMs) continue;
+      if (Date.parse(a.created_at) < accountCreatedMs) continue;
+      const earliest = earliestByAssignment.get(a.id);
+      if (earliest === undefined) {
+        warnItems.push({
+          id: `missed-${a.id}`,
+          kind: "missed",
+          href: `/assignments/${a.id}`,
+          text: t("warningMissed", { assignment: a.title }),
+          badgeLabel: t("badgeMissed"),
+          sortKey: deadlineMs,
+        });
+      } else if (earliest > deadlineMs) {
+        warnItems.push({
+          id: `late-${a.id}`,
+          kind: "late",
+          href: `/assignments/${a.id}`,
+          text: t("warningLate", { assignment: a.title }),
+          badgeLabel: t("badgeLate"),
+          sortKey: deadlineMs,
+        });
+      }
+    }
+  }
+
+  // Newest first
+  warnItems.sort((a, b) => b.sortKey - a.sortKey);
+  const warnings: StudentWarning[] = warnItems.map(({ sortKey, ...rest }) => rest);
+
+  const showAllWarningsLabel =
+    warnings.length > 5 ? t("showAllWarnings", { count: warnings.length }) : "";
+
   return (
     <div className="space-y-6">
       {hasError ? <Alert>{t("loadError")}</Alert> : null}
+
+      {profile.role === "student" && warnings.length > 0 ? (
+        <StudentWarningsCard
+          title={t("warningsTitle")}
+          showAllLabel={showAllWarningsLabel}
+          warnings={warnings}
+        />
+      ) : null}
 
       <PageHeader
         title={t("greeting", { name: profile.display_name })}

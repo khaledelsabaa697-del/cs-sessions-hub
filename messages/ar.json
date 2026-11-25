@@ -173,7 +173,15 @@
     "points": "النقاط",
     "pointsRank": "المرتبة #{rank}",
     "pointsDetail": "المجموع الكلي",
-    "pinned": "مثبّت"
+    "pinned": "مثبّت",
+    "warningsTitle": "تحذيرات",
+    "warningAbsence": "لقد تغيبت عن {session} ({date})",
+    "warningMissed": "لقد فاتك الموعد النهائي لـ {assignment}",
+    "warningLate": "تم تسليم {assignment} متأخرًا",
+    "badgeAbsent": "غياب",
+    "badgeMissed": "فائت",
+    "badgeLate": "متأخر",
+    "showAllWarnings": "عرض الكل ({count})"
   },
   "profile": {
     "title": "الملف الشخصي",

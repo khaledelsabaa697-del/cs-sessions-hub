@@ -173,7 +173,15 @@
     "points": "Points",
     "pointsRank": "Rank #{rank}",
     "pointsDetail": "All-time total",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "warningsTitle": "Warnings",
+    "warningAbsence": "You were absent from {session} ({date})",
+    "warningMissed": "You missed the deadline for {assignment}",
+    "warningLate": "{assignment} was submitted late",
+    "badgeAbsent": "Absent",
+    "badgeMissed": "Missed",
+    "badgeLate": "Late",
+    "showAllWarnings": "Show all ({count})"
   },
   "profile": {
     "title": "Profile",
