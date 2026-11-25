@@ -29,7 +29,7 @@ export function SiteHeader({ profile }: { profile: Profile }) {
         { href: "/hr/attendance", label: t("attendance") },
         { href: "/hr/students", label: t("students") },
         { href: "/hr/warnings", label: t("warnings") },
-        { href: "/announcements", label: t("announcements") },
+        { href: "/hr/announcements", label: t("announcements") },
       ]
     : isTeacherOrAdmin
     ? [
