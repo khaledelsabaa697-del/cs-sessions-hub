@@ -1,4 +1,4 @@
-export type UserRole = "student" | "teacher" | "admin";
+export type UserRole = "student" | "teacher" | "admin" | "hr";
 export type AttendanceStatus = "present" | "absent" | "late";
 export type SubmissionStatus = "pending" | "graded" | "flagged";
 export type SubmissionType = "file" | "text";

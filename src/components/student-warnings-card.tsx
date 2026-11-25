@@ -6,7 +6,7 @@ import { Card, CardHeader } from "@/components/ui";
 
 export type StudentWarning = {
   id: string;
-  kind: "absence" | "missed" | "late";
+  kind: "absence" | "missed" | "late" | "manual";
   href: string;
   text: string;
   badgeLabel: string;
@@ -37,7 +37,7 @@ export function StudentWarningsCard({
           const badgeClass =
             w.kind === "missed"
               ? "rounded-full bg-red-50 px-2.5 py-0.5 text-[11px] font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300"
-              : w.kind === "late"
+              : w.kind === "late" || w.kind === "manual"
                 ? "rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
                 : "rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300";
           return (

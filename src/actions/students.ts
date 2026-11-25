@@ -296,7 +296,7 @@ export async function changeUserRoleAction(
   const studentId = String(formData.get("student_id") ?? "").trim();
   const newRole = String(formData.get("new_role") ?? "").trim();
 
-  if (!studentId || !["student", "teacher", "admin"].includes(newRole)) {
+  if (!studentId || !["student", "teacher", "admin", "hr"].includes(newRole)) {
     return { status: "error", error: t("errors.invalid") };
   }
 

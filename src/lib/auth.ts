@@ -45,7 +45,13 @@ export async function requireAdmin(locale: AppLocale): Promise<Profile> {
 
 export async function requireTeacher(locale: AppLocale): Promise<Profile> {
   const profile = await requireProfile(locale);
-  if (profile.role === "student") redirect(`/${locale}/dashboard`);
+  if (profile.role === "student" || profile.role === "hr") redirect(`/${locale}/dashboard`);
+  return profile;
+}
+
+export async function requireHr(locale: AppLocale): Promise<Profile> {
+  const profile = await requireProfile(locale);
+  if (profile.role !== "hr" && profile.role !== "admin") redirect(`/${locale}/dashboard`);
   return profile;
 }
 
@@ -58,5 +64,6 @@ export const requireStaff = requireTeacher;
 export function homePath(locale: AppLocale, role: UserRole): string {
   if (role === "admin") return `/${locale}/admin`;
   if (role === "teacher") return `/${locale}/admin`;
+  if (role === "hr") return `/${locale}/hr`;
   return `/${locale}/dashboard`;
 }

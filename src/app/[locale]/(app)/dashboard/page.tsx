@@ -87,7 +87,7 @@ export default async function StudentDashboard({
   const t = await getTranslations("dashboard");
 
   const supabase = await createClient();
-  const [attendanceResult, sessionCountResult, submissionsResult, badgesResult, upcomingResult, announcementsResult, activeSessionResult, breakdownResult, pastSessionsResult, allAssignmentsResult, studentSubmissionsResult] =
+  const [attendanceResult, sessionCountResult, submissionsResult, badgesResult, upcomingResult, announcementsResult, activeSessionResult, breakdownResult, pastSessionsResult, allAssignmentsResult, studentSubmissionsResult, studentWarningsResult] =
     await Promise.all([
       supabase.from("attendance").select("status").eq("student_id", profile.id),
       supabase
@@ -146,6 +146,12 @@ export default async function StudentDashboard({
         .select("assignment_id, created_at")
         .eq("student_id", profile.id)
         .returns<SubmissionWarnRow[]>(),
+      supabase
+        .from("student_warnings")
+        .select("id, reason, note, created_at")
+        .eq("student_id", profile.id)
+        .order("created_at", { ascending: false })
+        .returns<{ id: string; reason: string; note: string | null; created_at: string }[]>(),
     ]);
 
   if (attendanceResult.error) console.error("[dashboard] attendance error:", attendanceResult.error);
@@ -159,6 +165,7 @@ export default async function StudentDashboard({
   if (pastSessionsResult.error) console.error("[dashboard] past sessions error:", pastSessionsResult.error);
   if (allAssignmentsResult.error) console.error("[dashboard] assignments error:", allAssignmentsResult.error);
   if (studentSubmissionsResult.error) console.error("[dashboard] student submissions error:", studentSubmissionsResult.error);
+  if (studentWarningsResult.error) console.error("[dashboard] student warnings error:", studentWarningsResult.error);
 
   const hasError = [
     attendanceResult.error,
@@ -172,6 +179,7 @@ export default async function StudentDashboard({
     pastSessionsResult.error,
     allAssignmentsResult.error,
     studentSubmissionsResult.error,
+    studentWarningsResult.error,
   ].some(Boolean);
 
   const breakdown = ((breakdownResult.data ?? [])[0] ?? null) as PointsBreakdown | null;
@@ -278,6 +286,20 @@ export default async function StudentDashboard({
           sortKey: deadlineMs,
         });
       }
+    }
+  }
+
+  // Manual warnings (from HR/admin)
+  if (profile.role === "student") {
+    for (const w of (studentWarningsResult.data ?? []) as { id: string; reason: string; note: string | null; created_at: string }[]) {
+      warnItems.push({
+        id: `manual-${w.id}`,
+        kind: "manual",
+        href: "/dashboard",
+        text: w.note ? `${w.reason} — ${w.note}` : w.reason,
+        badgeLabel: t("badgeLate"),
+        sortKey: Date.parse(w.created_at),
+      });
     }
   }
 

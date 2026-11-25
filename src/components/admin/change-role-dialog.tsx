@@ -117,6 +117,7 @@ function RoleForm({
         >
           <option value="student">{t("roleStudent")}</option>
           <option value="teacher">{t("roleTeacher")}</option>
+          <option value="hr">{t("roleHr")}</option>
           <option value="admin">{t("roleAdmin")}</option>
         </select>
       </div>

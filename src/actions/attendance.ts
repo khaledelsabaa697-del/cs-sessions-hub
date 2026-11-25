@@ -150,6 +150,7 @@ export async function recordAttendanceAction(
   }
 
   revalidatePath(`/${locale}/admin/attendance`);
+  revalidatePath(`/${locale}/hr/attendance`);
   revalidatePath(`/${locale}/admin/sessions/${sessionId}`);
   revalidatePath(`/${locale}/dashboard`);
   revalidatePath(`/${locale}/attendance`);
@@ -201,6 +202,7 @@ export async function removeAttendanceAction(
   }
 
   revalidatePath(`/${locale}/admin/attendance`);
+  revalidatePath(`/${locale}/hr/attendance`);
   revalidatePath(`/${locale}/admin/sessions/${sessionId}`);
   revalidatePath(`/${locale}/dashboard`);
   revalidatePath(`/${locale}/attendance`);

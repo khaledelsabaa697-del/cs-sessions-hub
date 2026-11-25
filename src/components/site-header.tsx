@@ -19,10 +19,19 @@ export function SiteHeader({ profile }: { profile: Profile }) {
   const tr = useTranslations("roles");
 
   const isTeacherOrAdmin = profile.role === "teacher" || profile.role === "admin";
+  const isHr = profile.role === "hr";
   const isAdmin = profile.role === "admin";
-  const home = isTeacherOrAdmin ? "/admin" : "/dashboard";
+  const home = isTeacherOrAdmin ? "/admin" : isHr ? "/hr" : "/dashboard";
 
-  const links: NavItem[] = isTeacherOrAdmin
+  const links: NavItem[] = isHr
+    ? [
+        { href: "/hr", label: t("overview"), exact: true },
+        { href: "/hr/attendance", label: t("attendance") },
+        { href: "/hr/students", label: t("students") },
+        { href: "/hr/warnings", label: t("warnings") },
+        { href: "/announcements", label: t("announcements") },
+      ]
+    : isTeacherOrAdmin
     ? [
         { href: "/admin", label: t("overview"), exact: true },
         { href: "/admin/sessions", label: t("sessions") },

@@ -1,0 +1,44 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
+import { getCurrentProfile } from "@/lib/auth";
+import { toLocale } from "@/lib/locale";
+import { createClient } from "@/lib/supabase/server";
+import { idSchema } from "@/lib/validation";
+
+
+export async function createWarningAction(
+  formData: FormData,
+): Promise<void> {
+  const locale = toLocale(formData.get("locale"));
+  const t = await getTranslations({ locale, namespace: "hr" });
+
+  const profile = await getCurrentProfile();
+  if (!profile || (profile.role !== "hr" && profile.role !== "admin")) {
+    return;
+  }
+
+  const studentId = idSchema.safeParse(formData.get("student_id"));
+  if (!studentId.success) return;
+
+  const reason = String(formData.get("reason") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim();
+  if (!reason) return;
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("hr_create_warning", {
+    p_student_id: studentId.data,
+    p_reason: reason,
+    p_note: note || null,
+  });
+
+  if (error) {
+    console.error("createWarningAction failed:", error.message);
+    return;
+  }
+
+  revalidatePath(`/${locale}/hr/warnings`);
+  revalidatePath(`/${locale}/hr/students/${studentId.data}`);
+  revalidatePath(`/${locale}/dashboard`);
+}

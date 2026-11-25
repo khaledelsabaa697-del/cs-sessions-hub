@@ -14,7 +14,7 @@ async function getAuthContext(
   supabaseUrl: string,
   supabaseAnonKey: string,
   cookies: NextRequest["cookies"],
-): Promise<{ role: "student" | "teacher" | "admin" | null; verified: boolean }> {
+): Promise<{ role: "student" | "teacher" | "admin" | "hr" | null; verified: boolean }> {
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -36,7 +36,7 @@ async function getAuthContext(
     .eq("id", user.id)
     .maybeSingle();
 
-  const role = (profile?.role as "student" | "teacher" | "admin") ?? "student";
+  const role = (profile?.role as "student" | "teacher" | "admin" | "hr") ?? "student";
   const verified =
     user.email?.endsWith("@cshub.local") === true || !!user.email_confirmed_at;
   return { role, verified };
@@ -80,13 +80,27 @@ export async function middleware(request: NextRequest) {
 
   // Redirect authenticated users away from login/signup/verify
   if (role && (isLogin || isSignup || isVerifyEmail)) {
-    const target = role === "admin" || role === "teacher" ? `/${locale}/admin` : `/${locale}/dashboard`;
+    const target =
+      role === "admin" || role === "teacher"
+        ? `/${locale}/admin`
+        : role === "hr"
+          ? `/${locale}/hr`
+          : `/${locale}/dashboard`;
     return copyCookies(NextResponse.redirect(new URL(target, request.url)), response);
   }
 
-  // Protect admin/teacher routes
+  // Protect admin/teacher routes: students and HR cannot enter /admin
   const isAdminArea = path === "/admin" || path.startsWith("/admin/");
-  if (role && isAdminArea && role === "student") {
+  if (role && isAdminArea && (role === "student" || role === "hr")) {
+    return copyCookies(
+      NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url)),
+      response,
+    );
+  }
+
+  // Protect HR routes: only HR (and admin) may enter /hr
+  const isHrArea = path === "/hr" || path.startsWith("/hr/");
+  if (isHrArea && !(role === "hr" || role === "admin")) {
     return copyCookies(
       NextResponse.redirect(new URL(`/${locale}/dashboard`, request.url)),
       response,
