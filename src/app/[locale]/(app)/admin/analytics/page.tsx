@@ -50,7 +50,10 @@ export default async function AdminAnalyticsPage({
     );
   }
 
-  const { totals, weeks, grades, at_risk: atRisk } = analytics;
+  const { totals } = analytics;
+  const weeks = analytics.weeks ?? [];
+  const grades = analytics.grades ?? [];
+  const atRisk = analytics.at_risk ?? [];
   const maxGrade = Math.max(...grades.map((bucket) => Number(bucket.count)), 1);
 
   return (
