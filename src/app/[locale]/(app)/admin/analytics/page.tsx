@@ -25,6 +25,13 @@ const bucketColors = [
   "bg-emerald-500",
 ];
 
+function formatPercent(value: number | null | undefined, locale: string): string {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) {
+    return "—";
+  }
+  return `${formatNumber(Number(value), locale, 1)}%`;
+}
+
 export default async function AdminAnalyticsPage({
   params,
 }: {
@@ -79,12 +86,12 @@ export default async function AdminAnalyticsPage({
         />
         <StatCard
           label={t("stats.attendance")}
-          value={`${formatNumber(Number(totals.attendance_percent), locale, 1)}%`}
+          value={formatPercent(totals.attendance_percent, locale)}
           hint={t("stats.attendanceHint")}
         />
         <StatCard
           label={t("stats.average")}
-          value={`${formatNumber(Number(totals.average_percent), locale, 1)}%`}
+          value={formatPercent(totals.average_percent, locale)}
           hint={t("stats.averageHint")}
         />
         <StatCard

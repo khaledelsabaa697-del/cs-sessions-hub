@@ -1,8 +1,8 @@
 # HANDOFF — CS Sessions Hub (Teacher-Side Fixes)
 
-Generated 2026-11-21, updated 2026-11-24. Branch `feature/self-signup`, working tree **dirty** (UI-only teacher access, check-in, RLS fixes).  
-Last commit `2a0be93 fix: three production bugs`; previous `136e0f4 fix: allow teachers to review submissions`.  
-`npx tsc --noEmit` passes; `npm run check:i18n` passes; `npm run build` passes. **No secret values are included here.**
+Generated 2026-11-21, updated 2026-11-25. Branch `feature/self-signup`, working tree clean.  
+Latest work: analytics null-array fix, direct-to-storage material uploads, hardened account deletion.  
+`npx tsc --noEmit` passes; `npm run check:i18n` passes (924 keys, EN/AR parity); `npm run build` passes. **No secret values are included here.**
 
 ---
 
@@ -116,6 +116,20 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 | `README.md`, `src/lib/grading/mock.ts` | GEMINI wording → AI_* wording. |
 | `src/app/[locale]/(app)/profile/*`, `src/app/[locale]/reset-password/*`, `src/middleware.ts` | Self-service password change via verification email (requestPasswordChangeAction + reset-password page). |
 
+### 2026-11-25 fixes
+
+| File | Change |
+|------|--------|
+| `src/actions/materials.ts` | **New** `createMaterialUploadUrlAction` (staff-gated signed upload URL). `addMaterialAction` no longer reads file bytes; it accepts `file_path` + `mime_type` and validates the path belongs to the session. |
+| `src/components/admin/materials-panel.tsx` | Browser uploads directly with `uploadToSignedUrl`, bypassing the 2 MB Server Action / ~4.5 MB Vercel body cap (PDF/PPTX now work up to 50 MB). |
+| `src/lib/materials.ts` | **New** shared bucket name, 50 MB limit, filename sanitizer. |
+| `src/actions/students.ts` | Delete now logs the full auth error (`message/status/name/code`), verifies the profile cascade ran, and cleans up a leftover profile. |
+| `supabase/migrations/20261125000002_harden_handle_new_user.sql` | **New** `handle_new_user` requires `username` + `full_name` metadata. Stops silent `"Student"` placeholder profiles when `generateLink`/dashboard creates a user without metadata. |
+| `src/app/[locale]/(app)/admin/analytics/page.tsx` | Null-safe `weeks`/`grades`/`at_risk`; Attendance/Average show `—` instead of `NaN%` when the RPC omits totals. |
+| `messages/en.json`, `messages/ar.json` | `admin.session.errors.uploadUrlFailed`; `admin.students.role`. |
+
+Note: `check-in` and `/reset-password` were removed earlier (OTP password change and manual attendance only).
+
 ---
 
 ## 4. IN PROGRESS / BROKEN — Root Causes & Evidence
@@ -151,7 +165,7 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 
 ## 5. DATABASE STATE
 
-### Migrations (Local, 18 files)
+### Migrations (Local, 19 files)
 ```
 20260101000000_init.sql
 20260101000100_reference_data.sql
@@ -161,35 +175,23 @@ Supabase: hosted project `bweewmzvwfpjkncygpez.supabase.co`.
 20260501000000_phase5.sql
 20260601000000_phase6_attendance_teacher_role.sql
 20260615000000_self_signup.sql
-20260615000000_text_submission.sql
+20260615000001_text_submission.sql
 20261120000001_teacher_attendance_access.sql
 20261120000002_lookup_email_by_username.sql
 20261121000001_fix_submission_insert.sql
 20261121000002_fix_teacher_rpc_access.sql
-20261121000002_fix_teacher_similarity_access.sql
 20261121000003_fix_teacher_profile_access.sql
 20261121000004_fix_remaining_admin_rpcs.sql
+20261121000005_fix_teacher_similarity_access.sql
+20261124000001_fix_staff_rls_and_rpcs.sql
+20261125000001_session_materials.sql
+20261125000002_harden_handle_new_user.sql
 ```
 
-### Hosted Supabase (Unknown)
-- **Unknown which migrations applied** — the hosted DB was set up partially by hand.
-- **Likely missing**: `20261121000002_fix_teacher_similarity_access.sql`, `20261121000003_fix_teacher_profile_access.sql`, `20261121000004_fix_remaining_admin_rpcs.sql`.
-- **Applied by hand (unknown which)**: `is_teacher_or_admin()` function, some attendance RLS policies.
-
-### SQL to Run in Supabase SQL Editor (In Order)
-```sql
--- 1. Similarity pairs for teachers
--- (Run supabase/migrations/20261121000002_fix_teacher_similarity_access.sql)
-
--- 2. Profiles RLS for teachers
--- (Run supabase/migrations/20261121000003_fix_teacher_profile_access.sql)
-
--- 3. Admin RPCs for teachers (run each block separately!)
--- (Run supabase/migrations/20261121000004_fix_remaining_admin_rpcs.sql -- 4 separate blocks)
-
--- 4. Reload PostgREST
-notify pgrst, 'reload schema';
-```
+### Hosted Supabase — verified 2026-11-25
+- All migrations **through `20261125000001_session_materials.sql` are applied** (probed directly: `session_materials` table, `session-materials` bucket = private/50 MB/all MIME, staff upload, student SELECT + signed URLs, `admin_analytics`, `admin_points_overview`, `admin_list_sessions`, `admin_student_metrics`, `get_email_by_username`, text-submission columns, `announcements.pinned`, `profiles.email`).
+- **Still to run**: `supabase/migrations/20261125000002_harden_handle_new_user.sql` (metadata guard). Run it in the Supabase SQL Editor.
+- `admin_analytics` returns `null` for `grades`/`at_risk` when there is no data — the page now handles this.
 
 ---
 
