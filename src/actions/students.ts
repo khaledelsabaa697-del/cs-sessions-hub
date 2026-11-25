@@ -346,8 +346,53 @@ export async function deleteStudentAccountAction(
 
   const { error } = await admin.auth.admin.deleteUser(studentId);
   if (error) {
-    console.error("deleteStudentAccountAction failed:", error.message);
+    const authError = error as { message?: string; status?: number; name?: string; code?: string };
+    console.error("deleteStudentAccountAction failed:", {
+      message: authError.message,
+      status: authError.status,
+      name: authError.name,
+      code: authError.code,
+      studentId,
+    });
     return { status: "error", error: t("errors.deleteFailed") };
+  }
+
+  // The profiles.id -> auth.users(id) FK is ON DELETE CASCADE, but verify it
+  // actually ran. If a hosted schema ever drifts, don't leave a ghost account
+  // in the admin list.
+  const { data: leftover, error: verifyError } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("id", studentId)
+    .maybeSingle();
+
+  if (verifyError) {
+    console.error("deleteStudentAccountAction verify failed:", {
+      message: verifyError.message,
+      code: verifyError.code,
+      details: verifyError.details,
+      hint: verifyError.hint,
+      studentId,
+    });
+    return { status: "error", error: t("errors.deleteFailed") };
+  }
+
+  if (leftover) {
+    const { error: cleanupError } = await admin
+      .from("profiles")
+      .delete()
+      .eq("id", studentId);
+
+    if (cleanupError) {
+      console.error("deleteStudentAccountAction profile cleanup failed:", {
+        message: cleanupError.message,
+        code: cleanupError.code,
+        details: cleanupError.details,
+        hint: cleanupError.hint,
+        studentId,
+      });
+      return { status: "error", error: t("errors.deleteFailed") };
+    }
   }
 
   revalidatePath(`/${locale}/admin/students`);
