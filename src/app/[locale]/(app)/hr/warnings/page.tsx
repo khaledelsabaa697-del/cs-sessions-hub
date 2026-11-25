@@ -14,7 +14,7 @@ export default async function HrWarningsPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ student?: string }>;
+  searchParams: Promise<{ student?: string; q?: string }>;
 }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
@@ -22,20 +22,24 @@ export default async function HrWarningsPage({
 
   await requireHr(locale);
   const t = await getTranslations("hr");
+  const tc = await getTranslations("common");
 
   const query = await searchParams;
   const selectedStudent = typeof query.student === "string" ? query.student : "";
+  const search = typeof query.q === "string" ? query.q.trim().slice(0, 60) : "";
 
   const supabase = await createClient();
-  const { data: students } = await supabase
-    .from("profiles")
-    .select("id, full_name, student_code")
-    .eq("role", "student")
-    .order("full_name", { ascending: true })
-    .limit(500)
-    .returns<StudentRow[]>();
+  const { data: overview, error: overviewError } = await supabase.rpc("hr_students_overview", {
+    p_search: search || null,
+  });
+  if (overviewError) console.error("[hr/warnings] hr_students_overview error:", overviewError);
 
-  const studentList = students ?? [];
+  type OverviewRow = { student_id: string; full_name: string; student_code: string };
+  const studentList = ((overview ?? []) as OverviewRow[]).map((r) => ({
+    id: r.student_id,
+    full_name: r.full_name,
+    student_code: r.student_code,
+  }));
 
   // Load warnings for selected student (if any) via RPC detail
   let warnings: { id: string; reason: string; note: string | null; created_at: string }[] = [];
@@ -47,6 +51,24 @@ export default async function HrWarningsPage({
   return (
     <div className="space-y-6">
       <PageHeader title={t("warningsTitle")} />
+
+      <Card>
+        <CardHeader title={t("searchPlaceholder")} />
+        <form method="get" className="flex min-w-0 gap-2 p-5" role="search">
+          <input type="hidden" name="student" value={selectedStudent} />
+          <input
+            name="q"
+            type="search"
+            defaultValue={search}
+            maxLength={60}
+            placeholder={t("searchPlaceholder")}
+            className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+          />
+          <button type="submit" className={`${buttonSecondary} shrink-0`}>
+            {tc("search") ?? "Search"}
+          </button>
+        </form>
+      </Card>
 
       <Card>
         <CardHeader title={t("createWarning")} />
