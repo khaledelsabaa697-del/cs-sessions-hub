@@ -12,7 +12,7 @@ import type { MaterialState } from "@/lib/types";
 const ALLOWED_TYPES = ["text", "file", "image", "video", "notebook", "code"];
 
 export type MaterialUploadUrlResult =
-  | { status: "ok"; path: string; token: string }
+  | { status: "ok"; path: string }
   | { status: "error"; error: string };
 
 /**
@@ -35,26 +35,15 @@ export async function createMaterialUploadUrlAction(
     return { status: "error", error: "invalid" };
   }
 
-  const supabase = await createClient();
+  // Path only — the browser uploads the bytes directly with supabase.storage.upload(),
+  // which uses the standard multipart endpoint and returns a proper response.
+  // (Signed-URL PUTs were observed to land the file but never return a response
+  //  for larger payloads, leaving the form stuck on "Saving…".)
   const path = `${parsed.data}/${Date.now()}-${crypto
     .randomUUID()
     .slice(0, 8)}-${sanitizeMaterialFileName(fileName)}`;
 
-  const { data, error } = await supabase.storage
-    .from(MATERIAL_BUCKET)
-    .createSignedUploadUrl(path);
-
-  if (error || !data?.token) {
-    console.error("createMaterialUploadUrlAction failed:", {
-      message: error?.message,
-      status: error?.status,
-      name: error?.name,
-      path,
-    });
-    return { status: "error", error: "uploadUrlFailed" };
-  }
-
-  return { status: "ok", path: data.path || path, token: data.token };
+  return { status: "ok", path };
 }
 
 export async function addMaterialAction(

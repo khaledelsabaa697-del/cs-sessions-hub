@@ -70,22 +70,27 @@ export function MaterialsPanel({
 
       const upload = await createMaterialUploadUrlAction(sessionId, file.name);
       if (upload.status !== "ok") {
-        const errorKey =
-          upload.error === "forbidden" ? "errors.forbidden" : "errors.uploadUrlFailed";
-        return { status: "error", error: t(errorKey) };
+        return {
+          status: "error",
+          error: t(upload.error === "forbidden" ? "errors.forbidden" : "errors.invalid"),
+        };
       }
 
+      // Upload via the standard multipart endpoint, which returns a proper
+      // response (signed-URL PUTs were observed to land the file but never
+      // return a response for larger payloads, leaving the form stuck).
       const supabase = createClient();
-      const { error } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from(MATERIAL_BUCKET)
-        .uploadToSignedUrl(upload.path, upload.token, file, {
+        .upload(upload.path, file, {
           contentType: file.type || "application/octet-stream",
+          upsert: false,
         });
 
-      if (error) {
+      if (uploadError) {
         console.error("material upload failed:", {
-          message: error.message,
-          name: error.name,
+          message: uploadError.message,
+          name: uploadError.name,
           path: upload.path,
         });
         return { status: "error", error: t("errors.uploadFailed") };
