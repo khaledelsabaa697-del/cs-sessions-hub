@@ -1,13 +1,8 @@
 -- ============================================================================
--- HR role: attendance recording + warning decisions
+-- HR role: attendance recording + warning decisions (step 2)
+-- Run AFTER 20261125000005_hr_role_enum.sql has committed.
 -- ============================================================================
-
--- 1. Add 'hr' to user_role enum
-do $$ begin
-  alter type public.user_role add value if not exists 'hr';
-exception when duplicate_object then null; end $$;
-
--- 2. is_hr() helper
+-- 1. is_hr() helper
 create or replace function public.is_hr()
 returns boolean
 language sql
