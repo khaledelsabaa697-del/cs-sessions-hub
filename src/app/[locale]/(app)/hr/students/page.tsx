@@ -11,7 +11,9 @@ import {
   PageHeader,
   buttonSecondary,
   inputClass,
+  buttonPrimary,
 } from "@/components/ui";
+import { setAbsenceThresholdAction } from "@/actions/hr";
 
 type OverviewRow = {
   student_id: string;
@@ -39,7 +41,7 @@ export default async function HrStudentsPage({
   const locale = toLocale(raw);
   setRequestLocale(locale);
 
-  await requireHr(locale);
+  const profile = await requireHr(locale);
   const t = await getTranslations("hr");
   const tc = await getTranslations("common");
 
@@ -54,6 +56,7 @@ export default async function HrStudentsPage({
   const rows = (data ?? []) as OverviewRow[];
 
   const threshold = (await supabase.rpc("hr_get_setting", { p_key: "absence_threshold" })).data ?? "3";
+  const isAdmin = profile.role === "admin";
 
   return (
     <div className="space-y-6">
@@ -64,6 +67,27 @@ export default async function HrStudentsPage({
         <div className="p-5 text-sm text-slate-500 dark:text-slate-400">
           {t("thresholdHint")} — {t("thresholdLabel")}: {threshold}
         </div>
+        {isAdmin ? (
+          <form action={setAbsenceThresholdAction} className="flex flex-wrap items-end gap-2 border-t border-slate-100 p-5 dark:border-slate-800">
+            <input type="hidden" name="locale" value={locale} />
+            <div>
+              <label htmlFor="threshold" className="block text-xs font-medium text-slate-600 dark:text-slate-300">
+                {t("thresholdLabel")}
+              </label>
+              <input
+                id="threshold"
+                name="threshold"
+                type="number"
+                min={0}
+                defaultValue={threshold}
+                className="mt-1 w-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+              />
+            </div>
+            <button type="submit" className={buttonPrimary}>
+              {t("saveThreshold")}
+            </button>
+          </form>
+        ) : null}
       </Card>
 
       <Card>

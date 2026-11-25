@@ -8,6 +8,21 @@ import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
 
 
+export async function setAbsenceThresholdAction(
+  formData: FormData,
+): Promise<void> {
+  const locale = toLocale(formData.get("locale"));
+  const profile = await getCurrentProfile();
+  if (!profile || profile.role !== "admin") return;
+
+  const value = String(formData.get("threshold") ?? "").trim();
+  if (!/^[0-9]+$/.test(value)) return;
+
+  const supabase = await createClient();
+  await supabase.rpc("hr_set_setting", { p_key: "absence_threshold", p_value: value });
+  revalidatePath(`/${locale}/hr/students`);
+}
+
 export async function createWarningAction(
   formData: FormData,
 ): Promise<void> {
