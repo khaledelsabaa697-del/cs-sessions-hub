@@ -3,11 +3,17 @@ import { requireHr } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
-import { Card, CardHeader, EmptyState, PageHeader, inputClass, labelClass, buttonPrimary, buttonSecondary } from "@/components/ui";
-import { SubmitButton } from "@/components/submit-button";
-import { createWarningAction } from "@/actions/hr";
+import {
+  Card,
+  CardHeader,
+  EmptyState,
+  PageHeader,
+  buttonSecondary,
+} from "@/components/ui";
+import { WarningForm } from "@/components/hr/warning-form";
 
 type StudentRow = { id: string; full_name: string; student_code: string };
+type WarningRow = { id: string; reason: string; note: string | null; created_at: string };
 
 export default async function HrWarningsPage({
   params,
@@ -29,23 +35,25 @@ export default async function HrWarningsPage({
   const search = typeof query.q === "string" ? query.q.trim().slice(0, 60) : "";
 
   const supabase = await createClient();
-  const { data: overview, error: overviewError } = await supabase.rpc("hr_students_overview", {
-    p_search: search || null,
-  });
-  if (overviewError) console.error("[hr/warnings] hr_students_overview error:", overviewError);
 
-  type OverviewRow = { student_id: string; full_name: string; student_code: string };
-  const studentList = ((overview ?? []) as OverviewRow[]).map((r) => ({
-    id: r.student_id,
-    full_name: r.full_name,
-    student_code: r.student_code,
-  }));
+  // HR has no SELECT on profiles (it contains emails); use the narrow RPC.
+  const { data: studentRows, error: studentsError } = await supabase.rpc("hr_list_students");
+  if (studentsError) console.error("[hr/warnings] hr_list_students error:", studentsError);
 
-  // Load warnings for selected student (if any) via RPC detail
-  let warnings: { id: string; reason: string; note: string | null; created_at: string }[] = [];
+  const allStudents = (studentRows ?? []) as StudentRow[];
+  const needle = search.toLowerCase();
+  const studentList = needle
+    ? allStudents.filter(
+        (s) =>
+          s.full_name.toLowerCase().includes(needle) ||
+          s.student_code.toLowerCase().includes(needle),
+      )
+    : allStudents;
+
+  let warnings: WarningRow[] = [];
   if (selectedStudent) {
     const { data } = await supabase.rpc("hr_student_detail", { p_student_id: selectedStudent });
-    warnings = (data as { warnings?: typeof warnings })?.warnings ?? [];
+    warnings = (data as { warnings?: WarningRow[] })?.warnings ?? [];
   }
 
   return (
@@ -65,36 +73,18 @@ export default async function HrWarningsPage({
             className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
           />
           <button type="submit" className={`${buttonSecondary} shrink-0`}>
-            {tc("search") ?? "Search"}
+            {tc("search")}
           </button>
         </form>
       </Card>
 
       <Card>
         <CardHeader title={t("createWarning")} />
-        <form action={createWarningAction} className="space-y-4 p-5">
-          <input type="hidden" name="locale" value={locale} />
-          <div>
-            <label htmlFor="w-student" className={labelClass}>{t("colStudent")}</label>
-            <select id="w-student" name="student_id" defaultValue={selectedStudent} className={inputClass} required>
-              <option value="">—</option>
-              {studentList.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.full_name} ({s.student_code})
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="w-reason" className={labelClass}>{t("warningReason")}</label>
-            <input id="w-reason" name="reason" type="text" required className={inputClass} />
-          </div>
-          <div>
-            <label htmlFor="w-note" className={labelClass}>{t("warningNote")}</label>
-            <textarea id="w-note" name="note" rows={3} className={inputClass} />
-          </div>
-          <SubmitButton idle={t("createWarning")} pendingLabel={t("createWarning")} />
-        </form>
+        <WarningForm
+          locale={locale}
+          students={studentList}
+          defaultStudentId={selectedStudent}
+        />
       </Card>
 
       {selectedStudent ? (
@@ -109,8 +99,12 @@ export default async function HrWarningsPage({
               {warnings.map((w) => (
                 <li key={w.id} className="px-5 py-3">
                   <p className="text-sm font-medium text-slate-900 dark:text-white">{w.reason}</p>
-                  {w.note ? <p className="text-xs text-slate-500 dark:text-slate-400">{w.note}</p> : null}
-                  <p className="text-xs text-slate-400">{formatDate(w.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}</p>
+                  {w.note ? (
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{w.note}</p>
+                  ) : null}
+                  <p className="text-xs text-slate-400">
+                    {formatDate(w.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}
+                  </p>
                 </li>
               ))}
             </ul>

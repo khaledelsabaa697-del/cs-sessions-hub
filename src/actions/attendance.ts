@@ -89,16 +89,36 @@ export async function recordAttendanceAction(
     filters.push(`student_code.in.(${codeIds.map((id) => `"${id}"`).join(",")})`);
   }
 
-  const studentsResult = filters.length
-    ? await supabase
+  const studentsResult: {
+    data: Array<{ id: string; student_code: string; full_name: string }> | null;
+    error: { message: string } | null;
+  } = { data: [], error: null };
+
+  if (filters.length > 0) {
+    if (profile.role === "hr") {
+      // HR has no SELECT on profiles (it contains emails). Use the narrow,
+      // security-definer lookup RPC instead.
+      const result = await supabase.rpc("hr_find_students", {
+        p_ids: uuidIds.length > 0 ? uuidIds : null,
+        p_codes: codeIds.length > 0 ? codeIds : null,
+      });
+      studentsResult.data = (result.data ?? []) as Array<{
+        id: string;
+        student_code: string;
+        full_name: string;
+      }>;
+      studentsResult.error = result.error;
+    } else {
+      const result = await supabase
         .from("profiles")
         .select("id, student_code, full_name")
         .eq("role", "student")
         .or(filters.join(","))
-    : {
-        data: [] as Array<{ id: string; student_code: string; full_name: string }>,
-        error: null,
-      };
+        .returns<Array<{ id: string; student_code: string; full_name: string }>>();
+      studentsResult.data = result.data;
+      studentsResult.error = result.error;
+    }
+  }
 
   if (studentsResult.error) {
     console.error("recordAttendanceAction student lookup failed:", studentsResult.error.message);

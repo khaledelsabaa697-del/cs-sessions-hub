@@ -234,6 +234,9 @@
     "errors": {
       "forbidden": "Only HR or admin can do that.",
       "invalid": "Check the fields and try again.",
+      "invalidStudent": "Choose a student from the list.",
+      "reasonRequired": "Enter a reason for the warning.",
+      "notStudent": "That account is not a student, so it cannot receive a warning.",
       "saveFailed": "Could not save. Please try again."
     }
   },

@@ -6,6 +6,7 @@ import { getCurrentProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
+import type { WarningFormState } from "@/lib/types";
 
 
 export async function setAbsenceThresholdAction(
@@ -24,22 +25,27 @@ export async function setAbsenceThresholdAction(
 }
 
 export async function createWarningAction(
+  _previous: WarningFormState,
   formData: FormData,
-): Promise<void> {
+): Promise<WarningFormState> {
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "hr" });
 
   const profile = await getCurrentProfile();
   if (!profile || (profile.role !== "hr" && profile.role !== "admin")) {
-    return;
+    return { status: "error", error: t("errors.forbidden") };
   }
 
   const studentId = idSchema.safeParse(formData.get("student_id"));
-  if (!studentId.success) return;
+  if (!studentId.success) {
+    return { status: "error", error: t("errors.invalidStudent") };
+  }
 
   const reason = String(formData.get("reason") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
-  if (!reason) return;
+  if (!reason) {
+    return { status: "error", error: t("errors.reasonRequired") };
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("hr_create_warning", {
@@ -50,10 +56,17 @@ export async function createWarningAction(
 
   if (error) {
     console.error("createWarningAction failed:", error.message);
-    return;
+    return {
+      status: "error",
+      error: error.message.includes("not_student")
+        ? t("errors.notStudent")
+        : t("errors.saveFailed"),
+    };
   }
 
   revalidatePath(`/${locale}/hr/warnings`);
   revalidatePath(`/${locale}/hr/students/${studentId.data}`);
   revalidatePath(`/${locale}/dashboard`);
+
+  return { status: "success", message: t("warningCreated") };
 }

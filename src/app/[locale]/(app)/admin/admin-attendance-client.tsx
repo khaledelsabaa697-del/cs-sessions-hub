@@ -27,7 +27,7 @@ type SessionRow = {
 type StudentRow = {
   id: string;
   full_name: string;
-  username: string;
+  username?: string;
   student_code: string;
 };
 
@@ -176,7 +176,8 @@ export function AdminAttendanceClient({
                                 {student.full_name}
                               </p>
                               <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                                @{student.username} · {student.student_code}
+                                {student.username ? `@${student.username} · ` : ""}
+                                {student.student_code}
                               </p>
                             </div>
                           </div>
@@ -245,9 +246,11 @@ export function AdminAttendanceClient({
                               <p className="truncate font-medium text-slate-900 dark:text-white">
                                 {student.full_name}
                               </p>
-                              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                                @{student.username}
-                              </p>
+                              {student.username ? (
+                                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                                  @{student.username}
+                                </p>
+                              ) : null}
                             </div>
                           </div>
                         </td>

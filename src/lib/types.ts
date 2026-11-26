@@ -52,6 +52,11 @@ export type ResetPasswordState =
   | { status: "error"; error: string }
   | { status: "success"; message: string };
 
+export type WarningFormState =
+  | { status: "idle" }
+  | { status: "error"; error: string }
+  | { status: "success"; message: string };
+
 export type SessionSummary = {
   id: string;
   title: string;

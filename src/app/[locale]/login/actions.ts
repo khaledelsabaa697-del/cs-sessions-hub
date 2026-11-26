@@ -79,9 +79,27 @@ export async function loginAction(
     return { error: t("emailNotVerified") };
   }
 
-  const role = data.user.app_metadata?.role === "admin" ? "admin" : data.user.app_metadata?.role === "teacher" ? "teacher" : "student";
+  // Role comes from profiles (authoritative), not app_metadata.
+  const { data: profileRow, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .maybeSingle();
+
+  if (profileError || !profileRow) {
+    // Orphan auth user: sign out and show the incomplete-account message.
+    await supabase.auth.signOut();
+    return { error: t("accountIncomplete") };
+  }
+
+  const role = profileRow.role as "student" | "teacher" | "admin" | "hr";
   const requested = safeRedirectPath(formData.get("next"), locale);
-  const fallback = role === "admin" || role === "teacher" ? `/${locale}/admin` : `/${locale}/dashboard`;
+  const fallback =
+    role === "hr"
+      ? `/${locale}/hr`
+      : role === "admin" || role === "teacher"
+        ? `/${locale}/admin`
+        : `/${locale}/dashboard`;
 
   redirect(requested ?? fallback);
 }

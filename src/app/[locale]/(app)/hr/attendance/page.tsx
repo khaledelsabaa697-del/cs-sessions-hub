@@ -7,7 +7,7 @@ import { formatDate } from "@/lib/utils";
 import { AdminAttendanceClient } from "../../admin/admin-attendance-client";
 
 type SessionRow = { id: string; title: string; session_date: string };
-type StudentRow = { id: string; full_name: string; username: string; student_code: string };
+type StudentRow = { id: string; full_name: string; student_code: string };
 type AttendanceRow = { student_id: string; status: "present" | "absent" | "late" };
 
 export default async function HrAttendancePage({
@@ -32,17 +32,12 @@ export default async function HrAttendancePage({
       .order("session_date", { ascending: false })
       .limit(100)
       .returns<SessionRow[]>(),
-    supabase
-      .from("profiles")
-      .select("id, full_name, username, student_code")
-      .eq("role", "student")
-      .order("full_name", { ascending: true })
-      .limit(500)
-      .returns<StudentRow[]>(),
+    // HR has no SELECT on profiles (it contains emails); use the narrow RPC.
+    supabase.rpc("hr_list_students"),
   ]);
 
   const sessions = sessionsResult.data ?? [];
-  const allStudents = studentsResult.data ?? [];
+  const allStudents = (studentsResult.data ?? []) as StudentRow[];
   const selectedSession = sessionIdParam
     ? sessions.find((s) => s.id === sessionIdParam) ?? null
     : sessions[0] ?? null;

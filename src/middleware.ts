@@ -14,7 +14,12 @@ async function getAuthContext(
   supabaseUrl: string,
   supabaseAnonKey: string,
   cookies: NextRequest["cookies"],
-): Promise<{ role: "student" | "teacher" | "admin" | "hr" | null; verified: boolean }> {
+): Promise<{
+  role: "student" | "teacher" | "admin" | "hr" | null;
+  verified: boolean;
+  authenticated: boolean;
+  hasProfile: boolean;
+}> {
   const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
@@ -28,7 +33,9 @@ async function getAuthContext(
 
   const { data } = await supabase.auth.getUser();
   const user = data.user;
-  if (!user) return { role: null, verified: false };
+  if (!user) {
+    return { role: null, verified: false, authenticated: false, hasProfile: false };
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -36,10 +43,17 @@ async function getAuthContext(
     .eq("id", user.id)
     .maybeSingle();
 
-  const role = (profile?.role as "student" | "teacher" | "admin" | "hr") ?? "student";
   const verified =
     user.email?.endsWith("@cshub.local") === true || !!user.email_confirmed_at;
-  return { role, verified };
+
+  // Never default a missing profile to "student": that would grant a
+  // student dashboard (and student RLS paths) to an orphan auth user.
+  return {
+    role: (profile?.role as "student" | "teacher" | "admin" | "hr") ?? null,
+    verified,
+    authenticated: true,
+    hasProfile: !!profile,
+  };
 }
 
 export async function middleware(request: NextRequest) {
@@ -69,7 +83,21 @@ export async function middleware(request: NextRequest) {
   const isSignup = path === "/signup";
   const isVerifyEmail = path === "/verify-email";
 
-  const { role, verified } = await getAuthContext(supabaseUrl, supabaseAnonKey, request.cookies);
+  const { role, verified, authenticated, hasProfile } = await getAuthContext(
+    supabaseUrl,
+    supabaseAnonKey,
+    request.cookies,
+  );
+
+  // Authenticated but no profiles row: do not fall through as a student.
+  // Login is always allowed here, so this redirect cannot loop; the login page
+  // shows the incomplete-account alert and a sign-out button.
+  if (authenticated && !hasProfile) {
+    if (isLogin || isSignup || isVerifyEmail) return response;
+    const url = new URL(`/${locale}/login`, request.url);
+    url.searchParams.set("error", "no_profile");
+    return copyCookies(NextResponse.redirect(url), response);
+  }
 
   // Redirect unauthenticated users to login
   if (!role && !isLogin && !isSignup && !isVerifyEmail) {
