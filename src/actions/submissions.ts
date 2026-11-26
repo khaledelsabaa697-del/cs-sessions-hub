@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { getTranslations } from "next-intl/server";
 import { getCurrentProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
@@ -12,7 +13,11 @@ import {
   textSubmissionSchema,
 } from "@/lib/validation";
 import { rateLimit } from "@/lib/rate-limit";
-import { gradeSubmissionById } from "@/lib/grading/service";
+import { isGradingConfigured } from "@/lib/grading/provider";
+import {
+  markGradingUnavailable,
+  processGradingQueue,
+} from "@/lib/grading/service";
 import type { SubmitAssignmentState } from "@/lib/types";
 
 type AssignmentRow = {
@@ -181,9 +186,17 @@ export async function submitAssignmentAction(
     };
   }
 
-  // Grade immediately when possible. A failure leaves the row pending; the
-  // teacher's queue ("Grade queued") can retry it.
-  const outcome = await gradeSubmissionById(inserted.id, { maxAttempts: 1 });
+  // The database trigger enqueues one job per submission. This RPC is a
+  // safety net for databases where the trigger migration has not run yet.
+  const { error: enqueueError } = await supabase.rpc("enqueue_grading_job", {
+    p_submission: inserted.id,
+  });
+  if (enqueueError) {
+    console.error(
+      "submitAssignmentAction enqueue failed:",
+      enqueueError.message,
+    );
+  }
 
   revalidatePath(`/${locale}/assignments`);
   revalidatePath(`/${locale}/assignments/${assignment.id}`);
@@ -191,19 +204,33 @@ export async function submitAssignmentAction(
   revalidatePath(`/${locale}/admin/assignments`);
   revalidatePath(`/${locale}/admin/assignments/${assignment.id}`);
 
-  if (outcome.ok) {
+  if (!isGradingConfigured()) {
+    await markGradingUnavailable(inserted.id);
     return {
       status: "success",
-      message: t("submittedGraded", { score: outcome.score }),
-      grading: "graded",
-      score: outcome.score,
+      message: t("submittedNotGraded"),
+      grading: "failed",
+      score: null,
     };
   }
+
+  // Do not make the student wait for the model. The queue is durable; this
+  // callback is just the fast path, and /api/cron/grading is the safety net.
+  after(async () => {
+    try {
+      await processGradingQueue({ limit: 1, worker: "submit" });
+    } catch (error) {
+      console.error(
+        "Background grading failed:",
+        error instanceof Error ? error.message : error,
+      );
+    }
+  });
 
   return {
     status: "success",
     message: t("submittedQueued"),
-    grading: outcome.reason === "config" ? "failed" : "queued",
+    grading: "queued",
     score: null,
   };
 }

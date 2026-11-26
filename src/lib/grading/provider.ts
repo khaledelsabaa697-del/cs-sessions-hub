@@ -1,27 +1,20 @@
 import "server-only";
-import { gradingResponseSchema, type GradingInput, type GradingResponse } from "./schema";
+import {
+  gradingResponseSchema,
+  normalizeGradingResponse,
+  type GradingInput,
+  type GradingResponse,
+} from "./schema";
 import { buildSystemPrompt, buildUserPrompt } from "./prompt";
+import { GradingError, classifyHttpFailure } from "./errors";
+import type { PlanModel } from "./fallback-core";
 
-const DEFAULT_MODEL = "gpt-4o-mini";
-const REQUEST_TIMEOUT_MS = 60_000;
-const MAX_ATTEMPTS = 3;
+export { GradingError } from "./errors";
+export type { GradingFailure } from "./errors";
 
-export type GradingFailure =
-  | "config"
-  | "rateLimited"
-  | "timeout"
-  | "api"
-  | "invalid";
-
-export class GradingError extends Error {
-  code: GradingFailure;
-
-  constructor(code: GradingFailure, message: string) {
-    super(message);
-    this.name = "GradingError";
-    this.code = code;
-  }
-}
+const DEFAULT_MODEL = "kilo-auto/free";
+const DEFAULT_BASE_URL = "https://ai-gateway.kilo.ai/api/v1";
+const DEFAULT_TIMEOUT_MS = 30_000;
 
 export type ProviderConfig = {
   apiKey: string | null;
@@ -30,9 +23,26 @@ export type ProviderConfig = {
   mock: boolean;
 };
 
+function timeoutMs(): number {
+  const parsed = Number(process.env.AI_REQUEST_TIMEOUT_MS);
+  if (Number.isFinite(parsed) && parsed >= 5_000) {
+    return Math.min(60_000, parsed);
+  }
+  return DEFAULT_TIMEOUT_MS;
+}
+
 export function providerConfig(): ProviderConfig {
-  const apiKey = (process.env.AI_API_KEY ?? "").trim();
-  const baseUrl = (process.env.AI_BASE_URL ?? "").trim();
+  const apiKey = (
+    process.env.AI_API_KEY ??
+    process.env.KILOCODE_API_KEY ??
+    process.env.KILO_API_KEY ??
+    ""
+  ).trim();
+  const baseUrl = (
+    process.env.AI_BASE_URL ??
+    process.env.KILO_BASE_URL ??
+    DEFAULT_BASE_URL
+  ).trim();
   const model = (process.env.AI_MODEL ?? "").trim() || DEFAULT_MODEL;
   const mock =
     !apiKey &&
@@ -72,35 +82,51 @@ const RESPONSE_SCHEMA = {
       description: "Concrete problems to fix, newest rubric order, max 6.",
       items: { type: "STRING" },
     },
+    rubric_scores: {
+      type: "ARRAY",
+      description: "Optional per-criterion scores, best effort.",
+      items: {
+        type: "OBJECT",
+        properties: {
+          criterion: { type: "STRING" },
+          score: { type: "NUMBER" },
+          max: { type: "NUMBER" },
+          comment: { type: "STRING" },
+        },
+        required: ["criterion", "score"],
+      },
+    },
   },
   required: ["score", "feedback_en", "feedback_ar", "issues"],
-  propertyOrdering: ["score", "feedback_en", "feedback_ar", "issues"],
+  propertyOrdering: [
+    "score",
+    "feedback_en",
+    "feedback_ar",
+    "issues",
+    "rubric_scores",
+  ],
 } as const;
 
-type OpenAICompatiblePayload = {
+type ChatPayload = {
+  id?: string;
+  model?: string;
   choices?: Array<{
-    message?: { content?: string };
-    finish_reason?: string;
+    message?: {
+      content?: string | null;
+      reasoning_content?: string | null;
+    };
+    delta?: { content?: string | null };
+    finish_reason?: string | null;
   }>;
-  error?: { message?: string; code?: string };
+  usage?: {
+    prompt_tokens?: number;
+    completion_tokens?: number;
+    total_tokens?: number;
+  };
+  error?: { message?: string; code?: string | number };
 };
 
-const RETRYABLE_STATUS = new Set([408, 425, 429, 500, 502, 503, 504]);
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function backoffMs(attempt: number, retryAfterHeader: string | null): number {
-  const retryAfter = Number(retryAfterHeader);
-  if (Number.isFinite(retryAfter) && retryAfter > 0) {
-    return Math.min(10_000, retryAfter * 1_000);
-  }
-  const base = 1_000 * 2 ** (attempt - 1);
-  return base + Math.floor(Math.random() * 500);
-}
-
-function extractText(payload: OpenAICompatiblePayload): string {
+function extractText(payload: ChatPayload): string {
   if (payload.error?.message) {
     throw new GradingError("api", payload.error.message);
   }
@@ -112,17 +138,28 @@ function extractText(payload: OpenAICompatiblePayload): string {
     throw new GradingError("invalid", "Grading response was truncated.");
   }
 
-  const text = choice.message?.content?.trim();
+  const text =
+    choice.message?.content?.trim() ||
+    choice.message?.reasoning_content?.trim() ||
+    choice.delta?.content?.trim() ||
+    "";
   if (!text) throw new GradingError("invalid", "Empty grading response.");
   return text;
 }
 
 function parseGradingJson(text: string, maxScore: number): GradingResponse {
-  const cleaned = text
+  let cleaned = text
     .replace(/^\uFEFF/, "")
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/```\s*$/, "")
     .trim();
+
+  // Some free models prepend a sentence before the JSON object.
+  const firstBrace = cleaned.indexOf("{");
+  const lastBrace = cleaned.lastIndexOf("}");
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
 
   let raw: unknown;
   try {
@@ -136,13 +173,165 @@ function parseGradingJson(text: string, maxScore: number): GradingResponse {
     throw new GradingError("invalid", "The grader returned an unexpected shape.");
   }
 
-  const score = Math.max(0, Math.min(maxScore, Math.round(parsed.data.score * 10) / 10));
+  return normalizeGradingResponse(parsed.data, maxScore);
+}
+
+export type ModelUsage = {
+  promptTokens: number | null;
+  completionTokens: number | null;
+  totalTokens: number | null;
+};
+
+export type ModelCallResult = {
+  response: GradingResponse;
+  rawModel: string;
+  provider: string;
+  usage: ModelUsage;
+  cost: number | null;
+};
+
+function tokenCount(value: number | undefined): number | null {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? Math.round(value)
+    : null;
+}
+
+/**
+ * One HTTP call to one model. No retry logic here: the fallback manager owns
+ * attempts, cooldowns, and model order.
+ */
+export async function callModel(
+  model: PlanModel,
+  input: GradingInput,
+  options: { allowPaid?: boolean } = {},
+): Promise<ModelCallResult> {
+  if (!model.isFree && options.allowPaid !== true) {
+    throw new GradingError(
+      "payment",
+      "A paid model was blocked by the free-only grading policy.",
+      { model: model.id, fatal: true },
+    );
+  }
+
+  const config = providerConfig();
+  if (!config.apiKey) {
+    throw new GradingError("config", "AI_API_KEY is not configured.", {
+      fatal: true,
+    });
+  }
+  if (!config.baseUrl) {
+    throw new GradingError("config", "AI_BASE_URL is not configured.", {
+      fatal: true,
+    });
+  }
+
+  const systemPrompt = buildSystemPrompt();
+  const userPrompt = buildUserPrompt(input);
+  const maxTokens = Math.max(
+    512,
+    Math.min(2048, model.maxCompletionTokens ?? 2048),
+  );
+
+  const body: Record<string, unknown> = {
+    model: model.id,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    temperature: 0.2,
+    max_tokens: maxTokens,
+  };
+
+  // Not every free endpoint accepts response_format. The prompt still demands
+  // JSON, and parseGradingJson tolerates fences and extra prose.
+  if (model.supportsJsonMode) {
+    body.response_format = { type: "json_object" };
+  }
+
+  const url = `${config.baseUrl.replace(/\/$/, "")}/chat/completions`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(timeoutMs()),
+      cache: "no-store",
+    });
+  } catch (error) {
+    const isTimeout =
+      error instanceof Error &&
+      (error.name === "TimeoutError" || error.name === "AbortError");
+    throw new GradingError(
+      isTimeout ? "timeout" : "api",
+      isTimeout
+        ? "The grading model did not answer in time."
+        : "Could not reach the AI gateway.",
+      { model: model.id },
+    );
+  }
+
+  if (!response.ok) {
+    const bodyText = await response.text().catch(() => "");
+    console.error(
+      `[grading] ${model.id} returned ${response.status}: ${bodyText.slice(0, 300)}`,
+    );
+    throw classifyHttpFailure(
+      response.status,
+      bodyText,
+      response.headers.get("retry-after"),
+    );
+  }
+
+  let payload: ChatPayload;
+  try {
+    payload = (await response.json()) as ChatPayload;
+  } catch {
+    throw new GradingError("invalid", "The gateway returned invalid JSON.", {
+      model: model.id,
+    });
+  }
+
+  const text = extractText(payload);
+  const grading = parseGradingJson(text, input.maxScore);
+  const promptTokens = tokenCount(payload.usage?.prompt_tokens);
+  const completionTokens = tokenCount(payload.usage?.completion_tokens);
+
+  let cost: number | null = null;
+  if (model.isFree) {
+    cost = 0;
+  } else if (
+    promptTokens !== null &&
+    completionTokens !== null &&
+    model.pricingPrompt !== null &&
+    model.pricingCompletion !== null
+  ) {
+    cost =
+      promptTokens * model.pricingPrompt +
+      completionTokens * model.pricingCompletion;
+  }
 
   return {
-    score: Number.isFinite(score) ? score : 0,
-    feedback_en: parsed.data.feedback_en,
-    feedback_ar: parsed.data.feedback_ar,
-    issues: parsed.data.issues.slice(0, 6),
+    response: grading,
+    rawModel:
+      typeof payload.model === "string" && payload.model.trim()
+        ? payload.model.trim()
+        : model.id,
+    provider: model.provider,
+    usage: {
+      promptTokens,
+      completionTokens,
+      totalTokens:
+        tokenCount(payload.usage?.total_tokens) ??
+        (promptTokens !== null && completionTokens !== null
+          ? promptTokens + completionTokens
+          : null),
+    },
+    cost,
   };
 }
 
@@ -153,115 +342,38 @@ export type GradeCodeResult = {
 };
 
 /**
- * Calls an OpenAI-compatible API with a strict JSON response schema and retries transient
- * failures (429/5xx/network). The API key never leaves the server.
+ * Legacy single-model helper kept for compatibility. New code goes through the
+ * queue + fallback manager in service.ts.
  */
 export async function gradeCode(
   input: GradingInput,
   options: { maxAttempts?: number } = {},
 ): Promise<GradeCodeResult> {
   const config = providerConfig();
-
   if (config.mock) {
     const { mockGrade } = await import("./mock");
     return { response: mockGrade(input), model: "mock", mock: true };
   }
 
-  if (!config.apiKey) {
-    throw new GradingError("config", "AI_API_KEY is not configured.");
-  }
-
-  if (!config.baseUrl) {
-    throw new GradingError("config", "AI_BASE_URL is not configured.");
-  }
-
-  const maxAttempts = Math.min(
-    MAX_ATTEMPTS,
-    Math.max(1, options.maxAttempts ?? MAX_ATTEMPTS),
+  const result = await callModel(
+    {
+      id: config.model,
+      displayName: config.model,
+      provider: "configured",
+      isFree: true,
+      supportsJsonMode: true,
+      available: true,
+      contextLength: null,
+      maxCompletionTokens: 2048,
+      pricingPrompt: 0,
+      pricingCompletion: 0,
+    },
+    input,
   );
 
-  const systemPrompt = buildSystemPrompt();
-  const userPrompt = buildUserPrompt(input);
-
-  const body = JSON.stringify({
-    model: config.model,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-    ],
-    temperature: 0.2,
-    max_tokens: 2048,
-    response_format: { type: "json_object" },
-  });
-
-  const url = `${config.baseUrl.replace(/\/$/, "")}/chat/completions`;
-
-  let lastFailure: GradingError | null = null;
-
-  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-          "authorization": `Bearer ${config.apiKey}`,
-        },
-        body,
-        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-        cache: "no-store",
-      });
-
-      if (response.ok) {
-        const payload = (await response.json()) as OpenAICompatiblePayload;
-        const text = extractText(payload);
-        return {
-          response: parseGradingJson(text, input.maxScore),
-          model: config.model,
-          mock: false,
-        };
-      }
-
-      const status = response.status;
-      const responseBody = await response.text().catch(() => "");
-      console.error(`AI grading failed with status ${status} (attempt ${attempt}). URL: ${url}, Model: ${config.model}, Response: ${responseBody.slice(0, 500)}`);
-
-      if (status === 429) {
-        lastFailure = new GradingError("rateLimited", "AI provider rate limit reached.");
-      } else if (status === 401 || status === 403) {
-        throw new GradingError("config", "AI provider rejected the API key.");
-      } else if (status === 400) {
-        throw new GradingError("api", `AI provider rejected the request: ${responseBody.slice(0, 200)}`);
-      } else if (status === 404) {
-        throw new GradingError("api", `AI provider endpoint not found (404). Check AI_BASE_URL (${config.baseUrl}) and model (${config.model}). Response: ${responseBody.slice(0, 200)}`);
-      } else {
-        lastFailure = new GradingError("api", `AI provider returned ${status}.`);
-      }
-
-      if (!RETRYABLE_STATUS.has(status) || attempt === maxAttempts) {
-        throw lastFailure;
-      }
-
-      await sleep(backoffMs(attempt, response.headers.get("retry-after")));
-    } catch (error) {
-      if (error instanceof GradingError) throw error;
-
-      const isTimeout =
-        error instanceof Error &&
-        (error.name === "TimeoutError" || error.name === "AbortError");
-
-      lastFailure = isTimeout
-        ? new GradingError("timeout", "AI provider did not answer in time.")
-        : new GradingError("api", "Could not reach AI provider.");
-
-      console.error(
-        `AI grading request error (attempt ${attempt}):`,
-        error instanceof Error ? error.message : error,
-      );
-
-      if (attempt === maxAttempts) throw lastFailure;
-      await sleep(backoffMs(attempt, null));
-    }
-  }
-
-  throw lastFailure ?? new GradingError("api", "Grading failed.");
+  return {
+    response: result.response,
+    model: result.rawModel,
+    mock: false,
+  };
 }

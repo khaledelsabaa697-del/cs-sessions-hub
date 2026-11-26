@@ -38,7 +38,7 @@ export default async function AdminOverviewPage({
     supabase
       .from("submissions")
       .select("id", { count: "exact", head: true })
-      .eq("status", "pending"),
+      .in("status", ["pending", "queued", "grading", "pending_retry", "failed"]),
     supabase
       .from("profiles")
       .select("id, display_name, username, student_code, created_at")

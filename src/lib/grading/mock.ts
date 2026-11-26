@@ -34,8 +34,9 @@ export function mockGrade(input: GradingInput): GradingResponse {
 
   return {
     score,
-    feedback_en: `Mock grading: a structural check only (score ${score} of ${input.maxScore}). It looks for #include <iostream>, int main(), input/output and control flow. Add a real AI_API_KEY for actual feedback.`,
-    feedback_ar: `تصحيح تجريبي: فحص هيكلي فقط (الدرجة ${score} من ${input.maxScore}). يبحث عن include و main والإدخال/الإخراج وعبارات التحكم. أضف مفتاح AI_API_KEY للحصول على ملاحظات حقيقية.`,
+    feedback_en: `Mock grading: ...`,
+    feedback_ar: `...`,
     issues: issues.slice(0, 6),
+    rubric_scores: [],
   };
 }

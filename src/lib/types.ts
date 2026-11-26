@@ -1,6 +1,13 @@
 export type UserRole = "student" | "teacher" | "admin" | "hr";
 export type AttendanceStatus = "present" | "absent" | "late";
-export type SubmissionStatus = "pending" | "graded" | "flagged";
+export type SubmissionStatus =
+  | "pending"
+  | "queued"
+  | "grading"
+  | "graded"
+  | "pending_retry"
+  | "failed"
+  | "flagged";
 export type SubmissionType = "file" | "text";
 export type AllowedSubmissionTypes = "file" | "text" | "both";
 
@@ -147,6 +154,11 @@ export type SubmissionReviewState =
   | { status: "success"; message: string; finalScore: number | null };
 
 export type GradeState =
+  | { status: "idle" }
+  | { status: "error"; error: string }
+  | { status: "success"; message: string };
+
+export type GradingSettingsState =
   | { status: "idle" }
   | { status: "error"; error: string }
   | { status: "success"; message: string };

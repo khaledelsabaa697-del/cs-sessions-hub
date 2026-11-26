@@ -1,5 +1,5 @@
 import "server-only";
-import { gradingResponseSchema, type GradingInput, type GradingResponse } from "./schema";
+import { gradingResponseSchema, normalizeGradingResponse, type GradingInput, type GradingResponse } from "./schema";
 import { MOCK_MODEL, mockGrade } from "./mock";
 import { buildSystemPrompt, buildUserPrompt } from "./prompt";
 
@@ -138,14 +138,7 @@ function parseGradingJson(text: string, maxScore: number): GradingResponse {
     throw new GradingError("invalid", "The grader returned an unexpected shape.");
   }
 
-  const score = Math.max(0, Math.min(maxScore, Math.round(parsed.data.score * 10) / 10));
-
-  return {
-    score: Number.isFinite(score) ? score : 0,
-    feedback_en: parsed.data.feedback_en,
-    feedback_ar: parsed.data.feedback_ar,
-    issues: parsed.data.issues.slice(0, 6),
-  };
+  return normalizeGradingResponse(parsed.data, maxScore);
 }
 
 export type GradeCodeResult = {

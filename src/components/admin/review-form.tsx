@@ -3,7 +3,8 @@
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { reviewSubmissionAction } from "@/actions/assignments";
-import type { SubmissionReviewState } from "@/lib/types";
+import type { SubmissionReviewState, SubmissionStatus } from "@/lib/types";
+
 import {
   Alert,
   Card,
@@ -29,7 +30,7 @@ export function ReviewForm({
   maxScore: number;
   aiScore: number | null;
   finalScore: number | null;
-  status: "pending" | "graded" | "flagged";
+  status: SubmissionStatus;
 }) {
   const t = useTranslations("admin.review");
   const [state, formAction] = useActionState(reviewSubmissionAction, initialState);

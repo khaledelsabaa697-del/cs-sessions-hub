@@ -11,6 +11,7 @@ import {
   badgeClass,
 } from "@/components/ui";
 import { SubmissionForm } from "@/components/submission-form";
+import { GradingStatusWatcher } from "@/components/grading-status-watcher";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +42,7 @@ type AttemptRow = {
   ai_feedback_ar: string | null;
   ai_issues: unknown;
   ai_model: string | null;
+  ai_rubric: unknown;
   ai_graded_at: string | null;
   final_score: number | string | null;
   status: SubmissionStatus;
@@ -87,7 +89,7 @@ export default async function StudentAssignmentPage({
   const { data: attemptsData, error: attemptsError } = await supabase
     .from("submissions")
     .select(
-      "id, file_path, code_text, ai_score, ai_feedback, ai_feedback_ar, ai_issues, ai_model, ai_graded_at, final_score, status, created_at",
+      "id, file_path, code_text, ai_score, ai_feedback, ai_feedback_ar, ai_issues, ai_model, ai_rubric, ai_graded_at, final_score, status, created_at",
     )
     .eq("assignment_id", assignment.id)
     .eq("student_id", profile.id)
@@ -236,6 +238,12 @@ export default async function StudentAssignmentPage({
         </Alert>
       )}
 
+      <GradingStatusWatcher
+        active={attempts.some((attempt) =>
+          ["queued", "grading", "pending_retry"].includes(attempt.status),
+        )}
+      />
+
       <Card>
         <CardHeader
           title={t("yourWork")}
@@ -274,7 +282,9 @@ export default async function StudentAssignmentPage({
                             ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                             : attempt.status === "flagged"
                               ? "rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
-                              : "rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                              : attempt.status === "failed"
+                                ? "rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+                                : "rounded-full bg-sky-50 px-2.5 py-0.5 text-[11px] font-medium text-sky-700 dark:bg-sky-500/10 dark:text-sky-300"
                         }
                       >
                         {ts(attempt.status)}
@@ -314,6 +324,34 @@ export default async function StudentAssignmentPage({
                       <ul className="mt-1 list-disc space-y-1 ps-5 text-sm text-slate-600 dark:text-slate-300">
                         {issues.map((issue, issueIndex) => (
                           <li key={issueIndex}>{issue}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+
+                  {Array.isArray(attempt.ai_rubric) && attempt.ai_rubric.length > 0 ? (
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        {t("rubricScores")}
+                      </p>
+                      <ul className="mt-1 space-y-1 text-sm text-slate-600 dark:text-slate-300">
+                        {(attempt.ai_rubric as Array<{
+                          criterion: string;
+                          score: number;
+                          max?: number | null;
+                          comment?: string | null;
+                        }>).map((item, itemIndex) => (
+                          <li key={itemIndex}>
+                            <span className="font-medium text-slate-700 dark:text-slate-200">
+                              {item.criterion}
+                            </span>
+                            {": "}
+                            {item.score}
+                            {item.max !== null && item.max !== undefined
+                              ? ` / ${item.max}`
+                              : ""}
+                            {item.comment ? ` — ${item.comment}` : ""}
+                          </li>
                         ))}
                       </ul>
                     </div>

@@ -301,6 +301,13 @@ export default async function AdminAssignmentPage({
                 pendingCount={overview?.pending_count ?? 0}
               />
 
+              <Link
+                href="/admin/grading"
+                className="text-xs font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+              >
+                {t("gradingSettingsLink")}
+              </Link>
+
               {(overview?.pending_count ?? 0) === 0 ? (
                 <p className="text-sm text-slate-500 dark:text-slate-400">
                   {t("nothingPending")}

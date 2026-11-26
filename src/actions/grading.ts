@@ -35,6 +35,14 @@ function failureKey(reason: GradeFailure): string {
       return "invalidResponse";
     case "notFound":
       return "notFound";
+    case "payment":
+      return "paidBlocked";
+    case "noModels":
+      return "noModels";
+    case "unavailable":
+      return "unavailable";
+    case "request":
+      return "requestRejected";
     default:
       return "gradeFailed";
   }

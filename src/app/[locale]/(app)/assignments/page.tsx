@@ -13,6 +13,7 @@ import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatNumber, cn } from "@/lib/utils";
+import type { SubmissionStatus } from "@/lib/types";
 
 type AssignmentRow = {
   id: string;
@@ -28,7 +29,7 @@ type MySubmissionRow = {
   assignment_id: string;
   final_score: number | string | null;
   ai_score: number | string | null;
-  status: "pending" | "graded" | "flagged";
+  status: SubmissionStatus;
 };
 
 export default async function StudentAssignmentsPage({
@@ -94,7 +95,11 @@ export default async function StudentAssignmentsPage({
               const max = Number(assignment.max_score) || 100;
               const open =
                 !assignment.deadline || Date.parse(assignment.deadline) > now;
-              const pending = attempts.some((row) => row.status === "pending");
+              const pending = attempts.some((row) =>
+                ["pending", "queued", "grading", "pending_retry", "failed"].includes(
+                  row.status,
+                ),
+              );
 
               let bestPercent: number | null = null;
               for (const row of attempts) {
@@ -127,7 +132,18 @@ export default async function StudentAssignmentsPage({
                         </span>
                         {pending ? (
                           <span className="rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-                            {t("statusPending")}
+                            {t(
+                              attempts.some(
+                                (row) =>
+                                  row.status === "queued" ||
+                                  row.status === "grading" ||
+                                  row.status === "pending_retry",
+                              )
+                                ? "statusGrading"
+                                : attempts.some((row) => row.status === "failed")
+                                  ? "statusFailed"
+                                  : "statusPending",
+                            )}
                           </span>
                         ) : null}
                       </div>

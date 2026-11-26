@@ -46,6 +46,7 @@ export function SiteHeader({ profile }: { profile: Profile }) {
               { href: "/admin/points", label: t("points") },
             ]
           : [{ href: "/admin/analytics", label: t("analytics") }]),
+        { href: "/admin/grading", label: t("grading") },
         { href: "/admin/announcements", label: t("announcements") },
       ]
     : [
