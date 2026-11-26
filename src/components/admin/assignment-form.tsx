@@ -30,12 +30,15 @@ export type AssignmentFormValues = {
   allowed_submission_types?: "file" | "text" | "both";
 };
 
-/** ISO → the `datetime-local` shape, deliberately in UTC (the label says so). */
+/** ISO → the `datetime-local` shape in Egypt time (Africa/Cairo). */
 function toDeadlineInput(iso: string | null | undefined): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toISOString().slice(0, 16);
+  return date
+    .toLocaleString("sv-SE", { timeZone: "Africa/Cairo" })
+    .slice(0, 16)
+    .replace(" ", "T");
 }
 
 export function AssignmentForm({

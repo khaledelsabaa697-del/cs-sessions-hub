@@ -121,7 +121,8 @@ export function parseDeadlineInput(
   if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/.test(trimmed)) return { ok: false };
 
   const withSeconds = trimmed.length === 16 ? `${trimmed}:00` : trimmed;
-  const date = new Date(`${withSeconds}Z`);
+  // Deadlines are entered in Egypt time (Africa/Cairo, UTC+2, no DST).
+  const date = new Date(`${withSeconds}+02:00`);
   if (Number.isNaN(date.getTime())) return { ok: false };
   return { ok: true, iso: date.toISOString() };
 }

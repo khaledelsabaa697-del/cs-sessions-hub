@@ -12,6 +12,8 @@ export function initials(name: string): string {
     .join("");
 }
 
+const CAIRO_TIME_ZONE = "Africa/Cairo";
+
 function toDate(value: string | Date): Date {
   return value instanceof Date ? value : new Date(value);
 }
@@ -23,11 +25,23 @@ export function formatDate(
 ): string {
   const date = toDate(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(locale, options).format(date);
+  return new Intl.DateTimeFormat(locale, {
+    timeZone: CAIRO_TIME_ZONE,
+    ...options,
+  }).format(date);
 }
 
 export function formatDateTime(value: string | Date, locale: string): string {
   return formatDate(value, locale, { dateStyle: "medium", timeStyle: "short" });
+}
+
+export function cairoToday(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: CAIRO_TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
 }
 
 export function formatNumber(

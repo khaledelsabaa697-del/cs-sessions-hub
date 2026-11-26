@@ -5,7 +5,7 @@ import { StudentWarningsCard, type StudentWarning } from "@/components/student-w
 import { AnnouncementList } from "@/components/announcement-list";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
-import { formatDate, formatNumber } from "@/lib/utils";
+import { formatDate, formatNumber, cairoToday } from "@/lib/utils";
 import type { PointsBreakdown } from "@/lib/types";
 import {
   Alert,
@@ -94,7 +94,7 @@ export default async function StudentDashboard({
       supabase
         .from("sessions")
         .select("id", { count: "exact", head: true })
-        .lte("session_date", new Date().toISOString().slice(0, 10)),
+        .lte("session_date", cairoToday()),
       supabase
         .from("submissions")
         .select("assignment_id, final_score, ai_score, assignments(max_score)")
@@ -221,9 +221,7 @@ export default async function StudentDashboard({
   const warnItems: WarnItem[] = [];
   if (profile.role === "student") {
     const accountCreatedMs = Date.parse(profile.created_at);
-    const todayUtc = new Date();
-    todayUtc.setUTCHours(0, 0, 0, 0);
-    const todayMs = todayUtc.getTime();
+    const todayCairo = cairoToday();
     const nowMs = Date.now();
 
     const attendedSessionIds = new Set<string>();
@@ -237,9 +235,8 @@ export default async function StudentDashboard({
 
     const pastSessions = (pastSessionsResult.data ?? []) as SessionWarnRow[];
     for (const sess of pastSessions) {
-      const sessionDateMs = Date.parse(sess.session_date + "T00:00:00Z");
-      if (sessionDateMs >= todayMs) continue;
-      if (sessionDateMs < accountCreatedMs) continue;
+      if (sess.session_date >= todayCairo) continue;
+      if (Date.parse(sess.session_date + "T00:00:00+02:00") < accountCreatedMs) continue;
       if (attendedSessionIds.has(sess.id)) continue;
       warnItems.push({
         id: `absence-${sess.id}`,
@@ -250,7 +247,7 @@ export default async function StudentDashboard({
           date: formatDate(sess.session_date, locale, { dateStyle: "medium" }),
         }),
         badgeLabel: t("badgeAbsent"),
-        sortKey: sessionDateMs,
+        sortKey: Date.parse(sess.session_date + "T00:00:00+02:00"),
       });
     }
 

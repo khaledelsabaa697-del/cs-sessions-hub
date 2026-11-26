@@ -12,7 +12,7 @@ import {
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate } from "@/lib/utils";
+import { formatDate, cairoToday } from "@/lib/utils";
 import type { SessionSummary } from "@/lib/types";
 
 const liveBadge =
@@ -37,7 +37,7 @@ export default async function AdminSessionsPage({
   const { data, error } = await supabase.rpc("admin_session_overview");
   const sessions = (data ?? []) as SessionSummary[];
 
-  const today = new Date().toISOString().slice(0, 10);
+  const today = cairoToday();
 
   return (
     <div className="space-y-6">
