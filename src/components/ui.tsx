@@ -4,7 +4,7 @@ import { CheckCircle2, Info, XCircle } from "lucide-react";
 import { CountUp } from "@/components/motion/count-up";
 
 export const inputClass =
-  "w-full rounded-xl border border-[var(--line-strong)] bg-[var(--glass-inset)] px-3.5 py-2.5 text-sm text-[var(--ink)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] outline-none transition placeholder:text-[var(--ink-muted)] focus:border-bronze-400 focus:ring-4 focus:ring-bronze-500/15 disabled:cursor-not-allowed disabled:opacity-60";
+  "w-full rounded-xl border border-[var(--line-strong)] bg-[var(--glass-inset)] px-3.5 py-2.5 text-base text-[var(--ink)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] outline-none transition placeholder:text-[var(--ink-muted)] focus:border-bronze-400 focus:ring-4 focus:ring-bronze-500/15 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm scheme-light dark:scheme-dark";
 
 export const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]";
 

@@ -29,7 +29,7 @@ export default async function LoginPage({
   const safeNext = safeRedirectPath(query.next, locale) ?? undefined;
 
   return (
-    <AuthShell locale={locale} title={t("signInTitle")} subtitle={t("signInSubtitle")}>
+    <AuthShell locale={locale} title={t("signInTitle")} subtitle={t("signInSubtitle")} footer={null}>
       {user && !profile ? (
         <div className="mt-8 space-y-4">
           <Alert>{t("accountIncomplete")}</Alert>
