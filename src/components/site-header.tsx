@@ -266,7 +266,6 @@ export function SiteHeader({ profile }: { profile: Profile }) {
                     <button
                       type="submit"
                       role="menuitem"
-                      onClick={closeMenu}
                       className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-start text-sm font-medium text-rose-600 transition hover:bg-rose-500/10 focus:bg-rose-500/10 focus:outline-none dark:text-rose-300"
                     >
                       <LogOut className="size-4" aria-hidden="true" />
