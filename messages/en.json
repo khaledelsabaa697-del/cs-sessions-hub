@@ -104,7 +104,7 @@
     "otpLabel": "Enter the 8-digit code",
     "digit": "Digit",
     "verify": "Verify",
-    "verifying": "Verifying…",
+    "verifying": "Verifying your link",
     "resendCode": "Resend code",
     "resendCooldown": "Resend in {seconds}s",
     "verifyNote": "Didn't receive the code? Check your spam folder or resend.",
@@ -147,8 +147,7 @@
     "confirmNewPassword": "Confirm new password",
     "resetPassword": "Update password",
     "resetting": "Updating…",
-    "passwordUpdated": "Your password has been updated. You can now sign in.",
-    "verifying": "Verifying your link"
+    "passwordUpdated": "Your password has been updated. You can now sign in."
   },
   "dashboard": {
     "greeting": "Welcome back, {name}",
@@ -184,7 +183,20 @@
     "badgeAbsent": "Absent",
     "badgeMissed": "Missed",
     "badgeLate": "Late",
-    "showAllWarnings": "Show all ({count})"
+    "showAllWarnings": "Show all ({count})",
+    "nextUp": "Next up",
+    "noUpcoming": "Nothing due right now",
+    "openAssignment": "Open assignment",
+    "leaderboardTile": "Class leaderboard",
+    "noLeaderboard": "The board is empty for now.",
+    "progressTile": "Momentum",
+    "lastEightWeeks": "Points over the last 8 weeks",
+    "noProgress": "Submit or attend a session to start the chart.",
+    "viewAll": "View all",
+    "announcementsHint": "Latest from your teachers",
+    "bestStreak": "Best: {count}",
+    "you": "You",
+    "viewProgress": "View progress"
   },
   "hr": {
     "overviewTitle": "HR overview",
@@ -239,7 +251,19 @@
       "reasonRequired": "Enter a reason for the warning.",
       "notStudent": "That account is not a student, so it cannot receive a warning.",
       "saveFailed": "Could not save. Please try again."
-    }
+    },
+    "studentsCount": "Students",
+    "averageAttendance": "Average attendance",
+    "needsAttention": "Needs attention",
+    "needsAttentionHint": "Students at or above the absence threshold",
+    "latestSession": "Latest session",
+    "noSession": "No sessions yet",
+    "presentCount": "Present",
+    "lateCount": "Late",
+    "markedCount": "Marked",
+    "openAttendance": "Open attendance",
+    "allClear": "All clear",
+    "quickActions": "Quick links"
   },
   "profile": {
     "title": "Profile",
@@ -280,7 +304,8 @@
       "full_name": "Enter your full name (2–80 characters).",
       "display_name": "Enter a display name between 2 and 40 characters.",
       "generic": "Could not save your changes. Please try again."
-    }
+    },
+    "viewProgress": "View progress"
   },
   "admin": {
     "overview": {
@@ -312,7 +337,22 @@
       "openAnalytics": "Open analytics",
       "announcementsCardTitle": "Announcements",
       "announcementsCardBody": "Publish class updates and pin the important ones.",
-      "manageAnnouncements": "Manage announcements"
+      "manageAnnouncements": "Manage announcements",
+      "pendingTitle": "Grading queue",
+      "pendingBody": "AI feedback still to be produced.",
+      "pendingHint": "Submissions waiting for a grade",
+      "pendingEmpty": "The queue is clear.",
+      "pendingCount": "{count} in the queue",
+      "openGrading": "Open grading",
+      "warningsTitle": "Student warnings",
+      "warningsHint": "Latest notes from HR and teachers",
+      "warningsUnit": "warnings",
+      "noWarnings": "No warnings raised yet.",
+      "openWarnings": "Open warnings",
+      "recentStudentsHint": "Newest accounts first",
+      "quickActions": "Quick actions",
+      "quickActionsHint": "Jump straight into the next task.",
+      "lastUpdated": "Synced {date}"
     },
     "students": {
       "title": "Students & accounts",
@@ -394,8 +434,8 @@
         "duplicate": "Duplicate username in this file.",
         "forbidden": "Only the teacher can do that.",
         "updateFailed": "Could not update the password. Please try again.",
-      "roleChangeFailed": "Could not change the role. Please try again.",
-      "deleteFailed": "Could not delete the account. Please try again."
+        "roleChangeFailed": "Could not change the role. Please try again.",
+        "deleteFailed": "Could not delete the account. Please try again."
       },
       "colAttendance": "Attendance",
       "colAverage": "Average",
@@ -494,10 +534,10 @@
         "notFound": "This session no longer exists.",
         "codeFailed": "Could not generate a code. Please try again.",
         "noStudents": "There are no students to mark.",
-      "fileMissing": "Please choose a file.",
-      "fileSize": "File is too large (max 50 MB).",
-      "uploadFailed": "Upload failed. Please try again.",
-      "uploadUrlFailed": "Could not start the upload. Please try again."
+        "fileMissing": "Please choose a file.",
+        "fileSize": "File is too large (max 50 MB).",
+        "uploadFailed": "Upload failed. Please try again.",
+        "uploadUrlFailed": "Could not start the upload. Please try again."
       },
       "saveDetails": "Save details",
       "savingDetails": "Saving…",
@@ -700,10 +740,10 @@
         "rateLimited": "The grading service is busy (rate limit). Try again shortly.",
         "timeout": "The grading model did not answer in time.",
         "invalidResponse": "The model returned an invalid answer. Try again.",
-      "paidBlocked": "A paid model was blocked by the free-only policy.",
-      "noModels": "No free grading model is available. Refresh the catalog.",
-      "unavailable": "The selected model is unavailable. Try another.",
-      "requestRejected": "The gateway rejected the request."
+        "paidBlocked": "A paid model was blocked by the free-only policy.",
+        "noModels": "No free grading model is available. Refresh the catalog.",
+        "unavailable": "The selected model is unavailable. Try another.",
+        "requestRejected": "The gateway rejected the request."
       }
     },
     "points": {
@@ -1175,5 +1215,32 @@
     "error": "Export unavailable.",
     "forbidden": "You do not have permission to export.",
     "failed": "Could not build the export."
+  },
+  "gamification": {
+    "rank": "Rank",
+    "bronze": "Bronze",
+    "silver": "Silver",
+    "gold": "Gold",
+    "diamond": "Diamond",
+    "level": "Level {level}",
+    "levelShort": "LVL",
+    "xp": "XP",
+    "xpLabel": "XP progress",
+    "nextTier": "{points} XP to {tier}",
+    "maxTier": "Top tier reached",
+    "streak": "Day streak",
+    "daysShort": "days",
+    "keepStreak": "Keep it alive today.",
+    "noStreak": "Start a streak today.",
+    "badgesEarned": "{earned} of {total} badges",
+    "levelUpTitle": "Level {level} unlocked",
+    "levelUpBody": "{points} XP and climbing.",
+    "badgeTitle": "New badge earned",
+    "badgeBody": "A new badge just landed on your profile.",
+    "dismiss": "Dismiss",
+    "unranked": "Not ranked yet",
+    "topThree": "Podium",
+    "seeAll": "Full board",
+    "yourPosition": "Your position"
   }
 }

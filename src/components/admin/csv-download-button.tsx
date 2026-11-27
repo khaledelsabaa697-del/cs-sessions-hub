@@ -2,11 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  exportAssignmentCsvAction,
-  exportSessionCsvAction,
-  exportStudentsCsvAction,
-} from "@/actions/exports";
+import { exportAssignmentCsvAction, exportSessionCsvAction, exportStudentsCsvAction } from "@/actions/exports";
 import { buttonSecondary } from "@/components/ui";
 
 type CsvKind = "students" | "session" | "assignment";
@@ -63,13 +59,7 @@ export function CsvDownloadButton({
 
   return (
     <span className="inline-flex flex-col items-start gap-1">
-      <button
-        type="button"
-        onClick={handleClick}
-        disabled={pending}
-        aria-busy={pending}
-        className={buttonSecondary}
-      >
+      <button type="button" onClick={handleClick} disabled={pending} aria-busy={pending} className={buttonSecondary}>
         <svg
           viewBox="0 0 24 24"
           fill="none"

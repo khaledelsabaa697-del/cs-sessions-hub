@@ -27,19 +27,10 @@ export function GradePendingButton({
       <form action={formAction} className="flex flex-wrap items-center gap-3">
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="assignment_id" value={assignmentId} />
-        <button
-          type="submit"
-          disabled={pending || pendingCount === 0}
-          aria-busy={pending}
-          className={buttonPrimary}
-        >
-          {pending
-            ? t("gradingPending")
-            : t("gradePending", { count: pendingCount })}
+        <button type="submit" disabled={pending || pendingCount === 0} aria-busy={pending} className={buttonPrimary}>
+          {pending ? t("gradingPending") : t("gradePending", { count: pendingCount })}
         </button>
-        {state.status === "success" ? (
-          <Alert tone="success">{state.message}</Alert>
-        ) : null}
+        {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
       </form>
     </div>

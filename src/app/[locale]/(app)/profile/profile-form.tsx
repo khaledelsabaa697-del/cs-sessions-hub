@@ -57,32 +57,24 @@ export function ProfileForm({
           defaultValue={displayName}
           className={inputClass}
         />
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-          {t("displayNameHint")}
-        </p>
+        <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("displayNameHint")}</p>
       </div>
 
-      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50">
+      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--line)] p-4 transition hover:bg-[var(--glass-inset)] ">
         <input
           type="checkbox"
           name="opted_out_of_leaderboard"
           defaultChecked={optedOut}
-          className="mt-0.5 size-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-900"
+          className="mt-0.5 size-4 rounded border-[var(--line-strong)] text-primary-600 focus:ring-primary-500 "
         />
         <span>
-          <span className="block text-sm font-medium text-slate-900 dark:text-white">
-            {t("optOut")}
-          </span>
-          <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
-            {t("optOutHint")}
-          </span>
+          <span className="block text-sm font-medium text-[var(--ink)]">{t("optOut")}</span>
+          <span className="mt-0.5 block text-xs text-[var(--ink-muted)]">{t("optOutHint")}</span>
         </span>
       </label>
 
       {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-      {state.status === "success" ? (
-        <Alert tone="success">{state.message}</Alert>
-      ) : null}
+      {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
 
       <SubmitButton idle={t("save")} pendingLabel={t("saving")} />
     </form>

@@ -1,17 +1,11 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  StatCard,
-  badgeClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, StatCard, badgeClass } from "@/components/ui";
 import { SubmissionForm } from "@/components/submission-form";
 import { GradingStatusWatcher } from "@/components/grading-status-watcher";
+import { CodePanel } from "@/components/code-panel";
+import { CompilerMessage, DiagnosticList } from "@/components/compiler-message";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -49,11 +43,7 @@ type AttemptRow = {
   created_at: string;
 };
 
-export default async function StudentAssignmentPage({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export default async function StudentAssignmentPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: raw, id } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -94,6 +84,8 @@ export default async function StudentAssignmentPage({
     .eq("assignment_id", assignment.id)
     .eq("student_id", profile.id)
     .order("created_at", { ascending: false })
+    .order("id", { ascending: false })
+    .limit(50)
     .returns<AttemptRow[]>();
 
   if (attemptsError) console.error("[student assignment] attempts error:", attemptsError);
@@ -105,9 +97,7 @@ export default async function StudentAssignmentPage({
     paths.length > 0
       ? await supabase.storage.from("submissions").createSignedUrls(paths, 600)
       : { data: null, error: null };
-  const signedByPath = new Map(
-    (signedResult.data ?? []).map((row) => [row.path, row.signedUrl]),
-  );
+  const signedByPath = new Map((signedResult.data ?? []).map((row) => [row.path, row.signedUrl]));
 
   let bestPercent: number | null = null;
   for (const attempt of attempts) {
@@ -126,7 +116,7 @@ export default async function StudentAssignmentPage({
       <div>
         <Link
           href="/assignments"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] transition hover:text-[var(--ink)] dark:hover:text-white"
         >
           <svg
             viewBox="0 0 24 24"
@@ -163,11 +153,7 @@ export default async function StudentAssignmentPage({
       <div className="grid gap-4 sm:grid-cols-3">
         <StatCard
           label={t("bestScore")}
-          value={
-            bestPercent === null
-              ? "—"
-              : `${formatNumber(bestPercent, locale, 1)}%`
-          }
+          value={bestPercent === null ? "—" : `${formatNumber(bestPercent, locale, 1)}%`}
           hint={t("maxScore", { max: formatNumber(maxScore, locale) })}
         />
         <StatCard
@@ -177,11 +163,7 @@ export default async function StudentAssignmentPage({
         />
         <StatCard
           label={t("deadline")}
-          value={
-            assignment.deadline
-              ? formatDate(assignment.deadline, locale)
-              : "—"
-          }
+          value={assignment.deadline ? formatDate(assignment.deadline, locale) : "—"}
           hint={assignment.allow_resubmit ? t("resubmitAllowed") : t("resubmitBlocked")}
         />
       </div>
@@ -190,20 +172,16 @@ export default async function StudentAssignmentPage({
         <CardHeader title={t("detailsTitle")} />
         <div className="space-y-5 p-5">
           <div>
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              {t("task")}
-            </h3>
-            <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+            <h3 className="text-sm font-semibold text-[var(--ink)]">{t("task")}</h3>
+            <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-[var(--ink-soft)]">
               {assignment.description || t("noDescription")}
             </p>
           </div>
 
           {assignment.rubric ? (
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                {t("rubric")}
-              </h3>
-              <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              <h3 className="text-sm font-semibold text-[var(--ink)]">{t("rubric")}</h3>
+              <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-[var(--ink-soft)]">
                 {assignment.rubric}
               </p>
             </div>
@@ -211,15 +189,16 @@ export default async function StudentAssignmentPage({
 
           {assignment.expected_output ? (
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-                {t("expectedOutput")}
-              </h3>
-              <pre
-                dir="ltr"
-                className="mt-1.5 overflow-x-auto rounded-xl bg-slate-950 p-3 font-mono text-xs leading-relaxed text-slate-100"
-              >
-                {assignment.expected_output}
-              </pre>
+              <h3 className="text-sm font-semibold text-[var(--ink)]">{t("expectedOutput")}</h3>
+              <div className="mt-2">
+                <CodePanel
+                  code={assignment.expected_output}
+                  title="expected_output.txt"
+                  language="text"
+                  maxHeight="18rem"
+                  showCopy={false}
+                />
+              </div>
             </div>
           ) : null}
         </div>
@@ -233,39 +212,28 @@ export default async function StudentAssignmentPage({
           allowedTypes={assignment.allowed_submission_types}
         />
       ) : (
-        <Alert tone="info">
-          {closed ? t("closedNotice") : t("resubmitNotice")}
-        </Alert>
+        <Alert tone="info">{closed ? t("closedNotice") : t("resubmitNotice")}</Alert>
       )}
 
       <GradingStatusWatcher
-        active={attempts.some((attempt) =>
-          ["queued", "grading", "pending_retry"].includes(attempt.status),
-        )}
+        active={attempts.some((attempt) => ["queued", "grading", "pending_retry"].includes(attempt.status))}
       />
 
       <Card>
         <CardHeader
           title={t("yourWork")}
-          action={
-            <span className="text-xs text-slate-500 dark:text-slate-400">
-              {t("attempts", { count: attempts.length })}
-            </span>
-          }
+          action={<span className="text-xs text-[var(--ink-muted)]">{t("attempts", { count: attempts.length })}</span>}
         />
         {attempts.length === 0 ? (
           <div className="p-5">
             <EmptyState title={t("noAttempts")} description={t("noAttemptsHint")} />
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <ul className="divide-y divide-[var(--line)]">
             {attempts.map((attempt, index) => {
               const attemptNumber = attempts.length - index;
               const score = attempt.final_score ?? attempt.ai_score;
-              const feedback =
-                locale === "ar"
-                  ? (attempt.ai_feedback_ar ?? attempt.ai_feedback)
-                  : attempt.ai_feedback;
+              const feedback = locale === "ar" ? (attempt.ai_feedback_ar ?? attempt.ai_feedback) : attempt.ai_feedback;
               const issues = stringList(attempt.ai_issues);
               const signedUrl = signedByPath.get(attempt.file_path) ?? null;
 
@@ -273,7 +241,7 @@ export default async function StudentAssignmentPage({
                 <li key={attempt.id} className="space-y-3 p-5">
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                      <span className="text-sm font-semibold text-[var(--ink)]">
                         {t("attemptLabel", { count: attemptNumber })}
                       </span>
                       <span
@@ -296,7 +264,7 @@ export default async function StudentAssignmentPage({
                           ? t("noScoreYet")
                           : `${formatNumber(Number(score), locale, 1)} / ${formatNumber(maxScore, locale)}`}
                       </span>
-                      <span className="text-xs text-slate-400 dark:text-slate-500">
+                      <span className="text-xs text-[var(--ink-muted)]">
                         {formatDate(attempt.created_at, locale, {
                           dateStyle: "medium",
                           timeStyle: "short",
@@ -307,49 +275,39 @@ export default async function StudentAssignmentPage({
 
                   {feedback ? (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                        {t("aiFeedback")}
-                      </p>
-                      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                      <p className="caption-code mb-2">{t("aiFeedback")}</p>
+                      <CompilerMessage tone="info" label="ai.feedback">
                         {feedback}
-                      </p>
+                      </CompilerMessage>
                     </div>
                   ) : null}
 
                   {issues.length > 0 ? (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                        {t("issues")}
-                      </p>
-                      <ul className="mt-1 list-disc space-y-1 ps-5 text-sm text-slate-600 dark:text-slate-300">
-                        {issues.map((issue, issueIndex) => (
-                          <li key={issueIndex}>{issue}</li>
-                        ))}
-                      </ul>
+                      <p className="caption-code mb-2">{t("issues")}</p>
+                      <DiagnosticList items={issues} label="diagnostics" empty={t("issues")} />
                     </div>
                   ) : null}
 
                   {Array.isArray(attempt.ai_rubric) && attempt.ai_rubric.length > 0 ? (
                     <div>
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--ink-muted)]">
                         {t("rubricScores")}
                       </p>
-                      <ul className="mt-1 space-y-1 text-sm text-slate-600 dark:text-slate-300">
-                        {(attempt.ai_rubric as Array<{
-                          criterion: string;
-                          score: number;
-                          max?: number | null;
-                          comment?: string | null;
-                        }>).map((item, itemIndex) => (
+                      <ul className="mt-1 space-y-1 text-sm text-[var(--ink-soft)]">
+                        {(
+                          attempt.ai_rubric as Array<{
+                            criterion: string;
+                            score: number;
+                            max?: number | null;
+                            comment?: string | null;
+                          }>
+                        ).map((item, itemIndex) => (
                           <li key={itemIndex}>
-                            <span className="font-medium text-slate-700 dark:text-slate-200">
-                              {item.criterion}
-                            </span>
+                            <span className="font-medium text-[var(--ink-soft)]">{item.criterion}</span>
                             {": "}
                             {item.score}
-                            {item.max !== null && item.max !== undefined
-                              ? ` / ${item.max}`
-                              : ""}
+                            {item.max !== null && item.max !== undefined ? ` / ${item.max}` : ""}
                             {item.comment ? ` — ${item.comment}` : ""}
                           </li>
                         ))}
@@ -357,17 +315,17 @@ export default async function StudentAssignmentPage({
                     </div>
                   ) : null}
 
-                  <details className="rounded-xl border border-slate-200 dark:border-slate-800">
-                    <summary className="cursor-pointer px-4 py-2.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+                  <details className="rounded-xl border border-[var(--line)]">
+                    <summary className="cursor-pointer px-4 py-2.5 text-xs font-medium text-[var(--ink-soft)]">
                       {t("showCode")}
                     </summary>
-                    <div className="border-t border-slate-200 p-3 dark:border-slate-800">
-                      <pre
-                        dir="ltr"
-                        className="max-h-80 overflow-auto rounded-lg bg-slate-950 p-3 font-mono text-xs leading-relaxed text-slate-100"
-                      >
-                        {attempt.code_text}
-                      </pre>
+                    <div className="border-t border-[var(--line)] p-3">
+                      <CodePanel
+                        code={attempt.code_text || "// file submission"}
+                        title={`attempt-${attemptNumber}.cpp`}
+                        maxHeight="20rem"
+                        showCopy={false}
+                      />
                       {signedUrl ? (
                         <a
                           href={signedUrl}

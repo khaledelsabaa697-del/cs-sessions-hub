@@ -66,8 +66,8 @@ export default async function AdminAttendancePage({
   // Default to the newest session when the URL has no ?session= — and load its
   // existing marks too, otherwise the panel looks empty despite recorded rows.
   const selectedSession = sessionIdParam
-    ? sessions.find((s) => s.id === sessionIdParam) ?? null
-    : sessions[0] ?? null;
+    ? (sessions.find((s) => s.id === sessionIdParam) ?? null)
+    : (sessions[0] ?? null);
 
   let attendanceResult: QueryResult<AttendanceRow> = { data: null, error: null };
   if (selectedSession) {
@@ -100,7 +100,8 @@ export default async function AdminAttendancePage({
   if (process.env.NODE_ENV !== "production") {
     if (sessionsResult.error) console.error("[AdminAttendance] sessions query error:", sessionsResult.error);
     if (studentsResult.error) console.error("[AdminAttendance] students query error:", studentsResult.error);
-    if (selectedSession && attendanceResult.error) console.error("[AdminAttendance] attendance query error:", attendanceResult.error);
+    if (selectedSession && attendanceResult.error)
+      console.error("[AdminAttendance] attendance query error:", attendanceResult.error);
   }
 
   // Pass actual error messages to client in development

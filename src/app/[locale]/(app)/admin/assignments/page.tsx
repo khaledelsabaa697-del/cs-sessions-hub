@@ -1,14 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { AssignmentForm } from "@/components/admin/assignment-form";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  buttonSecondary,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, buttonSecondary } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -24,11 +17,7 @@ type AssignmentRow = {
   allow_resubmit: boolean;
 };
 
-export default async function AdminAssignmentsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function AdminAssignmentsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -48,10 +37,7 @@ export default async function AdminAssignmentsPage({
   ]);
 
   const overviewById = new Map(
-    ((overviewResult.data ?? []) as AssignmentOverview[]).map((row) => [
-      row.assignment_id,
-      row,
-    ]),
+    ((overviewResult.data ?? []) as AssignmentOverview[]).map((row) => [row.assignment_id, row]),
   );
 
   const assignments = assignmentsResult.data ?? [];
@@ -77,7 +63,7 @@ export default async function AdminAssignmentsPage({
         <Alert>
           {assignmentsResult.error ? t("loadError") : t("overviewError")}
           {process.env.NODE_ENV !== "production" && errorMessages.length > 0 && (
-            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+            <pre className="mt-2 text-xs bg-[var(--glass-inset)] p-2 rounded overflow-auto max-h-24">
               {errorMessages.join("; ")}
             </pre>
           )}
@@ -95,35 +81,46 @@ export default async function AdminAssignmentsPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[52rem] text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+              <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAssignment")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colDeadline")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colSubmitted")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colPending")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAverage")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStatus")}</th>
-                  <th scope="col" className="px-5 py-3 text-end font-medium">{t("colManage")}</th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colAssignment")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colDeadline")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colSubmitted")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colPending")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colAverage")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colStatus")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-end font-medium">
+                    {t("colManage")}
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {assignments.map((assignment) => {
                   const overview = overviewById.get(assignment.id);
-                  const open =
-                    !assignment.deadline || Date.parse(assignment.deadline) > now;
+                  const open = !assignment.deadline || Date.parse(assignment.deadline) > now;
                   const pending = overview?.pending_count ?? 0;
 
                   return (
                     <tr key={assignment.id}>
                       <td className="max-w-72 px-5 py-3.5">
-                        <p className="truncate font-medium text-slate-900 dark:text-white">
-                          {assignment.title}
-                        </p>
-                        <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
+                        <p className="truncate font-medium text-[var(--ink)]">{assignment.title}</p>
+                        <p className="mt-0.5 truncate text-xs text-[var(--ink-muted)]">
                           {assignment.description || t("noDescription")}
                         </p>
                       </td>
-                      <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-500 dark:text-slate-400">
+                      <td className="whitespace-nowrap px-5 py-3.5 text-xs text-[var(--ink-muted)]">
                         {assignment.deadline
                           ? formatDate(assignment.deadline, locale, {
                               dateStyle: "medium",
@@ -133,14 +130,14 @@ export default async function AdminAssignmentsPage({
                       </td>
                       <td className="whitespace-nowrap px-5 py-3.5">
                         {overview ? (
-                          <span className="text-slate-700 dark:text-slate-200">
+                          <span className="text-[var(--ink-soft)]">
                             {t("studentsSubmitted", {
                               submitted: formatNumber(overview.student_count, locale),
                               total: formatNumber(overview.class_size, locale),
                             })}
                           </span>
                         ) : (
-                          <span className="text-slate-400">—</span>
+                          <span className="text-[var(--ink-muted)]">—</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-5 py-3.5">
@@ -149,17 +146,14 @@ export default async function AdminAssignmentsPage({
                             {formatNumber(pending, locale)}
                           </span>
                         ) : (
-                          <span className="text-slate-400">0</span>
+                          <span className="text-[var(--ink-muted)]">0</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        {overview?.average_percent === null ||
-                        overview?.average_percent === undefined ? (
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {t("noAverage")}
-                          </span>
+                        {overview?.average_percent === null || overview?.average_percent === undefined ? (
+                          <span className="text-xs text-[var(--ink-muted)]">{t("noAverage")}</span>
                         ) : (
-                          <span className="font-medium text-slate-900 dark:text-white">
+                          <span className="font-medium text-[var(--ink)]">
                             {formatNumber(overview.average_percent, locale, 1)}%
                           </span>
                         )}
@@ -169,7 +163,7 @@ export default async function AdminAssignmentsPage({
                           className={
                             open
                               ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                              : "rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                              : "rounded-full bg-[var(--glass-inset)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-soft)] "
                           }
                         >
                           {open ? t("open") : t("closed")}

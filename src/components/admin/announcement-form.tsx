@@ -2,18 +2,9 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  createAnnouncementAction,
-  updateAnnouncementAction,
-} from "@/actions/announcements";
+import { createAnnouncementAction, updateAnnouncementAction } from "@/actions/announcements";
 import type { Announcement, AnnouncementFormState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: AnnouncementFormState = { status: "idle" };
@@ -70,25 +61,19 @@ export function AnnouncementForm({
             placeholder={t("bodyPlaceholder")}
             className={inputClass}
           />
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            {t("bodyHint")}
-          </p>
+          <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("bodyHint")}</p>
         </div>
 
-        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-3 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50">
+        <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[var(--line)] p-3 transition hover:bg-[var(--glass-inset)] ">
           <input
             type="checkbox"
             name="pinned"
             defaultChecked={announcement?.pinned ?? false}
-            className="mt-0.5 size-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600 dark:bg-slate-900"
+            className="mt-0.5 size-4 rounded border-[var(--line-strong)] text-primary-600 focus:ring-primary-500 "
           />
           <span>
-            <span className="block text-sm font-medium text-slate-900 dark:text-white">
-              {t("pinned")}
-            </span>
-            <span className="mt-0.5 block text-xs text-slate-500 dark:text-slate-400">
-              {t("pinnedHint")}
-            </span>
+            <span className="block text-sm font-medium text-[var(--ink)]">{t("pinned")}</span>
+            <span className="mt-0.5 block text-xs text-[var(--ink-muted)]">{t("pinnedHint")}</span>
           </span>
         </label>
 

@@ -35,13 +35,7 @@ export function WarningForm({
         <label htmlFor="w-student" className={labelClass}>
           {t("colStudent")}
         </label>
-        <select
-          id="w-student"
-          name="student_id"
-          defaultValue={defaultStudentId ?? ""}
-          className={inputClass}
-          required
-        >
+        <select id="w-student" name="student_id" defaultValue={defaultStudentId ?? ""} className={inputClass} required>
           <option value="">—</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>

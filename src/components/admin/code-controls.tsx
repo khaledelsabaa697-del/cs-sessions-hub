@@ -9,13 +9,7 @@ import { SubmitButton } from "@/components/submit-button";
 
 const initialState: CodeState = { status: "idle" };
 
-export function RotateCodeForm({
-  locale,
-  sessionId,
-}: {
-  locale: string;
-  sessionId: string;
-}) {
+export function RotateCodeForm({ locale, sessionId }: { locale: string; sessionId: string }) {
   const t = useTranslations("admin.session");
   const [state, formAction] = useActionState(rotateCodeAction, initialState);
 
@@ -41,20 +35,12 @@ export function RotateCodeForm({
       </div>
 
       {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-      {state.status === "success" ? (
-        <Alert tone="success">{state.message}</Alert>
-      ) : null}
+      {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
     </form>
   );
 }
 
-export function EndCodeForm({
-  locale,
-  sessionId,
-}: {
-  locale: string;
-  sessionId: string;
-}) {
+export function EndCodeForm({ locale, sessionId }: { locale: string; sessionId: string }) {
   const t = useTranslations("admin.session");
   const [state, formAction] = useActionState(endCodeAction, initialState);
 
@@ -66,9 +52,7 @@ export function EndCodeForm({
         {t("endCode")}
       </button>
       {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-      {state.status === "success" ? (
-        <Alert tone="success">{state.message}</Alert>
-      ) : null}
+      {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
     </form>
   );
 }

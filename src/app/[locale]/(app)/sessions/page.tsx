@@ -1,12 +1,6 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader } from "@/components/ui";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -29,11 +23,7 @@ type MaterialRow = {
   language: string | null;
 };
 
-export default async function StudentSessionsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function StudentSessionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -68,9 +58,7 @@ export default async function StudentSessionsPage({
     materials
       .filter((m) => m.file_path)
       .map(async (m) => {
-        const { data } = await supabase.storage
-          .from("session-materials")
-          .createSignedUrl(m.file_path as string, 3600);
+        const { data } = await supabase.storage.from("session-materials").createSignedUrl(m.file_path as string, 3600);
         if (data?.signedUrl) signedUrls.set(m.id, data.signedUrl);
       }),
   );
@@ -106,53 +94,36 @@ export default async function StudentSessionsPage({
                 />
                 <div className="space-y-4 p-5">
                   {mats.length === 0 ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {t("noMaterials")}
-                    </p>
+                    <p className="text-sm text-[var(--ink-muted)]">{t("noMaterials")}</p>
                   ) : (
                     <ul className="space-y-3">
                       {mats.map((m) => {
                         const url = signedUrls.get(m.id);
                         return (
-                          <li
-                            key={m.id}
-                            className="rounded-xl border border-slate-200 p-4 dark:border-slate-800"
-                          >
-                            <p className="font-medium text-slate-900 dark:text-white">
-                              {m.title}
-                            </p>
-                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                          <li key={m.id} className="rounded-xl border border-[var(--line)] p-4 ">
+                            <p className="font-medium text-[var(--ink)]">{m.title}</p>
+                            <p className="text-xs text-[var(--ink-muted)]">
                               {m.type}
                               {m.language ? ` · ${m.language}` : ""}
                             </p>
 
                             {m.type === "text" && m.content ? (
-                              <p className="mt-3 whitespace-pre-wrap text-sm text-slate-700 dark:text-slate-200">
-                                {m.content}
-                              </p>
+                              <p className="mt-3 whitespace-pre-wrap text-sm text-[var(--ink-soft)]">{m.content}</p>
                             ) : null}
 
                             {m.type === "code" && m.content ? (
-                              <pre className="mt-3 overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100">
+                              <pre className="code-panel mt-3 overflow-x-auto rounded-lg p-3 font-mono text-xs leading-relaxed text-slate-200" dir="ltr">
                                 <code>{m.content}</code>
                               </pre>
                             ) : null}
 
                             {m.type === "image" && url ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                src={url}
-                                alt={m.title}
-                                className="mt-3 max-h-96 rounded-lg"
-                              />
+                              <img src={url} alt={m.title} loading="lazy" width={800} height={600} className="mt-3 max-h-96 w-full rounded-lg object-contain" />
                             ) : null}
 
                             {m.type === "video" && url ? (
-                              <video
-                                src={url}
-                                controls
-                                className="mt-3 max-h-96 w-full rounded-lg"
-                              />
+                              <video src={url} controls className="mt-3 max-h-96 w-full rounded-lg" />
                             ) : null}
 
                             {(m.type === "file" || m.type === "notebook") && url ? (

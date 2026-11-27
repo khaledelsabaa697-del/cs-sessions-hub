@@ -10,11 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatNumber, initials } from "@/lib/utils";
 import type { AdminPointsRow, PointsConfig } from "@/lib/types";
 
-export default async function AdminPointsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function AdminPointsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -28,9 +24,7 @@ export default async function AdminPointsPage({
     supabase.rpc("admin_points_overview"),
     supabase
       .from("points_config")
-      .select(
-        "homework_weight, attendance_points, on_time_bonus, streak_bonus, leaderboard_visible, weekly_reset_at",
-      )
+      .select("homework_weight, attendance_points, on_time_bonus, streak_bonus, leaderboard_visible, weekly_reset_at")
       .eq("id", 1)
       .single<PointsConfig>(),
   ]);
@@ -65,11 +59,7 @@ export default async function AdminPointsPage({
         <StatCard label={t("statStudents")} value={formatNumber(rows.length, locale)} />
         <StatCard label={t("statAverage")} value={points(classAverage)} hint={t("statAverageHint")} />
         <StatCard label={t("statTop")} value={points(topScore)} hint={t("statTopHint")} />
-        <StatCard
-          label={t("statHidden")}
-          value={formatNumber(hiddenCount, locale)}
-          hint={t("statHiddenHint")}
-        />
+        <StatCard label={t("statHidden")} value={formatNumber(hiddenCount, locale)} hint={t("statHiddenHint")} />
       </div>
 
       {config ? (
@@ -93,24 +83,16 @@ export default async function AdminPointsPage({
             <CardHeader title={t("maintenanceTitle")} description={t("maintenanceSubtitle")} />
             <div className="space-y-5 p-5">
               <div>
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
-                  {t("resetWeekTitle")}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {t("resetWeekHint")}
-                </p>
+                <p className="text-sm font-medium text-[var(--ink)]">{t("resetWeekTitle")}</p>
+                <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("resetWeekHint")}</p>
                 <div className="mt-3">
                   <ResetWeekButton locale={locale} />
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 pt-5 dark:border-slate-800">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">
-                  {t("recalcTitle")}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  {t("recalcHint")}
-                </p>
+              <div className="border-t border-[var(--line)] pt-5 ">
+                <p className="text-sm font-medium text-[var(--ink)]">{t("recalcTitle")}</p>
+                <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("recalcHint")}</p>
                 <div className="mt-3">
                   <RecalculateBadgesButton locale={locale} />
                 </div>
@@ -130,7 +112,7 @@ export default async function AdminPointsPage({
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                <tr className="border-b border-[var(--line)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <th scope="col" className="px-5 py-3 text-start font-medium">
                     {t("colStudent")}
                   </th>
@@ -160,53 +142,48 @@ export default async function AdminPointsPage({
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {rows.map((row) => (
-                  <tr
-                    key={row.student_id}
-                    className="transition hover:bg-slate-50 dark:hover:bg-slate-800/40"
-                  >
+                  <tr key={row.student_id} className="transition hover:bg-[var(--glass-inset)] ">
                     <td className="px-5 py-3.5">
                       <div className="flex items-center gap-3">
                         <span className="grid size-8 shrink-0 place-items-center rounded-full bg-primary-50 text-[11px] font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
                           {initials(row.full_name)}
                         </span>
                         <div className="min-w-0">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">
-                            {row.full_name}
-                          </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          <p className="truncate font-medium text-[var(--ink)]">{row.full_name}</p>
+                          <p className="truncate text-xs text-[var(--ink-muted)]">
                             @{row.username} · <span className="font-mono">{row.student_code}</span>
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end font-semibold tabular-nums text-slate-900 dark:text-white">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end font-semibold tabular-nums text-[var(--ink)]">
                       {points(row.total_points)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-[var(--ink-soft)]">
                       {points(row.weekly_points)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-[var(--ink-soft)]">
                       {points(row.homework_points)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-[var(--ink-soft)]">
                       {points(row.attendance_points)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-[var(--ink-soft)]">
                       {points(row.on_time_points)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-[var(--ink-soft)]">
                       {points(row.streak_points)}
                     </td>
-                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-3 py-3.5 text-end tabular-nums text-[var(--ink-soft)]">
                       {formatNumber(Number(row.badge_count), locale)}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5 text-end">
                       <span
                         className={
                           row.opted_out
-                            ? "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                            ? "rounded-full bg-[var(--glass-inset)] px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)] "
                             : "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                         }
                       >

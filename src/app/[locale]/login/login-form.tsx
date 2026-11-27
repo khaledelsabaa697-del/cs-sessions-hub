@@ -52,9 +52,7 @@ export function LoginForm({ locale, next }: { locale: string; next?: string }) {
           placeholder={t("usernameOrEmailPlaceholder")}
           className={inputClass}
         />
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-          {t("usernameOrEmailHint")}
-        </p>
+        <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("usernameOrEmailHint")}</p>
       </div>
 
       <div>
@@ -86,7 +84,7 @@ export function LoginForm({ locale, next }: { locale: string; next?: string }) {
         disabled={captchaRequired && !turnstileToken}
       />
 
-      <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
+      <p className="mt-6 text-center text-xs text-[var(--ink-muted)]">
         {t("noAccount")}
         <Link href={`/${locale}/signup`} className="ml-1 font-semibold underline underline-offset-2 hover:no-underline">
           {t("signUp")}

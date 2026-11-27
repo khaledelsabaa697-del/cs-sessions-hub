@@ -43,11 +43,7 @@ type MaterialRow = {
   language: string | null;
 };
 
-export default async function AdminSessionPage({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export default async function AdminSessionPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: raw, id } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -83,9 +79,7 @@ export default async function AdminSessionPage({
       .returns<MaterialRow[]>(),
   ]);
 
-  const session = ((sessionsResult.data ?? []) as AdminSessionRow[]).find(
-    (row) => row.id === sessionId.data,
-  );
+  const session = ((sessionsResult.data ?? []) as AdminSessionRow[]).find((row) => row.id === sessionId.data);
   if (!session) notFound();
 
   const students = studentsResult.data ?? [];
@@ -93,9 +87,7 @@ export default async function AdminSessionPage({
     (attendanceResult.data ?? []).map((row) => [row.student_id, row.status]),
   ) as Record<string, AttendanceStatus>;
 
-  const hasError = Boolean(
-    sessionsResult.error || studentsResult.error || attendanceResult.error,
-  );
+  const hasError = Boolean(sessionsResult.error || studentsResult.error || attendanceResult.error);
 
   return (
     <div className="space-y-6">
@@ -104,12 +96,7 @@ export default async function AdminSessionPage({
         description={formatDate(session.session_date, locale, { dateStyle: "full" })}
         action={
           <div className="flex flex-wrap items-start gap-2">
-            <CsvDownloadButton
-              locale={locale}
-              kind="session"
-              id={session.id}
-              label={t("exportAttendance")}
-            />
+            <CsvDownloadButton locale={locale} kind="session" id={session.id} label={t("exportAttendance")} />
             <Link href="/admin/sessions" className={buttonSecondary}>
               {t("back")}
             </Link>
@@ -119,26 +106,12 @@ export default async function AdminSessionPage({
 
       {hasError ? <Alert>{tc("errorBody")}</Alert> : null}
 
-      <AttendanceForm
-        locale={locale}
-        sessionId={session.id}
-        students={students}
-        existing={existing}
-      />
+      <AttendanceForm locale={locale} sessionId={session.id} students={students} existing={existing} />
 
-      <MaterialsPanel
-        locale={locale}
-        sessionId={session.id}
-        materials={materialsResult.data ?? []}
-      />
+      <MaterialsPanel locale={locale} sessionId={session.id} materials={materialsResult.data ?? []} />
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
-        <EditSessionForm
-          locale={locale}
-          sessionId={session.id}
-          title={session.title}
-          date={session.session_date}
-        />
+        <EditSessionForm locale={locale} sessionId={session.id} title={session.title} date={session.session_date} />
         <Card className="p-5">
           <DeleteSessionForm locale={locale} sessionId={session.id} />
         </Card>

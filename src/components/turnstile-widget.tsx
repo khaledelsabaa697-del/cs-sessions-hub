@@ -40,12 +40,7 @@ function getTurnstileWindow(): TurnstileWindow | undefined {
   return window as TurnstileWindow;
 }
 
-export function TurnstileWidget({
-  onVerify,
-  theme = "auto",
-  language,
-  resetKey = 0,
-}: TurnstileWidgetProps) {
+export function TurnstileWidget({ onVerify, theme = "auto", language, resetKey = 0 }: TurnstileWidgetProps) {
   const t = useTranslations("auth");
   const siteKey = turnstileSiteKey();
   const loadErrorMessage = t("turnstileLoadError");
@@ -194,17 +189,7 @@ export function TurnstileWidget({
         widgetIdRef.current = null;
       }
     };
-  }, [
-    siteKey,
-    status,
-    theme,
-    language,
-    retryNonce,
-    onVerify,
-    getThemeValue,
-    getLanguageValue,
-    loadErrorMessage,
-  ]);
+  }, [siteKey, status, theme, language, retryNonce, onVerify, getThemeValue, getLanguageValue, loadErrorMessage]);
 
   // Reset the challenge after a failed submit so the user can try again.
   useEffect(() => {

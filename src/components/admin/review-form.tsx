@@ -5,14 +5,7 @@ import { useTranslations } from "next-intl";
 import { reviewSubmissionAction } from "@/actions/assignments";
 import type { SubmissionReviewState, SubmissionStatus } from "@/lib/types";
 
-import {
-  Alert,
-  Card,
-  CardHeader,
-  buttonSecondary,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, buttonSecondary, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: SubmissionReviewState = { status: "idle" };
@@ -37,9 +30,7 @@ export function ReviewForm({
   const [score, setScore] = useState(
     finalScore !== null ? String(finalScore) : aiScore !== null ? String(aiScore) : "",
   );
-  const [reviewStatus, setReviewStatus] = useState<"graded" | "flagged">(
-    status === "flagged" ? "flagged" : "graded",
-  );
+  const [reviewStatus, setReviewStatus] = useState<"graded" | "flagged">(status === "flagged" ? "flagged" : "graded");
 
   return (
     <Card>
@@ -86,23 +77,17 @@ export function ReviewForm({
             id="review-status"
             name="status"
             value={reviewStatus}
-            onChange={(event) =>
-              setReviewStatus(event.target.value as "graded" | "flagged")
-            }
+            onChange={(event) => setReviewStatus(event.target.value as "graded" | "flagged")}
             className={inputClass}
           >
             <option value="graded">{t("statusGraded")}</option>
             <option value="flagged">{t("statusFlagged")}</option>
           </select>
-          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-            {t("statusHint")}
-          </p>
+          <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("statusHint")}</p>
         </div>
 
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-        {state.status === "success" ? (
-          <Alert tone="success">{state.message}</Alert>
-        ) : null}
+        {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
 
         <SubmitButton idle={t("save")} pendingLabel={t("saving")} />
       </form>

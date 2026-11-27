@@ -7,15 +7,7 @@ import { parseCsv } from "@/lib/csv";
 import { toCsv } from "@/lib/csv-export";
 import { csvStudentSchema, normalizeUsername } from "@/lib/validation";
 import type { CsvImportState, CsvRowResult } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  buttonPrimary,
-  buttonSecondary,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, buttonPrimary, buttonSecondary, inputClass, labelClass } from "@/components/ui";
 
 const MAX_FILE_BYTES = 1024 * 1024; // 1 MB
 const BATCH_SIZE = 200; // matches the server-side per-request limit
@@ -53,8 +45,7 @@ function parseTable(text: string): ParsedTable {
 
   const header = rows[0].map(normalizeHeader);
   const usernameIndex = header.indexOf("username");
-  const fullNameIndex =
-    header.indexOf("full_name") >= 0 ? header.indexOf("full_name") : header.indexOf("name");
+  const fullNameIndex = header.indexOf("full_name") >= 0 ? header.indexOf("full_name") : header.indexOf("name");
   const passwordIndex = header.indexOf("password");
 
   if (usernameIndex === -1 || fullNameIndex === -1) {
@@ -275,16 +266,8 @@ export function CsvImportForm({ locale }: { locale: string }) {
           <label htmlFor="csv-file" className={labelClass}>
             {t("uploadLabel")}
           </label>
-          <input
-            id="csv-file"
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleFile}
-            className={inputClass}
-          />
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            {t("uploadHint")}
-          </p>
+          <input id="csv-file" type="file" accept=".csv,text/csv" onChange={handleFile} className={inputClass} />
+          <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("uploadHint")}</p>
         </div>
 
         <div>
@@ -305,9 +288,7 @@ export function CsvImportForm({ locale }: { locale: string }) {
             placeholder={t("importPlaceholder")}
             className={`${inputClass} font-mono text-xs leading-relaxed`}
           />
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            {t("importHint")}
-          </p>
+          <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("importHint")}</p>
         </div>
 
         {fileError ? <Alert>{fileError}</Alert> : null}
@@ -328,11 +309,9 @@ export function CsvImportForm({ locale }: { locale: string }) {
       </form>
 
       {deferredCsv.trim() ? (
-        <div className="border-t border-slate-100 p-5 dark:border-slate-800">
+        <div className="border-t border-[var(--line)] p-5 ">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
-              {t("previewTitle")}
-            </h3>
+            <h3 className="text-sm font-semibold text-[var(--ink)]">{t("previewTitle")}</h3>
             {table.ok ? (
               <div className="flex flex-wrap items-center gap-2 text-sm">
                 <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -352,28 +331,32 @@ export function CsvImportForm({ locale }: { locale: string }) {
               <Alert>{t(`errors.${table.error}`)}</Alert>
             </div>
           ) : previewRows.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{t("previewEmpty")}</p>
+            <p className="mt-3 text-sm text-[var(--ink-muted)]">{t("previewEmpty")}</p>
           ) : (
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[34rem] text-sm">
                 <thead>
-                  <tr className="border-b border-slate-100 text-start text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                    <th scope="col" className="py-2 pe-3 text-start font-medium">{t("line")}</th>
-                    <th scope="col" className="py-2 pe-3 text-start font-medium">{t("colUsername")}</th>
-                    <th scope="col" className="py-2 pe-3 text-start font-medium">{t("colFullName")}</th>
-                    <th scope="col" className="py-2 text-start font-medium">{tc("status")}</th>
+                  <tr className="border-b border-[var(--line)] text-start text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
+                    <th scope="col" className="py-2 pe-3 text-start font-medium">
+                      {t("line")}
+                    </th>
+                    <th scope="col" className="py-2 pe-3 text-start font-medium">
+                      {t("colUsername")}
+                    </th>
+                    <th scope="col" className="py-2 pe-3 text-start font-medium">
+                      {t("colFullName")}
+                    </th>
+                    <th scope="col" className="py-2 text-start font-medium">
+                      {tc("status")}
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-[var(--line)]">
                   {previewRows.map((row) => (
                     <tr key={`${row.line}-${row.username}`}>
-                      <td className="py-2 pe-3 font-mono text-xs text-slate-500">{row.line}</td>
-                      <td className="py-2 pe-3 font-mono text-xs text-slate-700 dark:text-slate-300">
-                        {row.username || "—"}
-                      </td>
-                      <td className="py-2 pe-3 text-xs text-slate-600 dark:text-slate-300">
-                        {row.full_name || "—"}
-                      </td>
+                      <td className="py-2 pe-3 font-mono text-xs text-[var(--ink-muted)]">{row.line}</td>
+                      <td className="py-2 pe-3 font-mono text-xs text-[var(--ink-soft)] ">{row.username || "—"}</td>
+                      <td className="py-2 pe-3 text-xs text-[var(--ink-soft)]">{row.full_name || "—"}</td>
                       <td className="py-2 text-xs">
                         {row.issue === null ? (
                           <span className="font-medium text-emerald-600 dark:text-emerald-400">
@@ -390,9 +373,7 @@ export function CsvImportForm({ locale }: { locale: string }) {
                 </tbody>
               </table>
               {preview && preview.length > PREVIEW_LIMIT ? (
-                <p className="mt-2 text-xs text-slate-500 dark:text-slate-400">
-                  {t("previewLimit", { count: PREVIEW_LIMIT })}
-                </p>
+                <p className="mt-2 text-xs text-[var(--ink-muted)]">{t("previewLimit", { count: PREVIEW_LIMIT })}</p>
               ) : null}
             </div>
           )}
@@ -400,7 +381,7 @@ export function CsvImportForm({ locale }: { locale: string }) {
       ) : null}
 
       {state.status === "done" ? (
-        <div className="border-t border-slate-100 p-5 dark:border-slate-800">
+        <div className="border-t border-[var(--line)] p-5 ">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
@@ -420,34 +401,36 @@ export function CsvImportForm({ locale }: { locale: string }) {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[32rem] text-sm">
               <thead>
-                <tr className="border-b border-slate-100 text-start text-xs uppercase tracking-wide text-slate-500 dark:border-slate-800 dark:text-slate-400">
-                  <th scope="col" className="py-2 pe-3 text-start font-medium">{t("line")}</th>
-                  <th scope="col" className="py-2 pe-3 text-start font-medium">{t("colUsername")}</th>
-                  <th scope="col" className="py-2 pe-3 text-start font-medium">{tc("status")}</th>
-                  <th scope="col" className="py-2 text-start font-medium">{t("studentCode")}</th>
+                <tr className="border-b border-[var(--line)] text-start text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
+                  <th scope="col" className="py-2 pe-3 text-start font-medium">
+                    {t("line")}
+                  </th>
+                  <th scope="col" className="py-2 pe-3 text-start font-medium">
+                    {t("colUsername")}
+                  </th>
+                  <th scope="col" className="py-2 pe-3 text-start font-medium">
+                    {tc("status")}
+                  </th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {t("studentCode")}
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {state.rows.map((row) => (
                   <tr key={`${row.line}-${row.username}`}>
-                    <td className="py-2 pe-3 font-mono text-xs text-slate-500">{row.line}</td>
-                    <td className="py-2 pe-3 font-mono text-xs text-slate-700 dark:text-slate-300">
-                      {row.username || "—"}
-                    </td>
+                    <td className="py-2 pe-3 font-mono text-xs text-[var(--ink-muted)]">{row.line}</td>
+                    <td className="py-2 pe-3 font-mono text-xs text-[var(--ink-soft)] ">{row.username || "—"}</td>
                     <td className="py-2 pe-3">
                       {row.ok ? (
                         <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
                           {t("rowCreated")}
                         </span>
                       ) : (
-                        <span className="text-xs font-medium text-rose-600 dark:text-rose-400">
-                          {t("rowFailed")}
-                        </span>
+                        <span className="text-xs font-medium text-rose-600 dark:text-rose-400">{t("rowFailed")}</span>
                       )}
                     </td>
-                    <td className="py-2 text-xs text-slate-500 dark:text-slate-400">
-                      {row.ok ? row.student_code : row.error}
-                    </td>
+                    <td className="py-2 text-xs text-[var(--ink-muted)]">{row.ok ? row.student_code : row.error}</td>
                   </tr>
                 ))}
               </tbody>
@@ -455,9 +438,7 @@ export function CsvImportForm({ locale }: { locale: string }) {
           </div>
 
           {successfulRows.length > 0 ? (
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
-              {t("resultsHint")}
-            </p>
+            <p className="mt-3 text-xs text-[var(--ink-muted)]">{t("resultsHint")}</p>
           ) : null}
         </div>
       ) : null}

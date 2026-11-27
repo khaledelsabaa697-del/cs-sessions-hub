@@ -30,23 +30,23 @@ export function AnnouncementList({
 }) {
   if (announcements.length === 0) {
     return (
-      <div className="p-5">
+      <div className="py-4">
         <EmptyState title={emptyTitle} />
       </div>
     );
   }
 
   return (
-    <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+    <ul className="divide-y divide-[var(--line)]">
       {announcements.map((announcement) => (
-        <li key={announcement.id} className="px-5 py-4">
+        <li key={announcement.id} className="py-3 first:pt-0 last:pb-0">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <h3 className="text-sm font-semibold text-[var(--ink)]">
                 {hrefBase ? (
                   <Link
                     href={`${hrefBase}/${announcement.id}`}
-                    className="transition hover:text-primary-600 dark:hover:text-primary-400"
+                    className="transition hover:text-bronze-600 dark:hover:text-bronze-300"
                   >
                     {announcement.title}
                   </Link>
@@ -55,16 +55,16 @@ export function AnnouncementList({
                 )}
               </h3>
               {announcement.pinned ? (
-                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-2 py-0.5 font-mono text-[9px] font-semibold uppercase tracking-[0.12em] text-amber-700 dark:text-amber-300">
                   {pinnedLabel}
                 </span>
               ) : null}
             </div>
-            <span className="text-xs text-slate-400 dark:text-slate-500">
+            <span className="font-mono text-[10px] text-[var(--ink-muted)]">
               {formatDate(announcement.created_at, locale)}
             </span>
           </div>
-          <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+          <p className="mt-1 line-clamp-2 whitespace-pre-line text-xs leading-relaxed text-[var(--ink-muted)]">
             {announcement.body}
           </p>
         </li>

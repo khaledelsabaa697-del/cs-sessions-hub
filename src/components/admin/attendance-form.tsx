@@ -4,14 +4,7 @@ import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
 import { saveAttendanceAction } from "@/actions/sessions";
 import type { AttendanceSaveState, AttendanceStatus } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  buttonSecondary,
-  inputClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, buttonSecondary, inputClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { initials } from "@/lib/utils";
 
@@ -62,7 +55,7 @@ export function AttendanceForm({
         title={t("attendanceTitle")}
         description={t("attendanceSubtitle")}
         action={
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-medium text-[var(--ink-muted)]">
             {t("summary", { checked: marked, total: students.length })}
           </span>
         }
@@ -77,7 +70,7 @@ export function AttendanceForm({
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="session_id" value={sessionId} />
 
-          <div className="flex flex-wrap items-center gap-2 border-b border-slate-100 px-5 py-3 text-xs dark:border-slate-800">
+          <div className="flex flex-wrap items-center gap-2 border-b border-[var(--line)] px-5 py-3 text-xs ">
             <span className="rounded-full bg-emerald-50 px-2.5 py-1 font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
               {ts("present")}: {counts.present}
             </span>
@@ -87,16 +80,12 @@ export function AttendanceForm({
             <span className="rounded-full bg-rose-50 px-2.5 py-1 font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
               {ts("absent")}: {counts.absent}
             </span>
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+            <span className="rounded-full bg-[var(--glass-inset)] px-2.5 py-1 font-medium text-[var(--ink-soft)] ">
               {t("notMarked")}: {counts.unmarked}
             </span>
             <button
               type="button"
-              onClick={() =>
-                setStatuses(
-                  Object.fromEntries(students.map((student) => [student.id, "present"])),
-                )
-              }
+              onClick={() => setStatuses(Object.fromEntries(students.map((student) => [student.id, "present"])))}
               className={`${buttonSecondary} ms-auto px-3 py-1.5 text-xs`}
             >
               {t("markAllPresent")}
@@ -105,7 +94,7 @@ export function AttendanceForm({
 
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {students.map((student) => (
                   <tr key={student.id}>
                     <td className="px-3 py-3 sm:px-5">
@@ -114,19 +103,13 @@ export function AttendanceForm({
                           {initials(student.full_name)}
                         </span>
                         <div className="min-w-0">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">
-                            {student.full_name}
-                          </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                            @{student.username}
-                          </p>
+                          <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
+                          <p className="truncate text-xs text-[var(--ink-muted)]">@{student.username}</p>
                         </div>
                       </div>
                     </td>
                     <td className="hidden px-5 py-3 sm:table-cell">
-                      <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
-                        {student.student_code}
-                      </span>
+                      <span className="font-mono text-xs text-[var(--ink-muted)]">{student.student_code}</span>
                     </td>
                     <td className="px-3 py-3 text-end sm:px-5">
                       <label className="sr-only" htmlFor={`status-${student.id}`}>
@@ -158,15 +141,10 @@ export function AttendanceForm({
             </table>
           </div>
 
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-100 px-5 py-4 dark:border-slate-800">
+          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--line)] px-5 py-4 ">
             {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-            {state.status === "success" ? (
-              <Alert tone="success">{state.message}</Alert>
-            ) : null}
-            <SubmitButton
-              idle={t("saveAttendance")}
-              pendingLabel={t("savingAttendance")}
-            />
+            {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
+            <SubmitButton idle={t("saveAttendance")} pendingLabel={t("savingAttendance")} />
           </div>
         </form>
       )}

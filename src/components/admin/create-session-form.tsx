@@ -4,24 +4,12 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { createSessionAction } from "@/actions/sessions";
 import type { SessionFormState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: SessionFormState = { status: "idle" };
 
-export function CreateSessionForm({
-  locale,
-  today,
-}: {
-  locale: string;
-  today: string;
-}) {
+export function CreateSessionForm({ locale, today }: { locale: string; today: string }) {
   const t = useTranslations("admin.sessions");
   const [state, formAction] = useActionState(createSessionAction, initialState);
 
@@ -63,11 +51,7 @@ export function CreateSessionForm({
 
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
 
-        <SubmitButton
-          idle={t("create")}
-          pendingLabel={t("creating")}
-          className="w-full"
-        />
+        <SubmitButton idle={t("create")} pendingLabel={t("creating")} className="w-full" />
       </form>
     </Card>
   );

@@ -4,13 +4,7 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { updatePointsConfigAction } from "@/actions/points";
 import type { PointsConfigState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: PointsConfigState = { status: "idle" };
@@ -59,9 +53,7 @@ export function PointsConfigForm({
               className={inputClass}
               dir="ltr"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("homeworkWeightHint")}
-            </p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("homeworkWeightHint")}</p>
           </div>
 
           <div>
@@ -80,9 +72,7 @@ export function PointsConfigForm({
               className={inputClass}
               dir="ltr"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("attendancePointsHint")}
-            </p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("attendancePointsHint")}</p>
           </div>
 
           <div>
@@ -101,9 +91,7 @@ export function PointsConfigForm({
               className={inputClass}
               dir="ltr"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("onTimeBonusHint")}
-            </p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("onTimeBonusHint")}</p>
           </div>
 
           <div>
@@ -122,38 +110,28 @@ export function PointsConfigForm({
               className={inputClass}
               dir="ltr"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("streakBonusHint")}
-            </p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("streakBonusHint")}</p>
           </div>
         </div>
 
-        <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+        <label className="flex items-start gap-3 rounded-xl border border-[var(--line)] p-3 text-sm ">
           <input
             type="checkbox"
             name="leaderboard_visible"
             defaultChecked={config.leaderboard_visible}
-            className="mt-0.5 size-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600"
+            className="mt-0.5 size-4 rounded border-[var(--line-strong)] text-primary-600 focus:ring-primary-500 "
           />
           <span>
-            <span className="block font-medium text-slate-800 dark:text-slate-100">
-              {t("leaderboardVisible")}
-            </span>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">
-              {t("leaderboardVisibleHint")}
-            </span>
+            <span className="block font-medium text-[var(--ink)] ">{t("leaderboardVisible")}</span>
+            <span className="block text-xs text-[var(--ink-muted)]">{t("leaderboardVisibleHint")}</span>
           </span>
         </label>
 
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-        {state.status === "success" ? (
-          <Alert tone="success">{state.message}</Alert>
-        ) : null}
+        {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            {t("weekStarted", { date: weeklyResetLabel })}
-          </p>
+          <p className="text-xs text-[var(--ink-muted)]">{t("weekStarted", { date: weeklyResetLabel })}</p>
           <SubmitButton idle={t("save")} pendingLabel={t("saving")} />
         </div>
       </form>

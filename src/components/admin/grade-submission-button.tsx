@@ -28,18 +28,11 @@ export function GradeSubmissionButton({
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="submission_id" value={submissionId} />
         <input type="hidden" name="force" value="1" />
-        <button
-          type="submit"
-          disabled={pending}
-          aria-busy={pending}
-          className={buttonSecondary}
-        >
+        <button type="submit" disabled={pending} aria-busy={pending} className={buttonSecondary}>
           {pending ? t("regrading") : (idle ?? label ?? t("regrade"))}
         </button>
       </form>
-      {state.status === "success" ? (
-        <Alert tone="success">{state.message}</Alert>
-      ) : null}
+      {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
       {state.status === "error" ? <Alert>{state.error}</Alert> : null}
     </div>
   );

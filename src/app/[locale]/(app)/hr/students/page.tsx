@@ -4,15 +4,7 @@ import { requireHr } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate, formatNumber } from "@/lib/utils";
-import {
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  buttonSecondary,
-  inputClass,
-  buttonPrimary,
-} from "@/components/ui";
+import { Card, CardHeader, EmptyState, PageHeader, buttonSecondary, inputClass, buttonPrimary } from "@/components/ui";
 import { setAbsenceThresholdAction } from "@/actions/hr";
 
 type OverviewRow = {
@@ -64,14 +56,17 @@ export default async function HrStudentsPage({
 
       <Card>
         <CardHeader title={t("thresholdLabel")} />
-        <div className="p-5 text-sm text-slate-500 dark:text-slate-400">
+        <div className="p-5 text-sm text-[var(--ink-muted)]">
           {t("thresholdHint")} — {t("thresholdLabel")}: {threshold}
         </div>
         {isAdmin ? (
-          <form action={setAbsenceThresholdAction} className="flex flex-wrap items-end gap-2 border-t border-slate-100 p-5 dark:border-slate-800">
+          <form
+            action={setAbsenceThresholdAction}
+            className="flex flex-wrap items-end gap-2 border-t border-[var(--line)] p-5 "
+          >
             <input type="hidden" name="locale" value={locale} />
             <div>
-              <label htmlFor="threshold" className="block text-xs font-medium text-slate-600 dark:text-slate-300">
+              <label htmlFor="threshold" className="block text-xs font-medium text-[var(--ink-soft)]">
                 {t("thresholdLabel")}
               </label>
               <input
@@ -80,7 +75,7 @@ export default async function HrStudentsPage({
                 type="number"
                 min={0}
                 defaultValue={threshold}
-                className="mt-1 w-24 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+                className="mt-1 w-24 rounded-lg border border-[var(--line)] bg-[var(--glass-strong)] px-3 py-2 text-sm text-[var(--ink)]"
               />
             </div>
             <button type="submit" className={buttonPrimary}>
@@ -92,7 +87,7 @@ export default async function HrStudentsPage({
 
       <Card>
         <CardHeader title={t("studentsTitle")} />
-        <div className="border-b border-slate-100 p-4 dark:border-slate-800">
+        <div className="border-b border-[var(--line)] p-4 ">
           <form method="get" className="flex min-w-0 gap-2" role="search">
             <input
               name="q"
@@ -100,7 +95,7 @@ export default async function HrStudentsPage({
               defaultValue={search}
               maxLength={60}
               placeholder={t("searchPlaceholder")}
-              className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+              className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--glass-strong)] px-3 py-2 text-sm text-[var(--ink)]"
             />
             <button type="submit" className={`${buttonSecondary} shrink-0`}>
               {tc("search")}
@@ -116,7 +111,7 @@ export default async function HrStudentsPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[72rem] text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+              <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
                   <th className="px-4 py-3 text-start font-medium">{t("colStudent")}</th>
                   <th className="px-4 py-3 text-start font-medium">{t("colCode")}</th>
@@ -130,7 +125,7 @@ export default async function HrStudentsPage({
                   <th className="px-4 py-3 text-start font-medium">{t("colWarnings")}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {rows.map((r) => (
                   <tr key={r.student_id} className={r.needs_warning ? "bg-red-50/40 dark:bg-red-500/5" : ""}>
                     <td className="px-4 py-3">

@@ -42,13 +42,7 @@ export function SignupForm({ locale }: { locale: string }) {
         <label htmlFor="website" className={labelClass}>
           Website
         </label>
-        <input
-          type="text"
-          id="website"
-          name="website"
-          tabIndex={-1}
-          autoComplete="off"
-        />
+        <input type="text" id="website" name="website" tabIndex={-1} autoComplete="off" />
       </div>
 
       <div>
@@ -86,9 +80,7 @@ export function SignupForm({ locale }: { locale: string }) {
           placeholder={t("usernamePlaceholder")}
           className={inputClass}
         />
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-          {t("usernameHint")}
-        </p>
+        <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("usernameHint")}</p>
       </div>
 
       <div>
@@ -109,9 +101,7 @@ export function SignupForm({ locale }: { locale: string }) {
           placeholder={t("emailPlaceholder")}
           className={inputClass}
         />
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-          {t("emailHint")}
-        </p>
+        <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("emailHint")}</p>
       </div>
 
       <div>
@@ -133,25 +123,41 @@ export function SignupForm({ locale }: { locale: string }) {
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute inset-y-0 end-3 flex items-center text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+            className="absolute inset-y-0 end-3 flex items-center text-[var(--ink-muted)] hover:text-[var(--ink-soft)]"
             aria-label={showPassword ? t("hidePassword") : t("showPassword")}
           >
             {showPassword ? (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-5"
+                aria-hidden="true"
+              >
                 <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
                 <line x1="1" y1="1" x2="23" y2="23" />
               </svg>
             ) : (
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="size-5" aria-hidden="true">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="size-5"
+                aria-hidden="true"
+              >
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                 <circle cx="12" cy="12" r="3" />
               </svg>
             )}
           </button>
         </div>
-        <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-          {t("passwordHint")}
-        </p>
+        <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("passwordHint")}</p>
       </div>
 
       <div>
@@ -183,7 +189,7 @@ export function SignupForm({ locale }: { locale: string }) {
         disabled={captchaRequired && !turnstileToken}
       />
 
-      <p className="mt-6 text-center text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-6 text-center text-sm text-[var(--ink-soft)] ">
         {t("alreadyHaveAccount")}
         <Link href={`/${locale}/login`} className="ml-1 font-semibold underline underline-offset-2 hover:no-underline">
           {t("signIn")}

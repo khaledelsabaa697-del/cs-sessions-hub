@@ -1,5 +1,8 @@
-export function cn(...values: Array<string | false | null | undefined>): string {
-  return values.filter(Boolean).join(" ");
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...values: ClassValue[]): string {
+  return twMerge(clsx(values));
 }
 
 export function initials(name: string): string {
@@ -44,12 +47,15 @@ export function cairoToday(): string {
   }).format(new Date());
 }
 
+/** Latin digits even in Arabic — used for scores, ranks and IDs. */
 export function formatNumber(
   value: number,
   locale: string,
   maximumFractionDigits = 0,
 ): string {
-  return new Intl.NumberFormat(locale, { maximumFractionDigits }).format(value);
+  return new Intl.NumberFormat(locale === "ar" ? "en-US" : locale, {
+    maximumFractionDigits,
+  }).format(value);
 }
 
 export function clamp(value: number, min: number, max: number): number {

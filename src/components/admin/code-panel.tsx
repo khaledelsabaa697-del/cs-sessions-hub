@@ -8,7 +8,7 @@ import { formatDateTime } from "@/lib/utils";
 const liveBadge =
   "inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20";
 const closedBadge =
-  "inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-400/20";
+  "inline-flex items-center gap-1.5 rounded-full bg-[var(--glass-inset)] px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)] ring-1 ring-inset ring-slate-500/10 dark:ring-slate-400/20";
 
 export async function CodePanel({
   locale,
@@ -37,18 +37,13 @@ export async function CodePanel({
           {code ? (
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <span
-                  dir="ltr"
-                  className="font-mono text-3xl font-bold tracking-[0.2em] text-slate-900 dark:text-white"
-                >
+                <span dir="ltr" className="font-mono text-3xl font-bold tracking-[0.2em] text-[var(--ink)]">
                   {code}
                 </span>
                 <CopyButton value={code} />
-                <span className={active ? liveBadge : closedBadge}>
-                  {active ? t("active") : t("expired")}
-                </span>
+                <span className={active ? liveBadge : closedBadge}>{active ? t("active") : t("expired")}</span>
               </div>
-              <p className="text-sm text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-[var(--ink-muted)]">
                 {active && expiresAt ? (
                   <>
                     {t("expiresLabel")} <CodeCountdown expiresAt={expiresAt} />
@@ -60,30 +55,22 @@ export async function CodePanel({
             </div>
           ) : (
             <div>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                {t("noCodeTitle")}
-              </p>
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {t("noCodeBody")}
-              </p>
+              <p className="text-sm font-semibold text-[var(--ink)]">{t("noCodeTitle")}</p>
+              <p className="mt-1 text-sm text-[var(--ink-muted)]">{t("noCodeBody")}</p>
             </div>
           )}
 
           <RotateCodeForm locale={locale} sessionId={sessionId} />
 
-          {code ? (
-            <EndCodeForm locale={locale} sessionId={sessionId} />
-          ) : null}
+          {code ? <EndCodeForm locale={locale} sessionId={sessionId} /> : null}
 
           {active && checkInUrl ? (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-950/40">
+            <div className="rounded-xl border border-[var(--line)] bg-[var(--glass-inset)] p-3 ">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  {t("linkLabel")}
-                </p>
+                <p className="text-xs font-medium text-[var(--ink-muted)]">{t("linkLabel")}</p>
                 <CopyButton value={checkInUrl} />
               </div>
-              <code className="mt-1 block break-all text-xs text-slate-700 dark:text-slate-300" dir="ltr">
+              <code className="mt-1 block break-all text-xs text-[var(--ink-soft)] " dir="ltr">
                 {checkInUrl}
               </code>
             </div>
@@ -98,11 +85,9 @@ export async function CodePanel({
               alt={t("qrAlt")}
               width={200}
               height={200}
-              className="rounded-xl border border-slate-200 bg-white p-2 dark:border-slate-700"
+              className="rounded-xl border border-[var(--line)] bg-white p-2 "
             />
-            <figcaption className="mt-2 max-w-[12.5rem] text-xs text-slate-500 dark:text-slate-400">
-              {t("scanHint")}
-            </figcaption>
+            <figcaption className="mt-2 max-w-[12.5rem] text-xs text-[var(--ink-muted)]">{t("scanHint")}</figcaption>
           </figure>
         ) : null}
       </div>

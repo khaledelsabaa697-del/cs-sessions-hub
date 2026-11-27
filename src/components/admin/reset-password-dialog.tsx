@@ -4,13 +4,7 @@ import { useActionState, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { resetPasswordAction } from "@/actions/students";
 import type { ResetPasswordState } from "@/lib/types";
-import {
-  Alert,
-  buttonPrimary,
-  buttonSecondary,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, buttonPrimary, buttonSecondary, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: ResetPasswordState = { status: "idle" };
@@ -56,25 +50,16 @@ export function ResetPasswordDialog({
         onClick={(event) => {
           if (event.target === dialogRef.current) dialogRef.current?.close();
         }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-slate-200 bg-white p-0 text-slate-900 shadow-2xl backdrop:bg-slate-950/60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-0 text-[var(--ink)] shadow-2xl backdrop:bg-slate-950/60 "
         aria-labelledby={`reset-title-${studentId}`}
       >
         {open ? (
           <div className="p-6">
-            <h2
-              id={`reset-title-${studentId}`}
-              className="text-lg font-semibold text-slate-900 dark:text-white"
-            >
+            <h2 id={`reset-title-${studentId}`} className="text-lg font-semibold text-[var(--ink)]">
               {t("resetTitle")}
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              {t("resetHint", { name: studentName })}
-            </p>
-            <ResetForm
-              studentId={studentId}
-              locale={locale}
-              onClose={() => dialogRef.current?.close()}
-            />
+            <p className="mt-1 text-sm text-[var(--ink-muted)]">{t("resetHint", { name: studentName })}</p>
+            <ResetForm studentId={studentId} locale={locale} onClose={() => dialogRef.current?.close()} />
           </div>
         ) : null}
       </dialog>
@@ -82,15 +67,7 @@ export function ResetPasswordDialog({
   );
 }
 
-function ResetForm({
-  studentId,
-  locale,
-  onClose,
-}: {
-  studentId: string;
-  locale: string;
-  onClose: () => void;
-}) {
+function ResetForm({ studentId, locale, onClose }: { studentId: string; locale: string; onClose: () => void }) {
   const t = useTranslations("admin.students");
   const tc = useTranslations("common");
   const [state, formAction] = useActionState(resetPasswordAction, initialState);

@@ -6,11 +6,7 @@ import { AnnouncementList } from "@/components/announcement-list";
 import { Card, CardHeader, PageHeader } from "@/components/ui";
 import type { Announcement } from "@/lib/types";
 
-export default async function HrAnnouncementsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function HrAnnouncementsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);

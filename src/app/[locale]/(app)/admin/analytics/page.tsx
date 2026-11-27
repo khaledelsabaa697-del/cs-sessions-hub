@@ -1,14 +1,6 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  StatCard,
-  buttonSecondary,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, StatCard, buttonSecondary } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -16,14 +8,7 @@ import { cn, formatDate, formatNumber, initials } from "@/lib/utils";
 import type { AdminAnalytics, AnalyticsGradeBucket } from "@/lib/types";
 
 const bucketKeys = ["below50", "from50", "from60", "from70", "from80", "from90"] as const;
-const bucketColors = [
-  "bg-rose-500",
-  "bg-orange-400",
-  "bg-amber-400",
-  "bg-sky-400",
-  "bg-primary-500",
-  "bg-emerald-500",
-];
+const bucketColors = ["bg-rose-500", "bg-orange-400", "bg-amber-400", "bg-sky-400", "bg-primary-500", "bg-emerald-500"];
 
 function formatPercent(value: number | null | undefined, locale: string): string {
   if (value === null || value === undefined || Number.isNaN(Number(value))) {
@@ -32,11 +17,7 @@ function formatPercent(value: number | null | undefined, locale: string): string
   return `${formatNumber(Number(value), locale, 1)}%`;
 }
 
-export default async function AdminAnalyticsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function AdminAnalyticsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -94,16 +75,12 @@ export default async function AdminAnalyticsPage({
           value={formatPercent(totals.average_percent, locale)}
           hint={t("stats.averageHint")}
         />
-        <StatCard
-          label={t("stats.atRisk")}
-          value={formatNumber(atRisk.length, locale)}
-          hint={t("stats.atRiskHint")}
-        />
+        <StatCard label={t("stats.atRisk")} value={formatNumber(atRisk.length, locale)} hint={t("stats.atRiskHint")} />
       </div>
 
       <Card>
         <CardHeader title={t("countsTitle")} />
-        <dl className="grid grid-cols-2 divide-slate-100 sm:grid-cols-3 lg:grid-cols-6 dark:divide-slate-800">
+        <dl className="grid grid-cols-2 divide-[var(--line)] sm:grid-cols-3 lg:grid-cols-6 ">
           {[
             ["submissions", totals.submissions],
             ["graded", totals.graded],
@@ -112,14 +89,9 @@ export default async function AdminAnalyticsPage({
             ["unreviewedPairs", totals.unreviewed_pairs],
             ["assignments", totals.assignments],
           ].map(([key, value]) => (
-            <div
-              key={String(key)}
-              className="border-b border-slate-100 px-5 py-4 last:border-b-0 dark:border-slate-800"
-            >
-              <dt className="text-xs text-slate-500 dark:text-slate-400">
-                {t(`counts.${key}`)}
-              </dt>
-              <dd className="mt-1 text-lg font-semibold tabular-nums text-slate-900 dark:text-white">
+            <div key={String(key)} className="border-b border-[var(--line)] px-5 py-4 last:border-b-0 ">
+              <dt className="text-xs text-[var(--ink-muted)]">{t(`counts.${key}`)}</dt>
+              <dd className="mt-1 text-lg font-semibold tabular-nums text-[var(--ink)]">
                 {formatNumber(Number(value), locale)}
               </dd>
             </div>
@@ -135,22 +107,21 @@ export default async function AdminAnalyticsPage({
               <EmptyState title={t("weeksEmpty")} />
             ) : (
               weeks.map((week) => {
-                const percent =
-                  week.attendance_percent === null ? null : Number(week.attendance_percent);
+                const percent = week.attendance_percent === null ? null : Number(week.attendance_percent);
                 return (
                   <div key={week.week_start}>
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-sm text-slate-600 dark:text-slate-300">
+                      <span className="text-sm text-[var(--ink-soft)]">
                         {formatDate(week.week_start, locale, {
                           day: "numeric",
                           month: "short",
                         })}
                       </span>
-                      <span className="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                      <span className="text-sm font-semibold tabular-nums text-[var(--ink)]">
                         {percent === null ? "—" : `${formatNumber(percent, locale, 1)}%`}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[var(--glass-inset)]">
                       <div
                         className="h-full rounded-full bg-emerald-500"
                         style={{
@@ -158,7 +129,7 @@ export default async function AdminAnalyticsPage({
                         }}
                       />
                     </div>
-                    <p className="mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-[11px] text-[var(--ink-muted)]">
                       {t("weekDetail", {
                         sessions: formatNumber(Number(week.sessions), locale),
                         attended: formatNumber(Number(week.attended), locale),
@@ -184,19 +155,14 @@ export default async function AdminAnalyticsPage({
                 return (
                   <div key={bucket.bucket}>
                     <div className="flex items-baseline justify-between gap-3">
-                      <span className="text-sm text-slate-600 dark:text-slate-300">
-                        {t(`buckets.${key}`)}
-                      </span>
-                      <span className="text-sm font-semibold tabular-nums text-slate-900 dark:text-white">
+                      <span className="text-sm text-[var(--ink-soft)]">{t(`buckets.${key}`)}</span>
+                      <span className="text-sm font-semibold tabular-nums text-[var(--ink)]">
                         {formatNumber(count, locale)}
                       </span>
                     </div>
-                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-[var(--glass-inset)]">
                       <div
-                        className={cn(
-                          "h-full rounded-full",
-                          bucketColors[bucket.bucket] ?? "bg-primary-500",
-                        )}
+                        className={cn("h-full rounded-full", bucketColors[bucket.bucket] ?? "bg-primary-500")}
                         style={{ width: `${(count / maxGrade) * 100}%` }}
                       />
                     </div>
@@ -217,15 +183,23 @@ export default async function AdminAnalyticsPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+              <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStudent")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAttendance")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAverage")}</th>
-                  <th scope="col" className="px-5 py-3 text-end font-medium">{t("colActions")}</th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colStudent")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colAttendance")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colAverage")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-end font-medium">
+                    {t("colActions")}
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {atRisk.map((student) => (
                   <tr key={student.username}>
                     <td className="px-5 py-3.5">
@@ -234,10 +208,8 @@ export default async function AdminAnalyticsPage({
                           {initials(student.full_name)}
                         </span>
                         <div className="min-w-0">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">
-                            {student.full_name}
-                          </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
+                          <p className="truncate text-xs text-[var(--ink-muted)]">
                             @{student.username} · <span className="font-mono">{student.student_code}</span>
                           </p>
                         </div>
@@ -245,7 +217,7 @@ export default async function AdminAnalyticsPage({
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
                       {student.attendance_percent === null ? (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-[var(--ink-muted)]">—</span>
                       ) : (
                         <span
                           className={
@@ -260,9 +232,9 @@ export default async function AdminAnalyticsPage({
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
                       {student.average_percent === null ? (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-[var(--ink-muted)]">—</span>
                       ) : (
-                        <span className="font-semibold text-slate-900 dark:text-white">
+                        <span className="font-semibold text-[var(--ink)]">
                           {formatNumber(Number(student.average_percent), locale, 1)}%
                         </span>
                       )}

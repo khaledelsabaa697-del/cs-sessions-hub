@@ -3,16 +3,8 @@
 import { useActionState, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import {
-  flagSimilarPairAction,
-  markSimilarityReviewedAction,
-  runSimilarityCheckAction,
-} from "@/actions/similarity";
-import type {
-  SimilarityActionResult,
-  SimilarityPair,
-  SimilarityRunState,
-} from "@/lib/types";
+import { flagSimilarPairAction, markSimilarityReviewedAction, runSimilarityCheckAction } from "@/actions/similarity";
+import type { SimilarityActionResult, SimilarityPair, SimilarityRunState } from "@/lib/types";
 import {
   Alert,
   Card,
@@ -71,7 +63,7 @@ export function SimilarityPanel({
         title={t("title")}
         description={t("subtitle")}
         action={
-          <span className="text-xs text-slate-500 dark:text-slate-400">
+          <span className="text-xs text-[var(--ink-muted)]">
             {checkedAtLabel ? t("lastChecked", { date: checkedAtLabel }) : t("neverChecked")}
           </span>
         }
@@ -97,9 +89,7 @@ export function SimilarityPanel({
               className={`${inputClass} w-24`}
               dir="ltr"
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("thresholdHint")}
-            </p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("thresholdHint")}</p>
           </div>
           <div className="pt-6">
             <SubmitButton idle={t("run")} pendingLabel={t("running")} />
@@ -125,38 +115,40 @@ export function SimilarityPanel({
           <>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[44rem] text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>
-                    <th scope="col" className="px-4 py-3 text-start font-medium">{t("colStudents")}</th>
-                    <th scope="col" className="px-4 py-3 text-start font-medium">{t("colSimilarity")}</th>
-                    <th scope="col" className="px-4 py-3 text-start font-medium">{t("colReviewed")}</th>
-                    <th scope="col" className="px-4 py-3 text-end font-medium">{t("colActions")}</th>
+                    <th scope="col" className="px-4 py-3 text-start font-medium">
+                      {t("colStudents")}
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-start font-medium">
+                      {t("colSimilarity")}
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-start font-medium">
+                      {t("colReviewed")}
+                    </th>
+                    <th scope="col" className="px-4 py-3 text-end font-medium">
+                      {t("colActions")}
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-[var(--line)]">
                   {pairs.map((pair) => {
                     const similarity = Number(pair.similarity);
-                    const bothFlagged =
-                      pair.student_a_status === "flagged" &&
-                      pair.student_b_status === "flagged";
+                    const bothFlagged = pair.student_a_status === "flagged" && pair.student_b_status === "flagged";
 
                     return (
                       <tr key={pair.pair_id}>
                         <td className="px-4 py-3.5">
                           <div className="space-y-1">
                             <div>
-                              <span className="font-medium text-slate-900 dark:text-white">
-                                {pair.student_a_name}
-                              </span>
-                              <span className="ms-2 font-mono text-xs text-slate-500 dark:text-slate-400">
+                              <span className="font-medium text-[var(--ink)]">{pair.student_a_name}</span>
+                              <span className="ms-2 font-mono text-xs text-[var(--ink-muted)]">
                                 {pair.student_a_code}
                               </span>
                             </div>
                             <div>
-                              <span className="font-medium text-slate-900 dark:text-white">
-                                {pair.student_b_name}
-                              </span>
-                              <span className="ms-2 font-mono text-xs text-slate-500 dark:text-slate-400">
+                              <span className="font-medium text-[var(--ink)]">{pair.student_b_name}</span>
+                              <span className="ms-2 font-mono text-xs text-[var(--ink-muted)]">
                                 {pair.student_b_code}
                               </span>
                             </div>
@@ -169,7 +161,7 @@ export function SimilarityPanel({
                                 ? "font-semibold text-rose-600 dark:text-rose-400"
                                 : similarity >= 75
                                   ? "font-semibold text-amber-600 dark:text-amber-400"
-                                  : "font-semibold text-slate-700 dark:text-slate-200"
+                                  : "font-semibold text-[var(--ink-soft)]"
                             }
                           >
                             {formatNumber(similarity, locale, 1)}%
@@ -199,11 +191,7 @@ export function SimilarityPanel({
                               <button
                                 type="button"
                                 disabled={rowPending}
-                                onClick={() =>
-                                  runRow(() =>
-                                    markSimilarityReviewedAction(pair.pair_id, locale),
-                                  )
-                                }
+                                onClick={() => runRow(() => markSimilarityReviewedAction(pair.pair_id, locale))}
                                 className={`${buttonSecondary} px-3 py-1.5 text-xs`}
                               >
                                 {t("markReviewed")}
@@ -215,11 +203,9 @@ export function SimilarityPanel({
                                 disabled={rowPending}
                                 onClick={() => {
                                   if (!window.confirm(t("flagConfirm"))) return;
-                                  runRow(() =>
-                                    flagSimilarPairAction(pair.pair_id, locale),
-                                  );
+                                  runRow(() => flagSimilarPairAction(pair.pair_id, locale));
                                 }}
-                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-3 py-1.5 text-xs font-semibold text-rose-600 shadow-sm transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-500/30 dark:bg-slate-900 dark:text-rose-400 dark:hover:bg-rose-500/10"
+                                className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300"
                               >
                                 {t("flagBoth")}
                               </button>
@@ -233,16 +219,12 @@ export function SimilarityPanel({
               </table>
             </div>
 
-            {flaggedPairs > 0 ? (
-              <Alert tone="info">{t("flaggedNote")}</Alert>
-            ) : null}
+            {flaggedPairs > 0 ? <Alert tone="info">{t("flaggedNote")}</Alert> : null}
           </>
         )}
 
         <div className="flex flex-wrap items-center gap-3">
-          <span className="text-xs text-slate-500 dark:text-slate-400">
-            {t("reviewedNote")}
-          </span>
+          <span className="text-xs text-[var(--ink-muted)]">{t("reviewedNote")}</span>
           <button
             type="button"
             disabled={rowPending || pairs.every((pair) => pair.reviewed)}

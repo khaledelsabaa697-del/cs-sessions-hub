@@ -104,7 +104,7 @@
     "otpLabel": "أدخل الرمز المكوّن من ٨ أرقام",
     "digit": "رقم",
     "verify": "تحقق",
-    "verifying": "جارٍ التحقق…",
+    "verifying": "جارٍ التحقق من الرابط",
     "resendCode": "إعادة إرسال الرمز",
     "resendCooldown": "إعادة الإرسال خلال {seconds} ث",
     "verifyNote": "لم تصلك الرسالة؟ تفقّد مجلد السبام أو أعد الإرسال.",
@@ -147,8 +147,7 @@
     "confirmNewPassword": "تأكيد كلمة المرور الجديدة",
     "resetPassword": "تحديث كلمة المرور",
     "resetting": "جارٍ التحديث…",
-    "passwordUpdated": "تم تحديث كلمة المرور. يمكنك الآن تسجيل الدخول.",
-    "verifying": "جارٍ التحقق من الرابط"
+    "passwordUpdated": "تم تحديث كلمة المرور. يمكنك الآن تسجيل الدخول."
   },
   "dashboard": {
     "greeting": "أهلًا بعودتك، {name}",
@@ -184,7 +183,20 @@
     "badgeAbsent": "غياب",
     "badgeMissed": "فائت",
     "badgeLate": "متأخر",
-    "showAllWarnings": "عرض الكل ({count})"
+    "showAllWarnings": "عرض الكل ({count})",
+    "nextUp": "التالي",
+    "noUpcoming": "لا يوجد تسليم قريب",
+    "openAssignment": "فتح الواجب",
+    "leaderboardTile": "لوحة الصف",
+    "noLeaderboard": "اللوحة فارغة حاليًا.",
+    "progressTile": "الزخم",
+    "lastEightWeeks": "النقاط خلال آخر 8 أسابيع",
+    "noProgress": "سلّم واجبًا أو احضر جلسة لبدء الرسم.",
+    "viewAll": "عرض الكل",
+    "announcementsHint": "آخر أخبار المعلمين",
+    "bestStreak": "الأفضل: {count}",
+    "you": "أنت",
+    "viewProgress": "عرض التقدم"
   },
   "hr": {
     "overviewTitle": "نظرة عامة للموارد البشرية",
@@ -239,7 +251,19 @@
       "reasonRequired": "أدخل سببًا للتنبيه.",
       "notStudent": "هذا الحساب ليس طالبًا، لذلك لا يمكن إرسال تنبيه له.",
       "saveFailed": "تعذّر الحفظ. حاول مرة أخرى."
-    }
+    },
+    "studentsCount": "الطلاب",
+    "averageAttendance": "متوسط الحضور",
+    "needsAttention": "يحتاجون متابعة",
+    "needsAttentionHint": "طلاب عند حد الغياب أو تجاوزه",
+    "latestSession": "آخر جلسة",
+    "noSession": "لا توجد جلسات بعد",
+    "presentCount": "حاضر",
+    "lateCount": "متأخر",
+    "markedCount": "مسجل",
+    "openAttendance": "فتح الحضور",
+    "allClear": "كل شيء واضح",
+    "quickActions": "روابط سريعة"
   },
   "profile": {
     "title": "الملف الشخصي",
@@ -280,7 +304,8 @@
       "full_name": "أدخل اسمك الكامل (2–80 حرفًا).",
       "display_name": "أدخل اسمًا من 2 إلى 40 حرفًا.",
       "generic": "تعذّر حفظ التغييرات. حاول مرة أخرى."
-    }
+    },
+    "viewProgress": "عرض التقدم"
   },
   "admin": {
     "overview": {
@@ -312,7 +337,22 @@
       "openAnalytics": "فتح التحليلات",
       "announcementsCardTitle": "الإعلانات",
       "announcementsCardBody": "انشر تحديثات الفصل وثبّت المهم منها.",
-      "manageAnnouncements": "إدارة الإعلانات"
+      "manageAnnouncements": "إدارة الإعلانات",
+      "pendingTitle": "قائمة التصحيح",
+      "pendingBody": "تغذية راجعة بالذكاء الاصطناعي لم تُنتج بعد.",
+      "pendingHint": "تسليمات تنتظر التصحيح",
+      "pendingEmpty": "القائمة فارغة.",
+      "pendingCount": "{count} في القائمة",
+      "openGrading": "فتح التصحيح",
+      "warningsTitle": "تنبيهات الطلاب",
+      "warningsHint": "آخر ملاحظات الموارد البشرية والمعلمين",
+      "warningsUnit": "تنبيهات",
+      "noWarnings": "لا توجد تنبيهات بعد.",
+      "openWarnings": "فتح التنبيهات",
+      "recentStudentsHint": "أحدث الحسابات أولًا",
+      "quickActions": "إجراءات سريعة",
+      "quickActionsHint": "انتقل مباشرة إلى المهمة التالية.",
+      "lastUpdated": "تم التحديث {date}"
     },
     "students": {
       "title": "الطلاب والحسابات",
@@ -395,7 +435,7 @@
         "forbidden": "هذا الإجراء للمعلّم فقط.",
         "updateFailed": "تعذّر تحديث كلمة المرور. حاول مرة أخرى.",
         "roleChangeFailed": "تعذّر تغيير الدور. حاول مرة أخرى.",
-      "deleteFailed": "تعذّر حذف الحساب. حاول مرة أخرى."
+        "deleteFailed": "تعذّر حذف الحساب. حاول مرة أخرى."
       },
       "colAttendance": "الحضور",
       "colAverage": "المعدل",
@@ -1175,5 +1215,32 @@
     "error": "التصدير غير متاح.",
     "forbidden": "ليس لديك صلاحية التصدير.",
     "failed": "تعذّر إنشاء الملف."
+  },
+  "gamification": {
+    "rank": "الرتبة",
+    "bronze": "برونزي",
+    "silver": "فضي",
+    "gold": "ذهبي",
+    "diamond": "ألماسي",
+    "level": "المستوى {level}",
+    "levelShort": "LVL",
+    "xp": "XP",
+    "xpLabel": "تقدم XP",
+    "nextTier": "{points} XP حتى {tier}",
+    "maxTier": "أعلى رتبة",
+    "streak": "سلسلة الأيام",
+    "daysShort": "أيام",
+    "keepStreak": "حافظ عليها اليوم.",
+    "noStreak": "ابدأ سلسلتك اليوم.",
+    "badgesEarned": "{earned} من {total} شارات",
+    "levelUpTitle": "فتحت المستوى {level}",
+    "levelUpBody": "{points} XP وتستمر.",
+    "badgeTitle": "حصلت على شارة جديدة",
+    "badgeBody": "وصلت شارة جديدة إلى ملفك.",
+    "dismiss": "إغلاق",
+    "unranked": "غير مصنف بعد",
+    "topThree": "منصة التتويج",
+    "seeAll": "اللوحة كاملة",
+    "yourPosition": "مركزك"
   }
 }

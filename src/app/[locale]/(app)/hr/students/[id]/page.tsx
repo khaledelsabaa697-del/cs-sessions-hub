@@ -9,16 +9,19 @@ import { Card, CardHeader, EmptyState, PageHeader } from "@/components/ui";
 
 type Detail = {
   profile: { id: string; full_name: string; student_code: string; created_at: string };
-  sessions: { session_id: string; title: string; session_date: string; status: string; excused: boolean; excuse_note: string | null }[];
+  sessions: {
+    session_id: string;
+    title: string;
+    session_date: string;
+    status: string;
+    excused: boolean;
+    excuse_note: string | null;
+  }[];
   assignments: { assignment_id: string; title: string; deadline: string | null; state: string }[];
   warnings: { id: string; reason: string; note: string | null; created_at: string }[];
 };
 
-export default async function HrStudentDetailPage({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export default async function HrStudentDetailPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: raw, id } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -49,14 +52,14 @@ export default async function HrStudentDetailPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[40rem] text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+              <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
                   <th className="px-4 py-3 text-start font-medium">Session</th>
                   <th className="px-4 py-3 text-start font-medium">Date</th>
                   <th className="px-4 py-3 text-start font-medium">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {detail.sessions.map((s) => (
                   <tr key={s.session_id}>
                     <td className="px-4 py-3">{s.title}</td>
@@ -67,13 +70,15 @@ export default async function HrStudentDetailPage({
                           s.status === "present"
                             ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                             : s.excused
-                              ? "rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                              ? "rounded-full bg-[var(--glass-inset)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-soft)] "
                               : "rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
                         }
                       >
                         {s.excused ? t("excusedLabel") : s.status}
                       </span>
-                      {s.excuse_note ? <span className="ms-2 text-xs text-slate-500">{s.excuse_note}</span> : null}
+                      {s.excuse_note ? (
+                        <span className="ms-2 text-xs text-[var(--ink-muted)]">{s.excuse_note}</span>
+                      ) : null}
                     </td>
                   </tr>
                 ))}
@@ -90,10 +95,10 @@ export default async function HrStudentDetailPage({
             <EmptyState title={t("noStudents")} />
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <ul className="divide-y divide-[var(--line)]">
             {detail.assignments.map((a) => (
               <li key={a.assignment_id} className="flex items-center justify-between px-5 py-3">
-                <span className="text-sm text-slate-900 dark:text-white">{a.title}</span>
+                <span className="text-sm text-[var(--ink)]">{a.title}</span>
                 <span
                   className={
                     a.state === "missing"
@@ -122,12 +127,14 @@ export default async function HrStudentDetailPage({
             <EmptyState title={t("noWarnings")} />
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <ul className="divide-y divide-[var(--line)]">
             {detail.warnings.map((w) => (
               <li key={w.id} className="px-5 py-3">
-                <p className="text-sm font-medium text-slate-900 dark:text-white">{w.reason}</p>
-                {w.note ? <p className="text-xs text-slate-500 dark:text-slate-400">{w.note}</p> : null}
-                <p className="text-xs text-slate-400">{formatDate(w.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}</p>
+                <p className="text-sm font-medium text-[var(--ink)]">{w.reason}</p>
+                {w.note ? <p className="text-xs text-[var(--ink-muted)]">{w.note}</p> : null}
+                <p className="text-xs text-[var(--ink-muted)]">
+                  {formatDate(w.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}
+                </p>
               </li>
             ))}
           </ul>

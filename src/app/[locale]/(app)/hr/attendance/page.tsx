@@ -39,8 +39,8 @@ export default async function HrAttendancePage({
   const sessions = sessionsResult.data ?? [];
   const allStudents = (studentsResult.data ?? []) as StudentRow[];
   const selectedSession = sessionIdParam
-    ? sessions.find((s) => s.id === sessionIdParam) ?? null
-    : sessions[0] ?? null;
+    ? (sessions.find((s) => s.id === sessionIdParam) ?? null)
+    : (sessions[0] ?? null);
 
   const statusByStudent = new Map<string, "present" | "absent" | "late">();
   if (selectedSession) {

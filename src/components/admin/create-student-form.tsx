@@ -4,14 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { createStudentAction } from "@/actions/students";
 import type { CreateStudentState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  inputClass,
-  labelClass,
-  buttonSecondary,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, inputClass, labelClass, buttonSecondary } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 import { CopyButton } from "@/components/copy-button";
 
@@ -39,12 +32,7 @@ export function CreateStudentForm({ locale }: { locale: string }) {
   return (
     <Card>
       <CardHeader title={t("addTitle")} description={t("addSubtitle")} />
-      <form
-        ref={formRef}
-        action={formAction}
-        className="space-y-4 p-5"
-        onReset={() => setPassword("")}
-      >
+      <form ref={formRef} action={formAction} className="space-y-4 p-5" onReset={() => setPassword("")}>
         <input type="hidden" name="locale" value={locale} />
 
         <div>
@@ -107,20 +95,14 @@ export function CreateStudentForm({ locale }: { locale: string }) {
               {t("generatePassword")}
             </button>
           </div>
-          <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-            {t("passwordHint")}
-          </p>
+          <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("passwordHint")}</p>
         </div>
 
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
         {state.status === "success" ? (
           <div className="space-y-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 dark:border-emerald-500/30 dark:bg-emerald-500/10">
-            <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-              {state.message}
-            </p>
-            <p className="text-xs text-emerald-700 dark:text-emerald-300">
-              {t("credentialsHint")}
-            </p>
+            <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">{state.message}</p>
+            <p className="text-xs text-emerald-700 dark:text-emerald-300">{t("credentialsHint")}</p>
             <dl className="space-y-2 text-sm">
               <div className="flex items-center justify-between gap-3">
                 <dt className="text-emerald-700 dark:text-emerald-300">{t("username")}</dt>

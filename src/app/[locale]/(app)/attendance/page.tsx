@@ -1,15 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  StatCard,
-  buttonPrimary,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, StatCard, buttonPrimary } from "@/components/ui";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -31,16 +23,11 @@ const statusClasses: Record<AttendanceStatus | "none", string> = {
   present:
     "bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20",
   late: "bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20",
-  absent:
-    "bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-400/20",
-  none: "bg-slate-100 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-400/20",
+  absent: "bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-400/20",
+  none: "bg-[var(--glass-inset)] text-[var(--ink-soft)] ring-slate-500/10 dark:ring-slate-400/20",
 };
 
-export default async function StudentAttendancePage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function StudentAttendancePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -61,17 +48,11 @@ export default async function StudentAttendancePage({
       .order("session_date", { ascending: false })
       .limit(100)
       .returns<SessionRow[]>(),
-    supabase
-      .from("attendance")
-      .select("session_id, status")
-      .eq("student_id", profile.id)
-      .returns<AttendanceRow[]>(),
+    supabase.from("attendance").select("session_id, status").eq("student_id", profile.id).returns<AttendanceRow[]>(),
   ]);
 
   const sessions = sessionsResult.data ?? [];
-  const statusBySession = new Map(
-    (attendanceResult.data ?? []).map((row) => [row.session_id, row.status]),
-  );
+  const statusBySession = new Map((attendanceResult.data ?? []).map((row) => [row.session_id, row.status]));
 
   const counts = { present: 0, late: 0, absent: 0 };
   for (const session of sessions) {
@@ -86,10 +67,7 @@ export default async function StudentAttendancePage({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        description={t("subtitle")}
-      />
+      <PageHeader title={t("title")} description={t("subtitle")} />
 
       {hasError ? <Alert>{t("loadError")}</Alert> : null}
 
@@ -99,10 +77,7 @@ export default async function StudentAttendancePage({
           value={total > 0 ? `${formatNumber(rate, locale)}%` : "—"}
           hint={t("rateHint", { attended, total })}
         />
-        <StatCard
-          label={ts("present")}
-          value={formatNumber(counts.present, locale)}
-        />
+        <StatCard label={ts("present")} value={formatNumber(counts.present, locale)} />
         <StatCard label={ts("late")} value={formatNumber(counts.late, locale)} />
         <StatCard label={ts("absent")} value={formatNumber(counts.absent, locale)} />
       </div>
@@ -116,22 +91,24 @@ export default async function StudentAttendancePage({
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[30rem] text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+              <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colSession")}</th>
-                  <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStatus")}</th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colSession")}
+                  </th>
+                  <th scope="col" className="px-5 py-3 text-start font-medium">
+                    {t("colStatus")}
+                  </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody className="divide-y divide-[var(--line)]">
                 {sessions.map((session) => {
                   const status = statusBySession.get(session.id) ?? "none";
                   return (
                     <tr key={session.id}>
                       <td className="px-5 py-3.5">
-                        <p className="font-medium text-slate-900 dark:text-white">
-                          {session.title}
-                        </p>
-                        <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                        <p className="font-medium text-[var(--ink)]">{session.title}</p>
+                        <p className="mt-0.5 text-xs text-[var(--ink-muted)]">
                           {formatDate(session.session_date, locale)}
                         </p>
                       </td>
@@ -151,7 +128,7 @@ export default async function StudentAttendancePage({
         )}
       </Card>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">{t("note")}</p>
+      <p className="text-xs text-[var(--ink-muted)]">{t("note")}</p>
     </div>
   );
 }

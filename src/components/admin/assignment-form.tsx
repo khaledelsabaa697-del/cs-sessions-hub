@@ -2,18 +2,9 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  createAssignmentAction,
-  updateAssignmentAction,
-} from "@/actions/assignments";
+import { createAssignmentAction, updateAssignmentAction } from "@/actions/assignments";
 import type { AssignmentFormState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: AssignmentFormState = { status: "idle" };
@@ -35,10 +26,7 @@ function toDeadlineInput(iso: string | null | undefined): string {
   if (!iso) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date
-    .toLocaleString("sv-SE", { timeZone: "Africa/Cairo" })
-    .slice(0, 16)
-    .replace(" ", "T");
+  return date.toLocaleString("sv-SE", { timeZone: "Africa/Cairo" }).slice(0, 16).replace(" ", "T");
 }
 
 export function AssignmentForm({
@@ -66,9 +54,7 @@ export function AssignmentForm({
       />
       <form action={formAction} className="space-y-4 p-5">
         <input type="hidden" name="locale" value={locale} />
-        {assignment?.id ? (
-          <input type="hidden" name="assignment_id" value={assignment.id} />
-        ) : null}
+        {assignment?.id ? <input type="hidden" name="assignment_id" value={assignment.id} /> : null}
 
         <div>
           <label htmlFor={`${idPrefix}-title`} className={labelClass}>
@@ -162,26 +148,20 @@ export function AssignmentForm({
               defaultValue={toDeadlineInput(assignment?.deadline)}
               className={inputClass}
             />
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {t("deadlineHint")}
-            </p>
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">{t("deadlineHint")}</p>
           </div>
         </div>
 
-        <label className="flex items-start gap-3 rounded-xl border border-slate-200 p-3 text-sm dark:border-slate-800">
+        <label className="flex items-start gap-3 rounded-xl border border-[var(--line)] p-3 text-sm ">
           <input
             type="checkbox"
             name="allow_resubmit"
             defaultChecked={assignment?.allow_resubmit ?? true}
-            className="mt-0.5 size-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600"
+            className="mt-0.5 size-4 rounded border-[var(--line-strong)] text-primary-600 focus:ring-primary-500 "
           />
           <span>
-            <span className="block font-medium text-slate-800 dark:text-slate-100">
-              {t("allowResubmit")}
-            </span>
-            <span className="block text-xs text-slate-500 dark:text-slate-400">
-              {t("allowResubmitHint")}
-            </span>
+            <span className="block font-medium text-[var(--ink)] ">{t("allowResubmit")}</span>
+            <span className="block text-xs text-[var(--ink-muted)]">{t("allowResubmitHint")}</span>
           </span>
         </label>
 
@@ -191,30 +171,27 @@ export function AssignmentForm({
             {(["file", "text", "both"] as const).map((type) => (
               <label
                 key={type}
-                className="flex items-center gap-2 cursor-pointer rounded-xl border border-slate-200 p-3 transition hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+                className="flex items-center gap-2 cursor-pointer rounded-xl border border-[var(--line)] p-3 transition hover:bg-[var(--glass-inset)] "
               >
                 <input
                   type="radio"
                   name="allowed_submission_types"
                   value={type}
-                  defaultChecked={assignment?.allowed_submission_types === type || (assignment?.allowed_submission_types == null && type === "both")}
-                  className="mt-0.5 size-4 rounded border-slate-300 text-primary-600 focus:ring-primary-500 dark:border-slate-600"
+                  defaultChecked={
+                    assignment?.allowed_submission_types === type ||
+                    (assignment?.allowed_submission_types == null && type === "both")
+                  }
+                  className="mt-0.5 size-4 rounded border-[var(--line-strong)] text-primary-600 focus:ring-primary-500 "
                 />
-                <span className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                  {t(`allowedType.${type}`)}
-                </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400">
-                  {t(`allowedTypeHint.${type}`)}
-                </span>
+                <span className="text-sm font-medium text-[var(--ink)] ">{t(`allowedType.${type}`)}</span>
+                <span className="text-xs text-[var(--ink-muted)]">{t(`allowedTypeHint.${type}`)}</span>
               </label>
             ))}
           </div>
         </div>
 
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-        {state.status === "success" ? (
-          <Alert tone="success">{state.message}</Alert>
-        ) : null}
+        {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
 
         <SubmitButton
           idle={mode === "create" ? t("create") : te("save")}

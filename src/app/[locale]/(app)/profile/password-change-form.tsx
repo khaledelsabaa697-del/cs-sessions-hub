@@ -47,11 +47,9 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
   function mapError(err: { message?: string } | null): string {
     const msg = (err?.message ?? "").toLowerCase();
     if (!msg) return t("errors.reauthFailed");
-    if (msg.includes("rate") || msg.includes("too many"))
-      return t("errors.rateLimited");
+    if (msg.includes("rate") || msg.includes("too many")) return t("errors.rateLimited");
     if (msg.includes("expired")) return t("errors.expiredCode");
-    if (msg.includes("invalid") || msg.includes("otp") || msg.includes("token"))
-      return t("errors.invalidCode");
+    if (msg.includes("invalid") || msg.includes("otp") || msg.includes("token")) return t("errors.invalidCode");
     if (msg.includes("password") && (msg.includes("weak") || msg.includes("short") || msg.includes("least")))
       return t("errors.weakPassword");
     if (msg.includes("password")) return t("errors.weakPassword");
@@ -119,9 +117,7 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-slate-600 dark:text-slate-300">
-        {t("changePasswordHint")}
-      </p>
+      <p className="text-sm text-[var(--ink-soft)]">{t("changePasswordHint")}</p>
 
       {success ? <Alert tone="success">{t("passwordChanged")}</Alert> : null}
       {error ? <Alert>{error}</Alert> : null}
@@ -154,9 +150,7 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
               placeholder="00000000"
               className={`${inputClass} text-center font-mono text-lg tracking-[0.4em]`}
             />
-            <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-              {t("codeHint")}
-            </p>
+            <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("codeHint")}</p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -166,11 +160,7 @@ export function PasswordChangeForm({ locale }: { locale: string }) {
               disabled={sending || cooldown > 0}
               className="text-sm font-medium text-primary-600 underline-offset-2 hover:underline disabled:cursor-not-allowed disabled:opacity-50 dark:text-primary-400"
             >
-              {cooldown > 0
-                ? t("resendIn", { seconds: cooldown })
-                : sending
-                  ? t("sendingCode")
-                  : t("resendCode")}
+              {cooldown > 0 ? t("resendIn", { seconds: cooldown }) : sending ? t("sendingCode") : t("resendCode")}
             </button>
           </div>
 

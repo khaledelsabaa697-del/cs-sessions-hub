@@ -113,7 +113,11 @@ export function VerifyEmailForm({ locale, email }: { locale: string; email: stri
   useEffect(() => {
     const saved = sessionStorage.getItem(`resend_cooldown_${email}`);
     if (saved) {
-      const remaining = Math.max(0, parseInt(saved, 10) - Math.floor((Date.now() - parseInt(sessionStorage.getItem(`resend_time_${email}`) ?? "0", 10)) / 1000));
+      const remaining = Math.max(
+        0,
+        parseInt(saved, 10) -
+          Math.floor((Date.now() - parseInt(sessionStorage.getItem(`resend_time_${email}`) ?? "0", 10)) / 1000),
+      );
       if (remaining > 0) {
         setResendCooldown(remaining);
         const interval = setInterval(() => {
@@ -175,7 +179,7 @@ export function VerifyEmailForm({ locale, email }: { locale: string; email: stri
           type="button"
           onClick={handleResend}
           disabled={resendCooldown > 0 || (captchaRequired && !turnstileToken)}
-          className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 disabled:text-slate-400 dark:disabled:text-slate-500"
+          className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 disabled:text-[var(--ink-muted)] dark:disabled:text-[var(--ink-muted)]"
         >
           {resendCooldown > 0 ? t("resendCooldown", { seconds: resendCooldown }) : t("resendCode")}
         </button>
@@ -186,7 +190,7 @@ export function VerifyEmailForm({ locale, email }: { locale: string; email: stri
         )}
       </div>
 
-      <p className="mt-6 text-center text-xs text-slate-400 dark:text-slate-500">
+      <p className="mt-6 text-center text-xs text-[var(--ink-muted)]">
         {t("verifyHelp")}
         <Link href={`/${locale}/login`} className="ml-1 font-semibold underline underline-offset-2 hover:no-underline">
           {t("backToLogin")}

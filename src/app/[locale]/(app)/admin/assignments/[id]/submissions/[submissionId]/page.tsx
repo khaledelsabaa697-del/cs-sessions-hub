@@ -3,13 +3,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { GradeSubmissionButton } from "@/components/admin/grade-submission-button";
 import { ReviewForm } from "@/components/admin/review-form";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  PageHeader,
-  badgeClass,
-} from "@/components/ui";
+import { CodePanel } from "@/components/code-panel";
+import { CompilerMessage, DiagnosticList } from "@/components/compiler-message";
+import { Alert, Card, CardHeader, PageHeader, badgeClass } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -94,7 +90,7 @@ export default async function SubmissionReviewPage({
       <div>
         <Link
           href={`/admin/assignments/${assignment.id}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] transition hover:text-[var(--ink)] dark:hover:text-white"
         >
           <svg
             viewBox="0 0 24 24"
@@ -135,7 +131,7 @@ export default async function SubmissionReviewPage({
                     max: formatNumber(maxScore, locale),
                   })}
             </span>
-            <span className={`${badgeClass} bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200`}>
+            <span className={`${badgeClass} bg-[var(--glass-inset)] text-[var(--ink-soft)] `}>
               {data.submission_type === "text" ? t("typeText") : t("typeFile")}
             </span>
             <span
@@ -144,7 +140,7 @@ export default async function SubmissionReviewPage({
                   ? "rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                   : data.status === "flagged"
                     ? "rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
-                    : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                    : "rounded-full bg-[var(--glass-inset)] px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)] "
               }
             >
               {ts(data.status)}
@@ -155,7 +151,7 @@ export default async function SubmissionReviewPage({
 
       <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         <div className="space-y-6">
-          <Card>
+          <Card className="overflow-hidden">
             <CardHeader
               title={t("codeTitle")}
               action={
@@ -163,19 +159,19 @@ export default async function SubmissionReviewPage({
                   <a
                     href={signedUrl}
                     download
-                    className="text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+                    className="text-xs font-semibold text-bronze-700 transition hover:text-bronze-600 dark:text-bronze-300"
                   >
                     {t("download")}
                   </a>
                 ) : null
               }
             />
-            <pre
-              dir="ltr"
-              className="max-h-[34rem] overflow-auto rounded-b-2xl bg-slate-950 p-4 font-mono text-xs leading-relaxed text-slate-100"
-            >
-              {data.code_text}
-            </pre>
+            <CodePanel
+              code={data.code_text || "// empty submission"}
+              title={`${student?.student_code ?? "submission"}.cpp`}
+              maxHeight="34rem"
+              className="rounded-none border-0"
+            />
           </Card>
 
           <Card>
@@ -195,11 +191,11 @@ export default async function SubmissionReviewPage({
                   : undefined
               }
             />
-            <div className="space-y-5 p-5">
+            <div className="space-y-4 p-5">
               {data.grading_error ? (
-                <Alert>
-                  {t("lastError", { message: data.grading_error.slice(0, 200) })}
-                </Alert>
+                <CompilerMessage tone="error" label="grading.error">
+                  {data.grading_error.slice(0, 300)}
+                </CompilerMessage>
               ) : null}
 
               {data.ai_feedback === null && data.ai_feedback_ar === null ? (
@@ -207,39 +203,22 @@ export default async function SubmissionReviewPage({
               ) : (
                 <>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      {t("feedbackEn")}
-                    </p>
-                    <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                    <p className="caption-code mb-2">{t("feedbackEn")}</p>
+                    <CompilerMessage tone="info" label="ai.feedback">
                       {data.ai_feedback ?? "—"}
-                    </p>
+                    </CompilerMessage>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      {t("feedbackAr")}
-                    </p>
-                    <p
-                      dir="rtl"
-                      className="mt-1 whitespace-pre-line text-sm leading-relaxed text-slate-700 dark:text-slate-200"
-                    >
-                      {data.ai_feedback_ar ?? "—"}
-                    </p>
+                    <p className="caption-code mb-2">{t("feedbackAr")}</p>
+                    <div dir="rtl">
+                      <CompilerMessage tone="info" label="ai.feedback.ar">
+                        {data.ai_feedback_ar ?? "—"}
+                      </CompilerMessage>
+                    </div>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                      {t("issues")}
-                    </p>
-                    {issues.length === 0 ? (
-                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        {t("noIssues")}
-                      </p>
-                    ) : (
-                      <ul className="mt-1 list-disc space-y-1 ps-5 text-sm text-slate-600 dark:text-slate-300">
-                        {issues.map((issue, index) => (
-                          <li key={index}>{issue}</li>
-                        ))}
-                      </ul>
-                    )}
+                    <p className="caption-code mb-2">{t("issues")}</p>
+                    <DiagnosticList items={issues} label="diagnostics" empty={t("noIssues")} />
                   </div>
                 </>
               )}

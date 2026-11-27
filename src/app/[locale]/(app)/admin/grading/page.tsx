@@ -1,22 +1,13 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
-import {
-  ensureModelCatalog,
-  getGradingSettings,
-  getModelStateMap,
-  getCatalogUpdatedAt,
-} from "@/lib/grading/catalog";
+import { ensureModelCatalog, getGradingSettings, getModelStateMap, getCatalogUpdatedAt } from "@/lib/grading/catalog";
 import { GradingSettingsForm } from "@/components/admin/grading-settings-form";
 import { PageHeader } from "@/components/ui";
 
 export const maxDuration = 60;
 
-export default async function AdminGradingPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function AdminGradingPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);

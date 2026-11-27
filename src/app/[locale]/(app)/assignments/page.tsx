@@ -1,14 +1,7 @@
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  badgeClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, badgeClass } from "@/components/ui";
 import { requireProfile } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -32,11 +25,7 @@ type MySubmissionRow = {
   status: SubmissionStatus;
 };
 
-export default async function StudentAssignmentsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function StudentAssignmentsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -89,16 +78,13 @@ export default async function StudentAssignmentsPage({
             <EmptyState title={t("empty")} />
           </div>
         ) : (
-          <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+          <ul className="divide-y divide-[var(--line)]">
             {assignments.map((assignment) => {
               const attempts = byAssignment.get(assignment.id) ?? [];
               const max = Number(assignment.max_score) || 100;
-              const open =
-                !assignment.deadline || Date.parse(assignment.deadline) > now;
+              const open = !assignment.deadline || Date.parse(assignment.deadline) > now;
               const pending = attempts.some((row) =>
-                ["pending", "queued", "grading", "pending_retry", "failed"].includes(
-                  row.status,
-                ),
+                ["pending", "queued", "grading", "pending_retry", "failed"].includes(row.status),
               );
 
               let bestPercent: number | null = null;
@@ -113,19 +99,17 @@ export default async function StudentAssignmentsPage({
                 <li key={assignment.id}>
                   <Link
                     href={`/assignments/${assignment.id}`}
-                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 transition hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 transition hover:bg-[var(--glass-inset)] "
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="truncate font-medium text-slate-900 dark:text-white">
-                          {assignment.title}
-                        </p>
+                        <p className="truncate font-medium text-[var(--ink)]">{assignment.title}</p>
                         <span
                           className={cn(
                             "rounded-full px-2.5 py-0.5 text-[11px] font-medium",
                             open
                               ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
-                              : "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300",
+                              : "bg-[var(--glass-inset)] text-[var(--ink-soft)] ",
                           )}
                         >
                           {open ? t("open") : t("closed")}
@@ -135,9 +119,7 @@ export default async function StudentAssignmentsPage({
                             {t(
                               attempts.some(
                                 (row) =>
-                                  row.status === "queued" ||
-                                  row.status === "grading" ||
-                                  row.status === "pending_retry",
+                                  row.status === "queued" || row.status === "grading" || row.status === "pending_retry",
                               )
                                 ? "statusGrading"
                                 : attempts.some((row) => row.status === "failed")
@@ -147,7 +129,7 @@ export default async function StudentAssignmentsPage({
                           </span>
                         ) : null}
                       </div>
-                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                      <p className="mt-1 text-xs text-[var(--ink-muted)]">
                         {assignment.deadline
                           ? t("due", {
                               date: formatDate(assignment.deadline, locale, {
@@ -167,7 +149,7 @@ export default async function StudentAssignmentsPage({
                           })}
                         </span>
                       ) : null}
-                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                      <span className="text-xs text-[var(--ink-muted)]">
                         {t("attempts", { count: attempts.length })}
                       </span>
                       <svg
@@ -177,7 +159,7 @@ export default async function StudentAssignmentsPage({
                         strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="size-4 text-slate-400 rtl:-scale-x-100"
+                        className="size-4 text-[var(--ink-muted)] rtl:-scale-x-100"
                         aria-hidden="true"
                       >
                         <path d="m9 18 6-6-6-6" />

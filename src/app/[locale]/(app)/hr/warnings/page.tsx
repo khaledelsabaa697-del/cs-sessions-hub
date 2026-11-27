@@ -3,13 +3,7 @@ import { requireHr } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
-import {
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  buttonSecondary,
-} from "@/components/ui";
+import { Card, CardHeader, EmptyState, PageHeader, buttonSecondary } from "@/components/ui";
 import { WarningForm } from "@/components/hr/warning-form";
 
 type StudentRow = { id: string; full_name: string; student_code: string };
@@ -44,9 +38,7 @@ export default async function HrWarningsPage({
   const needle = search.toLowerCase();
   const studentList = needle
     ? allStudents.filter(
-        (s) =>
-          s.full_name.toLowerCase().includes(needle) ||
-          s.student_code.toLowerCase().includes(needle),
+        (s) => s.full_name.toLowerCase().includes(needle) || s.student_code.toLowerCase().includes(needle),
       )
     : allStudents;
 
@@ -70,7 +62,7 @@ export default async function HrWarningsPage({
             defaultValue={search}
             maxLength={60}
             placeholder={t("searchPlaceholder")}
-            className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            className="flex-1 rounded-lg border border-[var(--line)] bg-[var(--glass-strong)] px-3 py-2 text-sm text-[var(--ink)]"
           />
           <button type="submit" className={`${buttonSecondary} shrink-0`}>
             {tc("search")}
@@ -80,11 +72,7 @@ export default async function HrWarningsPage({
 
       <Card>
         <CardHeader title={t("createWarning")} />
-        <WarningForm
-          locale={locale}
-          students={studentList}
-          defaultStudentId={selectedStudent}
-        />
+        <WarningForm locale={locale} students={studentList} defaultStudentId={selectedStudent} />
       </Card>
 
       {selectedStudent ? (
@@ -95,14 +83,12 @@ export default async function HrWarningsPage({
               <EmptyState title={t("noWarnings")} />
             </div>
           ) : (
-            <ul className="divide-y divide-slate-100 dark:divide-slate-800">
+            <ul className="divide-y divide-[var(--line)]">
               {warnings.map((w) => (
                 <li key={w.id} className="px-5 py-3">
-                  <p className="text-sm font-medium text-slate-900 dark:text-white">{w.reason}</p>
-                  {w.note ? (
-                    <p className="text-xs text-slate-500 dark:text-slate-400">{w.note}</p>
-                  ) : null}
-                  <p className="text-xs text-slate-400">
+                  <p className="text-sm font-medium text-[var(--ink)]">{w.reason}</p>
+                  {w.note ? <p className="text-xs text-[var(--ink-muted)]">{w.note}</p> : null}
+                  <p className="text-xs text-[var(--ink-muted)]">
                     {formatDate(w.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}
                   </p>
                 </li>

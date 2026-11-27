@@ -27,7 +27,7 @@ export function WeeklyPointsChart({
 
   if (!hasData) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-slate-300 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+      <div className="flex h-48 items-center justify-center rounded-xl border border-dashed border-[var(--line-strong)] text-sm text-[var(--ink-muted)]">
         {emptyLabel}
       </div>
     );
@@ -54,16 +54,11 @@ export function WeeklyPointsChart({
 
   return (
     <div dir="ltr" className="w-full">
-      <svg
-        viewBox={`0 0 ${width} ${height}`}
-        className="h-56 w-full"
-        role="img"
-        aria-label={pointsLabel}
-      >
+      <svg viewBox={`0 0 ${width} ${height}`} className="h-56 w-full" role="img" aria-label={pointsLabel}>
         <defs>
           <linearGradient id="weeklyPointsFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0.02" />
+            <stop offset="0%" stopColor="#c79967" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="#c79967" stopOpacity="0.02" />
           </linearGradient>
         </defs>
 
@@ -78,7 +73,7 @@ export function WeeklyPointsChart({
               y2={y}
               stroke="currentColor"
               strokeWidth="1"
-              className="text-slate-200 dark:text-slate-700"
+              className="text-[var(--line)]"
             />
           );
         })}
@@ -87,7 +82,7 @@ export function WeeklyPointsChart({
         <path
           d={linePath}
           fill="none"
-          stroke="#6366f1"
+          stroke="#c79967"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -99,7 +94,7 @@ export function WeeklyPointsChart({
               cx={point.x}
               cy={point.y}
               r={3.5}
-              fill="#6366f1"
+              fill="#c79967"
               stroke="white"
               strokeWidth="1.5"
               className="dark:stroke-slate-900"
@@ -118,7 +113,7 @@ export function WeeklyPointsChart({
                 x={point.x}
                 y={height - 10}
                 textAnchor={index === 0 ? "start" : index === coords.length - 1 ? "end" : "middle"}
-                className="fill-slate-500 text-[11px] dark:fill-slate-400"
+                className="fill-[var(--ink-muted)] text-[11px]"
               >
                 {formatDate(point.row.week_start, locale, {
                   day: "numeric",
@@ -129,11 +124,7 @@ export function WeeklyPointsChart({
           </g>
         ))}
 
-        <text
-          x={padX}
-          y={padTop - 4}
-          className="fill-slate-400 text-[11px] dark:fill-slate-500"
-        >
+        <text x={padX} y={padTop - 4} className="fill-[var(--ink-muted)] text-[11px]">
           {formatNumber(max, locale)}
         </text>
       </svg>

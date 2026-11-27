@@ -4,13 +4,7 @@ import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import { updateSessionAction } from "@/actions/sessions";
 import type { SessionFormState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: SessionFormState = { status: "idle" };
@@ -67,9 +61,7 @@ export function EditSessionForm({
         </div>
 
         {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-        {state.status === "success" ? (
-          <Alert tone="success">{state.message}</Alert>
-        ) : null}
+        {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
 
         <SubmitButton idle={t("saveDetails")} pendingLabel={t("savingDetails")} />
       </form>

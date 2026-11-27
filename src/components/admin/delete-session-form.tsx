@@ -3,13 +3,7 @@
 import { useTranslations } from "next-intl";
 import { deleteSessionAction } from "@/actions/sessions";
 
-export function DeleteSessionForm({
-  locale,
-  sessionId,
-}: {
-  locale: string;
-  sessionId: string;
-}) {
+export function DeleteSessionForm({ locale, sessionId }: { locale: string; sessionId: string }) {
   const t = useTranslations("admin.session");
 
   return (
@@ -22,12 +16,8 @@ export function DeleteSessionForm({
     >
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="session_id" value={sessionId} />
-      <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-300">
-        {t("dangerTitle")}
-      </h3>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        {t("dangerBody")}
-      </p>
+      <h3 className="text-sm font-semibold text-rose-700 dark:text-rose-300">{t("dangerTitle")}</h3>
+      <p className="mt-1 text-sm text-[var(--ink-muted)]">{t("dangerBody")}</p>
       <button
         type="submit"
         className="mt-3 inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-500"

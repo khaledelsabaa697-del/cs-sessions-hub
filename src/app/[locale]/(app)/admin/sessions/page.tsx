@@ -1,14 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { CreateSessionForm } from "@/components/admin/create-session-form";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  buttonSecondary,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, buttonSecondary } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -18,13 +11,9 @@ import type { SessionSummary } from "@/lib/types";
 const liveBadge =
   "inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20";
 const mutedBadge =
-  "inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-400/20";
+  "inline-flex items-center rounded-full bg-[var(--glass-inset)] px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)] ring-1 ring-inset ring-slate-500/10 dark:ring-slate-400/20";
 
-export default async function AdminSessionsPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+export default async function AdminSessionsPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: raw } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -67,34 +56,40 @@ export default async function AdminSessionsPage({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[38rem] text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colSession")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colDate")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAttendance")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colCode")}</th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colSession")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colDate")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colAttendance")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colCode")}
+                    </th>
                     <th scope="col" className="px-5 py-3 text-end font-medium" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-[var(--line)]">
                   {sessions.map((session) => (
                     <tr key={session.id}>
                       <td className="px-5 py-3.5">
                         <Link
                           href={`/admin/sessions/${session.id}`}
-                          className="font-medium text-slate-900 hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
+                          className="font-medium text-[var(--ink)] hover:text-primary-600 dark:text-white dark:hover:text-primary-400"
                         >
                           {session.title}
                         </Link>
                       </td>
-                      <td className="whitespace-nowrap px-5 py-3.5 text-slate-500 dark:text-slate-400">
+                      <td className="whitespace-nowrap px-5 py-3.5 text-[var(--ink-muted)]">
                         {formatDate(session.session_date, locale)}
                       </td>
                       <td className="whitespace-nowrap px-5 py-3.5">
-                        <span className="font-medium text-slate-900 dark:text-white">
-                          {session.checked_in_count}
-                        </span>
-                        <span className="text-slate-400 dark:text-slate-500">
+                        <span className="font-medium text-[var(--ink)]">{session.checked_in_count}</span>
+                        <span className="text-[var(--ink-muted)]">
                           {" / "}
                           {session.class_size}
                         </span>

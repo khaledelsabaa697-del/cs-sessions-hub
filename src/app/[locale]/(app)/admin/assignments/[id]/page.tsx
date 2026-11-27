@@ -6,15 +6,7 @@ import { CsvDownloadButton } from "@/components/admin/csv-download-button";
 import { DeleteAssignmentForm } from "@/components/admin/delete-assignment-form";
 import { GradePendingButton } from "@/components/admin/grade-pending-button";
 import { SimilarityPanel } from "@/components/admin/similarity-panel";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  PageHeader,
-  StatCard,
-  buttonSecondary,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, PageHeader, StatCard, buttonSecondary } from "@/components/ui";
 import { requireStaff } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
@@ -53,11 +45,7 @@ type SubmissionRow = {
   } | null;
 };
 
-export default async function AdminAssignmentPage({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export default async function AdminAssignmentPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: raw, id } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -89,6 +77,8 @@ export default async function AdminAssignmentPage({
       )
       .eq("assignment_id", parsedId.data)
       .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(100)
       .returns<SubmissionRow[]>(),
     supabase.rpc("admin_assignment_overview"),
     supabase.rpc("admin_similarity_pairs", { p_assignment: parsedId.data }),
@@ -129,15 +119,12 @@ export default async function AdminAssignmentPage({
   const deadlineMs = assignment.deadline ? Date.parse(assignment.deadline) : null;
   const latestByStudent = new Map<string, SubmissionRow>();
   for (const [studentId, list] of byStudent.entries()) {
-    const sorted = [...list].sort(
-      (a, b) => Date.parse(a.created_at) - Date.parse(b.created_at),
-    );
+    const sorted = [...list].sort((a, b) => Date.parse(a.created_at) - Date.parse(b.created_at));
     latestByStudent.set(studentId, sorted[sorted.length - 1]);
   }
   const latestSubmissions = [...latestByStudent.values()];
 
-  const isLate = (row: SubmissionRow) =>
-    deadlineMs !== null && Date.parse(row.created_at) > deadlineMs;
+  const isLate = (row: SubmissionRow) => deadlineMs !== null && Date.parse(row.created_at) > deadlineMs;
 
   const lateByMinutes = (row: SubmissionRow) => {
     if (deadlineMs === null) return 0;
@@ -168,7 +155,7 @@ export default async function AdminAssignmentPage({
       <div>
         <Link
           href="/admin/assignments"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] transition hover:text-[var(--ink)] dark:hover:text-white"
         >
           <svg
             viewBox="0 0 24 24"
@@ -199,7 +186,7 @@ export default async function AdminAssignmentPage({
             : ta("noDeadline")
         }
         action={
-          <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          <span className="text-xs font-medium text-[var(--ink-muted)]">
             {ta("scoreOutOf", { max: formatNumber(maxScore, locale) })}
           </span>
         }
@@ -209,7 +196,7 @@ export default async function AdminAssignmentPage({
         <Alert>
           {t("loadError")}
           {process.env.NODE_ENV !== "production" && (
-            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+            <pre className="mt-2 text-xs bg-[var(--glass-inset)] p-2 rounded overflow-auto max-h-24">
               {submissionsResult.error.message}
             </pre>
           )}
@@ -219,7 +206,7 @@ export default async function AdminAssignmentPage({
         <Alert>
           {ta("overviewError")}
           {process.env.NODE_ENV !== "production" && (
-            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+            <pre className="mt-2 text-xs bg-[var(--glass-inset)] p-2 rounded overflow-auto max-h-24">
               {overviewResult.error.message}
             </pre>
           )}
@@ -229,7 +216,7 @@ export default async function AdminAssignmentPage({
         <Alert>
           {t("similarityLoadError")}
           {process.env.NODE_ENV !== "production" && (
-            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">
+            <pre className="mt-2 text-xs bg-[var(--glass-inset)] p-2 rounded overflow-auto max-h-24">
               {similarityResult.error.message}
             </pre>
           )}
@@ -244,14 +231,8 @@ export default async function AdminAssignmentPage({
             total: formatNumber(overview?.class_size ?? 0, locale),
           })}
         />
-        <StatCard
-          label={t("statsPending")}
-          value={formatNumber(overview?.pending_count ?? 0, locale)}
-        />
-        <StatCard
-          label={t("statsGraded")}
-          value={formatNumber(overview?.graded_count ?? 0, locale)}
-        />
+        <StatCard label={t("statsPending")} value={formatNumber(overview?.pending_count ?? 0, locale)} />
+        <StatCard label={t("statsGraded")} value={formatNumber(overview?.graded_count ?? 0, locale)} />
         <StatCard
           label={t("statsAverage")}
           value={
@@ -260,9 +241,7 @@ export default async function AdminAssignmentPage({
               : `${formatNumber(overview.average_percent, locale, 1)}%`
           }
           hint={
-            overview?.average_percent === null || overview?.average_percent === undefined
-              ? t("noAverage")
-              : undefined
+            overview?.average_percent === null || overview?.average_percent === undefined ? t("noAverage") : undefined
           }
         />
       </div>
@@ -309,9 +288,7 @@ export default async function AdminAssignmentPage({
               </Link>
 
               {(overview?.pending_count ?? 0) === 0 ? (
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  {t("nothingPending")}
-                </p>
+                <p className="text-sm text-[var(--ink-muted)]">{t("nothingPending")}</p>
               ) : null}
             </div>
           </Card>
@@ -339,17 +316,12 @@ export default async function AdminAssignmentPage({
           title={t("submissionsTitle")}
           action={
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs text-slate-500 dark:text-slate-400">
+              <span className="text-xs text-[var(--ink-muted)]">
                 {t("submissionsCount", {
                   count: formatNumber(latestSubmissions.length, locale),
                 })}
               </span>
-              <CsvDownloadButton
-                locale={locale}
-                kind="assignment"
-                id={assignment.id}
-                label={ta("exportGrades")}
-              />
+              <CsvDownloadButton locale={locale} kind="assignment" id={assignment.id} label={ta("exportGrades")} />
             </div>
           }
         />
@@ -374,22 +346,20 @@ export default async function AdminAssignmentPage({
                           {initials(student?.full_name ?? "?")}
                         </span>
                         <div className="min-w-0">
-                          <p className="truncate font-medium text-slate-900 dark:text-white">
-                            {student?.full_name ?? "—"}
-                          </p>
-                          <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                          <p className="truncate font-medium text-[var(--ink)]">{student?.full_name ?? "—"}</p>
+                          <p className="truncate text-xs text-[var(--ink-muted)]">
                             {student ? `@${student.username}` : ""}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap px-5 py-3.5 text-[var(--ink-soft)]">
                       {t("attemptOf", {
                         current: attemptNumber.get(row.id) ?? 1,
                         total: byStudent.get(row.student_id)?.length ?? 1,
                       })}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-3.5 text-xs text-slate-500 dark:text-slate-400">
+                    <td className="whitespace-nowrap px-5 py-3.5 text-xs text-[var(--ink-muted)]">
                       <div className="flex flex-col gap-0.5">
                         <span>
                           {formatDate(row.created_at, locale, {
@@ -406,20 +376,16 @@ export default async function AdminAssignmentPage({
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
                       {ai === null ? (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-[var(--ink-muted)]">—</span>
                       ) : (
-                        <span className="text-slate-700 dark:text-slate-200">
-                          {formatNumber(ai, locale, 1)}
-                        </span>
+                        <span className="text-[var(--ink-soft)]">{formatNumber(ai, locale, 1)}</span>
                       )}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
                       {final === null ? (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-[var(--ink-muted)]">—</span>
                       ) : (
-                        <span className="font-medium text-slate-900 dark:text-white">
-                          {formatNumber(final, locale, 1)}
-                        </span>
+                        <span className="font-medium text-[var(--ink)]">{formatNumber(final, locale, 1)}</span>
                       )}
                     </td>
                     <td className="whitespace-nowrap px-5 py-3.5">
@@ -430,7 +396,7 @@ export default async function AdminAssignmentPage({
                               ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                               : row.status === "flagged"
                                 ? "rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
-                                : "rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+                                : "rounded-full bg-[var(--glass-inset)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-soft)] "
                           }
                         >
                           {ts(row.status)}
@@ -461,15 +427,29 @@ export default async function AdminAssignmentPage({
               };
 
               const tableHead = (
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStudent")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAttempt")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colSubmitted")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colAi")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colFinal")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStatus")}</th>
-                    <th scope="col" className="px-5 py-3 text-end font-medium">{t("colActions")}</th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colStudent")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colAttempt")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colSubmitted")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colAi")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colFinal")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colStatus")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-end font-medium">
+                      {t("colActions")}
+                    </th>
                   </tr>
                 </thead>
               );
@@ -477,18 +457,18 @@ export default async function AdminAssignmentPage({
               const renderTable = (title: string, rows: SubmissionRow[], showLateBadge: boolean) => (
                 <section className="space-y-2">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{title}</h3>
-                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    <h3 className="text-sm font-semibold text-[var(--ink)]">{title}</h3>
+                    <span className="rounded-full bg-[var(--glass-inset)] px-2 py-0.5 text-xs font-medium text-[var(--ink-soft)] ">
                       {formatNumber(rows.length, locale)}
                     </span>
                   </div>
                   {rows.length === 0 ? (
                     <EmptyState title={t("noSubmissions")} description={t("noSubmissionsHint")} />
                   ) : (
-                    <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                    <div className="overflow-x-auto rounded-xl border border-[var(--line)]">
                       <table className="w-full min-w-[56rem] text-sm">
                         {tableHead}
-                        <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        <tbody className="divide-y divide-[var(--line)]">
                           {rows.map((row) => renderRow(row, showLateBadge))}
                         </tbody>
                       </table>

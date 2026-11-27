@@ -25,7 +25,7 @@ export function LocaleSwitcher({ showLabel = true }: { showLabel?: boolean }) {
         startTransition(() => router.replace(pathname, { locale: nextLocale }));
       }}
       className={cn(
-        "inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 disabled:opacity-60 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-500",
+        "inline-flex h-9 items-center gap-1.5 rounded-lg px-2.5 text-sm font-medium text-[var(--ink-soft)] transition hover:bg-[var(--glass-inset)] hover:text-[var(--ink)] disabled:opacity-60",
         !showLabel && iconButtonClass,
       )}
       aria-label={t("language")}

@@ -39,9 +39,8 @@ const statusClasses: Record<AttendanceStatus | "none", string> = {
   present:
     "bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20",
   late: "bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20",
-  absent:
-    "bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-400/20",
-  none: "bg-slate-100 text-slate-600 ring-slate-500/10 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-400/20",
+  absent: "bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-400/20",
+  none: "bg-[var(--glass-inset)] text-[var(--ink-soft)] ring-slate-500/10 dark:ring-slate-400/20",
 };
 
 export function AdminAttendanceClient({
@@ -90,7 +89,9 @@ export function AdminAttendanceClient({
         <Alert>
           {t("loadError")}
           {errorMessage && process.env.NODE_ENV !== "production" && (
-            <pre className="mt-2 text-xs bg-slate-100 dark:bg-slate-900 p-2 rounded overflow-auto max-h-24">{errorMessage}</pre>
+            <pre className="mt-2 text-xs bg-[var(--glass-inset)] p-2 rounded overflow-auto max-h-24">
+              {errorMessage}
+            </pre>
           )}
         </Alert>
       ) : null}
@@ -138,9 +139,7 @@ export function AdminAttendanceClient({
                       value={studentIds}
                       onChange={(e) => setStudentIds(e.target.value)}
                     />
-                    <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-400">
-                      {t("idsHint")}
-                    </p>
+                    <p className="mt-1.5 text-xs text-[var(--ink-muted)]">{t("idsHint")}</p>
                   </div>
 
                   <button type="submit" disabled={recordState.status === "success"} className={buttonPrimary}>
@@ -150,19 +149,17 @@ export function AdminAttendanceClient({
                   {recordState.status === "success" ? <Alert tone="success">{recordState.message}</Alert> : null}
                 </form>
 
-                <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
-                  <h4 className="text-sm font-medium text-slate-900 dark:text-white mb-2">
-                    {t("markedTitle")}
-                  </h4>
+                <div className="pt-4 border-t border-[var(--line)]">
+                  <h4 className="text-sm font-medium text-[var(--ink)] mb-2">{t("markedTitle")}</h4>
                   {markedStudents.length === 0 ? (
-                    <p className="text-sm text-slate-500 dark:text-slate-400">{t("noMarked")}</p>
+                    <p className="text-sm text-[var(--ink-muted)]">{t("noMarked")}</p>
                   ) : (
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {markedStudents.map((student) => (
                         <form
                           key={student.id}
                           action={removeAction}
-                          className="flex items-center justify-between gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50"
+                          className="flex items-center justify-between gap-3 p-2 rounded-lg bg-[var(--glass-inset)] "
                         >
                           <input type="hidden" name="locale" value={locale} />
                           <input type="hidden" name="session_id" value={selectedSession.id} />
@@ -172,17 +169,17 @@ export function AdminAttendanceClient({
                               {initials(student.full_name)}
                             </span>
                             <div className="min-w-0">
-                              <p className="truncate text-sm font-medium text-slate-900 dark:text-white">
-                                {student.full_name}
-                              </p>
-                              <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                              <p className="truncate text-sm font-medium text-[var(--ink)]">{student.full_name}</p>
+                              <p className="truncate text-xs text-[var(--ink-muted)]">
                                 {student.username ? `@${student.username} · ` : ""}
                                 {student.student_code}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusClasses[student.status]}`}>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusClasses[student.status]}`}
+                            >
                               {ts(student.status)}
                             </span>
                             <button
@@ -194,7 +191,9 @@ export function AdminAttendanceClient({
                             </button>
                           </div>
                           {removeState.status === "error" ? <Alert>{removeState.error}</Alert> : null}
-                          {removeState.status === "success" ? <Alert tone="success">{removeState.message}</Alert> : null}
+                          {removeState.status === "success" ? (
+                            <Alert tone="success">{removeState.message}</Alert>
+                          ) : null}
                         </form>
                       ))}
                     </div>
@@ -202,7 +201,7 @@ export function AdminAttendanceClient({
                 </div>
               </>
             ) : (
-              <p className="text-sm text-slate-500 dark:text-slate-400">{t("selectSessionFirst")}</p>
+              <p className="text-sm text-[var(--ink-muted)]">{t("selectSessionFirst")}</p>
             )}
           </div>
         </Card>
@@ -210,7 +209,9 @@ export function AdminAttendanceClient({
         <Card>
           <CardHeader
             title={selectedSession ? `${t("markedTitle")} — ${selectedSession.title}` : t("markedTitle")}
-            description={selectedSession ? formatDate(selectedSession.session_date, locale, { dateStyle: "full" }) : undefined}
+            description={
+              selectedSession ? formatDate(selectedSession.session_date, locale, { dateStyle: "full" }) : undefined
+            }
           />
           {markedStudents.length === 0 ? (
             <div className="p-5">
@@ -219,20 +220,25 @@ export function AdminAttendanceClient({
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[30rem] text-sm">
-                <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/40 dark:text-slate-400">
+                <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStudent")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colCode")}</th>
-                    <th scope="col" className="px-5 py-3 text-start font-medium">{t("colStatus")}</th>
-                    <th scope="col" className="px-5 py-3 text-end font-medium">{t("colActions")}</th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colStudent")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colCode")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-start font-medium">
+                      {t("colStatus")}
+                    </th>
+                    <th scope="col" className="px-5 py-3 text-end font-medium">
+                      {t("colActions")}
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                <tbody className="divide-y divide-[var(--line)]">
                   {markedStudents.map((student) => (
-                    <form
-                      key={student.id}
-                      action={removeAction}
-                    >
+                    <form key={student.id} action={removeAction}>
                       <input type="hidden" name="locale" value={locale} />
                       <input type="hidden" name="session_id" value={selectedSession!.id} />
                       <input type="hidden" name="student_id" value={student.id} />
@@ -243,24 +249,20 @@ export function AdminAttendanceClient({
                               {initials(student.full_name)}
                             </span>
                             <div className="min-w-0">
-                              <p className="truncate font-medium text-slate-900 dark:text-white">
-                                {student.full_name}
-                              </p>
+                              <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
                               {student.username ? (
-                                <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-                                  @{student.username}
-                                </p>
+                                <p className="truncate text-xs text-[var(--ink-muted)]">@{student.username}</p>
                               ) : null}
                             </div>
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-5 py-3.5">
-                          <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
-                            {student.student_code}
-                          </span>
+                          <span className="font-mono text-xs text-[var(--ink-muted)]">{student.student_code}</span>
                         </td>
                         <td className="px-5 py-3.5">
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${statusClasses[student.status]}`}>
+                          <span
+                            className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${statusClasses[student.status]}`}
+                          >
                             {ts(student.status)}
                           </span>
                         </td>

@@ -39,10 +39,8 @@ export default async function HrAnnouncementDetailPage({
       </div>
       <PageHeader title={data.title} />
       <Card className="p-5">
-        <p className="whitespace-pre-line text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          {data.body}
-        </p>
-        <p className="mt-4 text-xs text-slate-400">
+        <p className="whitespace-pre-line text-sm leading-relaxed text-[var(--ink-soft)]">{data.body}</p>
+        <p className="mt-4 text-xs text-[var(--ink-muted)]">
           {formatDate(data.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}
         </p>
       </Card>

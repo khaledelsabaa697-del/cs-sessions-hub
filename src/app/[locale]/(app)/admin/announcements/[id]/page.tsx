@@ -10,11 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { idSchema } from "@/lib/validation";
 import type { Announcement } from "@/lib/types";
 
-export default async function EditAnnouncementPage({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export default async function EditAnnouncementPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale: raw, id } = await params;
   const locale = toLocale(raw);
   setRequestLocale(locale);
@@ -40,7 +36,7 @@ export default async function EditAnnouncementPage({
       <div>
         <Link
           href="/admin/announcements"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-600 transition hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-[var(--ink-soft)] transition hover:text-[var(--ink)] dark:hover:text-white"
         >
           <svg
             viewBox="0 0 24 24"

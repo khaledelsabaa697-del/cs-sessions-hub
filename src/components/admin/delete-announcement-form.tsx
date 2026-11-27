@@ -8,18 +8,9 @@ import { Alert } from "@/components/ui";
 
 const initialState: AnnouncementFormState = { status: "idle" };
 
-export function DeleteAnnouncementForm({
-  locale,
-  announcementId,
-}: {
-  locale: string;
-  announcementId: string;
-}) {
+export function DeleteAnnouncementForm({ locale, announcementId }: { locale: string; announcementId: string }) {
   const t = useTranslations("admin.announcements");
-  const [state, formAction, pending] = useActionState(
-    deleteAnnouncementAction,
-    initialState,
-  );
+  const [state, formAction, pending] = useActionState(deleteAnnouncementAction, initialState);
 
   return (
     <div className="space-y-3">
@@ -35,7 +26,7 @@ export function DeleteAnnouncementForm({
           type="submit"
           disabled={pending}
           aria-busy={pending}
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-600 shadow-sm transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-500/30 dark:bg-slate-900 dark:text-rose-400 dark:hover:bg-rose-500/10"
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-sm transition hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300"
         >
           {pending ? t("deleting") : t("delete")}
         </button>

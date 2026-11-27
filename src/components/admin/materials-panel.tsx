@@ -2,23 +2,11 @@
 
 import { useActionState, useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  addMaterialAction,
-  createMaterialUploadUrlAction,
-  deleteMaterialAction,
-} from "@/actions/materials";
+import { addMaterialAction, createMaterialUploadUrlAction, deleteMaterialAction } from "@/actions/materials";
 import { MATERIAL_BUCKET, MAX_MATERIAL_FILE_BYTES } from "@/lib/materials";
 import { createClient } from "@/lib/supabase/client";
 import type { MaterialState } from "@/lib/types";
-import {
-  Alert,
-  Card,
-  CardHeader,
-  EmptyState,
-  buttonSecondary,
-  inputClass,
-  labelClass,
-} from "@/components/ui";
+import { Alert, Card, CardHeader, EmptyState, buttonSecondary, inputClass, labelClass } from "@/components/ui";
 import { SubmitButton } from "@/components/submit-button";
 
 const initialState: MaterialState = { status: "idle" };
@@ -51,19 +39,11 @@ export function MaterialsPanel({
   const needsContent = type === "text" || type === "code";
   const needsLanguage = type === "code" || type === "notebook";
 
-  async function submitMaterial(
-    previous: MaterialState,
-    formData: FormData,
-  ): Promise<MaterialState> {
+  async function submitMaterial(previous: MaterialState, formData: FormData): Promise<MaterialState> {
     const selectedType = String(formData.get("type") ?? "");
     const file = formData.get("file");
 
-    if (
-      selectedType !== "text" &&
-      selectedType !== "code" &&
-      file instanceof File &&
-      file.size > 0
-    ) {
+    if (selectedType !== "text" && selectedType !== "code" && file instanceof File && file.size > 0) {
       if (file.size > MAX_MATERIAL_FILE_BYTES) {
         return { status: "error", error: t("errors.fileSize") };
       }
@@ -80,12 +60,10 @@ export function MaterialsPanel({
       // response (signed-URL PUTs were observed to land the file but never
       // return a response for larger payloads, leaving the form stuck).
       const supabase = createClient();
-      const { error: uploadError } = await supabase.storage
-        .from(MATERIAL_BUCKET)
-        .upload(upload.path, file, {
-          contentType: file.type || "application/octet-stream",
-          upsert: false,
-        });
+      const { error: uploadError } = await supabase.storage.from(MATERIAL_BUCKET).upload(upload.path, file, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
 
       if (uploadError) {
         console.error("material upload failed:", {
@@ -136,14 +114,7 @@ export function MaterialsPanel({
               <label htmlFor="material_title" className={labelClass}>
                 {t("materialTitle")}
               </label>
-              <input
-                id="material_title"
-                name="title"
-                type="text"
-                required
-                maxLength={120}
-                className={inputClass}
-              />
+              <input id="material_title" name="title" type="text" required maxLength={120} className={inputClass} />
             </div>
           </div>
 
@@ -152,12 +123,7 @@ export function MaterialsPanel({
               <label htmlFor="material_content" className={labelClass}>
                 {t("materialContent")}
               </label>
-              <textarea
-                id="material_content"
-                name="content"
-                rows={6}
-                className={inputClass}
-              />
+              <textarea id="material_content" name="content" rows={6} className={inputClass} />
             </div>
           ) : null}
 
@@ -181,25 +147,17 @@ export function MaterialsPanel({
               <label htmlFor="material_file" className={labelClass}>
                 {t("materialFile")}
               </label>
-              <input
-                id="material_file"
-                name="file"
-                type="file"
-                required
-                className={inputClass}
-              />
+              <input id="material_file" name="file" type="file" required className={inputClass} />
             </div>
           ) : null}
 
           {state.status === "error" ? <Alert>{state.error}</Alert> : null}
-          {state.status === "success" ? (
-            <Alert tone="success">{state.message}</Alert>
-          ) : null}
+          {state.status === "success" ? <Alert tone="success">{state.message}</Alert> : null}
 
           <SubmitButton idle={t("addMaterial")} pendingLabel={t("savingDetails")} />
         </form>
 
-        <div className="border-t border-slate-200 pt-4 dark:border-slate-800">
+        <div className="border-t border-[var(--line)] pt-4 ">
           {materials.length === 0 ? (
             <EmptyState title={t("noMaterials")} />
           ) : (
@@ -207,13 +165,11 @@ export function MaterialsPanel({
               {materials.map((m) => (
                 <li
                   key={m.id}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 p-3 dark:border-slate-800"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[var(--line)] p-3 "
                 >
                   <div className="min-w-0">
-                    <p className="truncate font-medium text-slate-900 dark:text-white">
-                      {m.title}
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="truncate font-medium text-[var(--ink)]">{m.title}</p>
+                    <p className="text-xs text-[var(--ink-muted)]">
                       {m.type}
                       {m.language ? ` · ${m.language}` : ""}
                     </p>
