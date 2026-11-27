@@ -181,7 +181,42 @@ export default async function AdminAnalyticsPage({ params }: { params: Promise<{
             <EmptyState title={t("atRiskEmpty")} description={t("atRiskEmptyHint")} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="space-y-3 md:hidden">
+            {atRisk.map((student) => (
+              <div key={student.username} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-50 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
+                    {initials(student.full_name)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
+                    <p className="truncate text-xs text-[var(--ink-muted)]">
+                      @{student.username} · <span className="font-mono">{student.student_code}</span>
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--ink-muted)]">
+                  {student.attendance_percent !== null ? (
+                    <span className={Number(student.attendance_percent) < 50 ? "font-semibold text-rose-600 dark:text-rose-400" : "font-semibold text-amber-600 dark:text-amber-400"}>
+                      {formatNumber(Number(student.attendance_percent), locale, 1)}%
+                    </span>
+                  ) : (
+                    <span>—</span>
+                  )}
+                  {student.average_percent !== null ? (
+                    <span className="font-semibold text-[var(--ink)]">{formatNumber(Number(student.average_percent), locale, 1)}%</span>
+                  ) : null}
+                </div>
+                <div className="mt-3">
+                  <Link href={`/admin/students?q=${encodeURIComponent(student.username)}`} className={`${buttonSecondary} px-3 py-1.5 text-xs`}>
+                    {t("viewStudent")}
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
@@ -252,6 +287,7 @@ export default async function AdminAnalyticsPage({ params }: { params: Promise<{
               </tbody>
             </table>
           </div>
+            </div>
         )}
       </Card>
     </div>

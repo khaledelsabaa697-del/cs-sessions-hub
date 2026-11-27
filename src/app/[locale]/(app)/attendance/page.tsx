@@ -89,7 +89,24 @@ export default async function StudentAttendancePage({ params }: { params: Promis
             <EmptyState title={t("empty")} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="space-y-2 md:hidden">
+            {sessions.map((session) => {
+              const status = statusBySession.get(session.id) ?? "none";
+              return (
+                <div key={session.id} className="glass-inset flex items-center justify-between gap-3 rounded-xl px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate font-medium text-[var(--ink)]">{session.title}</p>
+                    <p className="text-xs text-[var(--ink-muted)]">{formatDate(session.session_date, locale)}</p>
+                  </div>
+                  <span className={`shrink-0 inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${statusClasses[status]}`}>
+                    {status === "none" ? t("notRecorded") : ts(status)}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full min-w-[30rem] text-sm">
               <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
@@ -125,6 +142,7 @@ export default async function StudentAttendancePage({ params }: { params: Promis
               </tbody>
             </table>
           </div>
+            </div>
         )}
       </Card>
 

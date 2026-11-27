@@ -122,7 +122,47 @@ export default async function AdminStudentsPage({
                 <Alert>{t("metricsError")}</Alert>
               </div>
             ) : null}
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {students.map((student) => {
+                const metric = metricById.get(student.id);
+                return (
+                  <div key={student.id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                    <div className="flex items-start gap-3">
+                      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-50 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
+                        {initials(student.full_name)}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
+                        <p className="truncate text-xs text-[var(--ink-muted)]">@{student.username}</p>
+                      </div>
+                      <span className="shrink-0 inline-flex items-center rounded-full bg-[var(--glass-inset)] px-2.5 py-0.5 text-xs font-medium text-[var(--ink-soft)]">
+                        {student.role}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--ink-muted)]">
+                      <span className="font-mono text-[var(--ink-soft)]">{student.student_code}</span>
+                      {metric && metric.sessions_total > 0 ? (
+                        <>
+                          <span>{formatNumber(metric.attendance_percent ?? 0, locale)}% ({metric.attended}/{metric.sessions_total})</span>
+                          {metric.average_percent !== null ? <span>{formatNumber(metric.average_percent, locale, 1)}%</span> : null}
+                          <span>{metric.last_attended_at ? formatDate(metric.last_attended_at, locale) : t("never")}</span>
+                        </>
+                      ) : (
+                        <span>{t("noSessions")}</span>
+                      )}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-3">
+                      <ResetPasswordDialog studentId={student.id} studentName={student.full_name} locale={locale} />
+                      <ChangeRoleDialog studentId={student.id} studentName={student.full_name} currentRole={student.role} locale={locale} />
+                      {student.role === "student" ? (
+                        <DeleteAccountDialog studentId={student.id} studentName={student.full_name} locale={locale} />
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full min-w-[56rem] text-sm">
                 <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>

@@ -109,7 +109,48 @@ export default async function HrStudentsPage({
             <EmptyState title={t("noStudents")} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="space-y-3 md:hidden">
+            {rows.map((r) => (
+              <div key={r.student_id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                <div className="flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <Link href={`/hr/students/${r.student_id}`} className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
+                      {r.full_name}
+                    </Link>
+                    <p className="font-mono text-xs text-[var(--ink-muted)]">{r.student_code}</p>
+                  </div>
+                  {r.needs_warning ? (
+                    <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-medium text-red-700 dark:bg-red-500/10 dark:text-red-300">
+                      {t("needsWarning")}
+                    </span>
+                  ) : null}
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colAttended")}</p>
+                    <p className="font-semibold text-[var(--ink)]">{formatNumber(r.sessions_attended, locale)}</p>
+                  </div>
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colAbsent")}</p>
+                    <p className="font-semibold text-[var(--ink)]">{formatNumber(r.sessions_absent, locale)}</p>
+                  </div>
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colAttendancePercent")}</p>
+                    <p className="font-semibold text-[var(--ink)]">{formatNumber(Number(r.attendance_percent), locale, 1)}%</p>
+                  </div>
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colWarnings")}</p>
+                    <p className="font-semibold text-[var(--ink)]">{formatNumber(r.warnings_count, locale)}</p>
+                  </div>
+                </div>
+                <div className="mt-2 text-xs text-[var(--ink-muted)]">
+                  {r.last_attended ? formatDate(r.last_attended, locale, { dateStyle: "medium" }) : "—"}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full min-w-[72rem] text-sm">
               <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
@@ -157,6 +198,7 @@ export default async function HrStudentsPage({
               </tbody>
             </table>
           </div>
+            </div>
         )}
       </Card>
     </div>

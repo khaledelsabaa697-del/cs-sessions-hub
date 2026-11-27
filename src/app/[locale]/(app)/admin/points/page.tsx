@@ -109,7 +109,46 @@ export default async function AdminPointsPage({ params }: { params: Promise<{ lo
             <EmptyState title={t("tableEmpty")} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="space-y-3 md:hidden">
+            {rows.map((row) => (
+              <div key={row.student_id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                <div className="flex items-start gap-3">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-50 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
+                    {initials(row.full_name)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-[var(--ink)]">{row.full_name}</p>
+                    <p className="truncate text-xs text-[var(--ink-muted)]">
+                      @{row.username} · <span className="font-mono">{row.student_code}</span>
+                    </p>
+                  </div>
+                  <span className={row.opted_out ? "shrink-0 rounded-full bg-[var(--glass-inset)] px-2.5 py-1 text-xs font-medium text-[var(--ink-soft)]" : "shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"}>
+                    {row.opted_out ? t("visibilityHidden") : t("visibilityVisible")}
+                  </span>
+                </div>
+                <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colTotal")}</p>
+                    <p className="font-semibold tabular-nums text-[var(--ink)]">{points(row.total_points)}</p>
+                  </div>
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colWeekly")}</p>
+                    <p className="font-semibold tabular-nums text-[var(--ink)]">{points(row.weekly_points)}</p>
+                  </div>
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{t("colBadges")}</p>
+                    <p className="font-semibold tabular-nums text-[var(--ink)]">{formatNumber(Number(row.badge_count), locale)}</p>
+                  </div>
+                  <div className="glass-inset rounded-lg px-2 py-1.5">
+                    <p className="text-[var(--ink-muted)]">{tp("components.homework")}</p>
+                    <p className="font-semibold tabular-nums text-[var(--ink)]">{points(row.homework_points)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-[var(--line)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
@@ -194,6 +233,7 @@ export default async function AdminPointsPage({ params }: { params: Promise<{ lo
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         )}
       </Card>

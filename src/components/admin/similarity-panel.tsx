@@ -113,7 +113,79 @@ export function SimilarityPanel({
           <EmptyState title={t("empty")} description={t("emptyHint")} />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <div className="space-y-3 md:hidden">
+              {pairs.map((pair) => {
+                const similarity = Number(pair.similarity);
+                const bothFlagged = pair.student_a_status === "flagged" && pair.student_b_status === "flagged";
+                return (
+                  <div key={pair.pair_id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate font-medium text-[var(--ink)]">{pair.student_a_name}</span>
+                        <span className="font-mono text-xs text-[var(--ink-muted)]">{pair.student_a_code}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate font-medium text-[var(--ink)]">{pair.student_b_name}</span>
+                        <span className="font-mono text-xs text-[var(--ink-muted)]">{pair.student_b_code}</span>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+                      <span
+                        className={
+                          similarity >= 90
+                            ? "font-semibold text-rose-600 dark:text-rose-400"
+                            : similarity >= 75
+                              ? "font-semibold text-amber-600 dark:text-amber-400"
+                              : "font-semibold text-[var(--ink-soft)]"
+                        }
+                      >
+                        {formatNumber(similarity, locale, 1)}%
+                      </span>
+                      <span
+                        className={
+                          pair.reviewed
+                            ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+                            : "rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
+                        }
+                      >
+                        {pair.reviewed ? t("reviewed") : t("pendingReview")}
+                      </span>
+                      {bothFlagged ? (
+                        <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+                          {ts("flagged")}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {!pair.reviewed ? (
+                        <button
+                          type="button"
+                          disabled={rowPending}
+                          onClick={() => runRow(() => markSimilarityReviewedAction(pair.pair_id, locale))}
+                          className={`${buttonSecondary} px-3 py-1.5 text-xs`}
+                        >
+                          {t("markReviewed")}
+                        </button>
+                      ) : null}
+                      {!bothFlagged ? (
+                        <button
+                          type="button"
+                          disabled={rowPending}
+                          onClick={() => {
+                            if (!window.confirm(t("flagConfirm"))) return;
+                            runRow(() => flagSimilarPairAction(pair.pair_id, locale));
+                          }}
+                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold text-rose-700 shadow-sm transition hover:bg-rose-500/15 disabled:cursor-not-allowed disabled:opacity-60 dark:text-rose-300"
+                        >
+                          {t("flagBoth")}
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full min-w-[44rem] text-sm">
                 <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>

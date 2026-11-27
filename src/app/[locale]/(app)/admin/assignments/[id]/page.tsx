@@ -465,13 +465,59 @@ export default async function AdminAssignmentPage({ params }: { params: Promise<
                   {rows.length === 0 ? (
                     <EmptyState title={t("noSubmissions")} description={t("noSubmissionsHint")} />
                   ) : (
-                    <div className="overflow-x-auto rounded-xl border border-[var(--line)]">
-                      <table className="w-full min-w-[56rem] text-sm">
-                        {tableHead}
-                        <tbody className="divide-y divide-[var(--line)]">
-                          {rows.map((row) => renderRow(row, showLateBadge))}
-                        </tbody>
-                      </table>
+                    <div className="space-y-4">
+                      <div className="space-y-3 md:hidden">
+                        {rows.map((row) => {
+                          const student = row.profiles;
+                          const ai = row.ai_score === null ? null : Number(row.ai_score);
+                          const final = row.final_score === null ? null : Number(row.final_score);
+                          const late = isLate(row);
+                          return (
+                            <div key={row.id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                              <div className="flex items-start gap-3">
+                                <span className="grid size-10 shrink-0 place-items-center rounded-full bg-primary-50 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
+                                  {initials(student?.full_name ?? "?")}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <p className="truncate font-medium text-[var(--ink)]">{student?.full_name ?? "—"}</p>
+                                  <p className="truncate text-xs text-[var(--ink-muted)]">{student ? `@${student.username}` : ""}</p>
+                                </div>
+                                <span
+                                  className={
+                                    row.status === "graded"
+                                      ? "shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+                                      : row.status === "flagged"
+                                        ? "shrink-0 rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+                                        : "shrink-0 rounded-full bg-amber-50 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
+                                  }
+                                >
+                                  {ts(row.status)}
+                                </span>
+                              </div>
+                              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--ink-muted)]">
+                                <span>{t("attemptOf", { current: attemptNumber.get(row.id) ?? 1, total: byStudent.get(row.student_id)?.length ?? 1 })}</span>
+                                <span>{formatDate(row.created_at, locale, { dateStyle: "medium", timeStyle: "short" })}</span>
+                                {ai !== null ? <span>AI {formatNumber(ai, locale, 1)}</span> : null}
+                                {final !== null ? <span>Final {formatNumber(final, locale, 1)}</span> : null}
+                                {showLateBadge ? (late ? t("lateBadge") : t("onTimeBadge")) : null}
+                              </div>
+                              <div className="mt-3">
+                                <Link href={`/admin/assignments/${assignment.id}/submissions/${row.id}`} className={`${buttonSecondary} px-3 py-1.5 text-xs`}>
+                                  {t("review")}
+                                </Link>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="hidden md:block overflow-x-auto rounded-xl border border-[var(--line)]">
+                        <table className="w-full min-w-[56rem] text-sm">
+                          {tableHead}
+                          <tbody className="divide-y divide-[var(--line)]">
+                            {rows.map((row) => renderRow(row, showLateBadge))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   )}
                 </section>

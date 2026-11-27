@@ -54,7 +54,35 @@ export default async function AdminSessionsPage({ params }: { params: Promise<{ 
               <EmptyState title={t("empty")} />
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="space-y-4">
+              <div className="space-y-3 md:hidden">
+              {sessions.map((session) => (
+                <div key={session.id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <Link href={`/admin/sessions/${session.id}`} className="min-w-0 font-medium text-[var(--ink)] hover:text-primary-600">
+                      {session.title}
+                    </Link>
+                    {session.code_active ? (
+                      <span className={liveBadge}>{t("codeActive")}</span>
+                    ) : session.code_expires_at ? (
+                      <span className={mutedBadge}>{t("codeExpired")}</span>
+                    ) : (
+                      <span className={mutedBadge}>{t("noCode")}</span>
+                    )}
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--ink-muted)]">
+                    <span>{formatDate(session.session_date, locale)}</span>
+                    <span>{session.checked_in_count}/{session.class_size}</span>
+                  </div>
+                  <div className="mt-3">
+                    <Link href={`/admin/sessions/${session.id}`} className={`${buttonSecondary} px-3 py-1.5 text-xs`}>
+                      {t("open")}
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full min-w-[38rem] text-sm">
                 <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>
@@ -115,6 +143,7 @@ export default async function AdminSessionsPage({ params }: { params: Promise<{ 
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </Card>

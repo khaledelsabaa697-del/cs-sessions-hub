@@ -333,8 +333,27 @@ export function CsvImportForm({ locale }: { locale: string }) {
           ) : previewRows.length === 0 ? (
             <p className="mt-3 text-sm text-[var(--ink-muted)]">{t("previewEmpty")}</p>
           ) : (
-            <div className="mt-3 overflow-x-auto">
-              <table className="w-full min-w-[34rem] text-sm">
+            <div className="mt-3 space-y-4">
+              <div className="space-y-2 md:hidden">
+                {previewRows.map((row) => (
+                  <div key={`${row.line}-${row.username}`} className="glass-inset rounded-xl p-3 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-mono text-[var(--ink-muted)]">{t("line")} {row.line}</span>
+                      {row.issue === null ? (
+                        <span className="font-medium text-emerald-600 dark:text-emerald-400">{t("previewReady")}</span>
+                      ) : (
+                        <span className="font-medium text-rose-600 dark:text-rose-400">
+                          {row.issue === "duplicate" ? t("previewDuplicate") : t("previewInvalidRow")}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 font-mono text-[var(--ink-soft)]">{row.username || "—"}</p>
+                    <p className="text-[var(--ink-soft)]">{row.full_name || "—"}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full min-w-[34rem] text-sm">
                 <thead>
                   <tr className="border-b border-[var(--line)] text-start text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                     <th scope="col" className="py-2 pe-3 text-start font-medium">
@@ -372,6 +391,7 @@ export function CsvImportForm({ locale }: { locale: string }) {
                   ))}
                 </tbody>
               </table>
+              </div>
               {preview && preview.length > PREVIEW_LIMIT ? (
                 <p className="mt-2 text-xs text-[var(--ink-muted)]">{t("previewLimit", { count: PREVIEW_LIMIT })}</p>
               ) : null}
@@ -398,8 +418,21 @@ export function CsvImportForm({ locale }: { locale: string }) {
             </button>
           </div>
 
-          <div className="mt-4 overflow-x-auto">
-            <table className="w-full min-w-[32rem] text-sm">
+          <div className="mt-4 space-y-4">
+            <div className="space-y-2 md:hidden">
+              {state.rows.map((row) => (
+                <div key={`${row.line}-${row.username}`} className="glass-inset rounded-xl p-3 text-xs">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="font-mono text-[var(--ink-muted)]">{t("line")} {row.line}</span>
+                    <span className="font-mono text-[var(--ink-soft)]">{row.student_code || "—"}</span>
+                  </div>
+                  <p className="mt-1 font-mono text-[var(--ink-soft)]">{row.username}</p>
+                  <p className="text-[var(--ink-muted)]">{row.ok ? t("rowCreated") : t("rowFailed")}</p>
+                </div>
+              ))}
+            </div>
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full min-w-[32rem] text-sm">
               <thead>
                 <tr className="border-b border-[var(--line)] text-start text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <th scope="col" className="py-2 pe-3 text-start font-medium">
@@ -435,6 +468,7 @@ export function CsvImportForm({ locale }: { locale: string }) {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {successfulRows.length > 0 ? (

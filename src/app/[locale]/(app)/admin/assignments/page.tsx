@@ -79,7 +79,47 @@ export default async function AdminAssignmentsPage({ params }: { params: Promise
             <EmptyState title={t("empty")} description={t("emptyHint")} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="space-y-3 md:hidden">
+            {assignments.map((assignment) => {
+              const overview = overviewById.get(assignment.id);
+              const open = !assignment.deadline || Date.parse(assignment.deadline) > now;
+              const pending = overview?.pending_count ?? 0;
+              return (
+                <div key={assignment.id} className="glass-card rounded-2xl p-2.5 sm:p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-[var(--ink)]">{assignment.title}</p>
+                      <p className="mt-0.5 truncate text-xs text-[var(--ink-muted)]">
+                        {assignment.description || t("noDescription")}
+                      </p>
+                    </div>
+                    <span className={open ? "shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300" : "shrink-0 rounded-full bg-[var(--glass-inset)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-soft)] "}>
+                      {open ? t("open") : t("closed")}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-[var(--ink-muted)]">
+                    <span>
+                      {assignment.deadline ? formatDate(assignment.deadline, locale, { dateStyle: "medium", timeStyle: "short" }) : t("noDeadline")}
+                    </span>
+                    {overview ? (
+                      <span>{t("studentsSubmitted", { submitted: formatNumber(overview.student_count, locale), total: formatNumber(overview.class_size, locale) })}</span>
+                    ) : null}
+                    {pending > 0 ? <span>{formatNumber(pending, locale)} pending</span> : null}
+                    {overview?.average_percent !== null && overview?.average_percent !== undefined ? (
+                      <span>{formatNumber(overview.average_percent, locale, 1)}%</span>
+                    ) : null}
+                  </div>
+                  <div className="mt-3">
+                    <Link href={`/admin/assignments/${assignment.id}`} className={`${buttonSecondary} px-3 py-1.5 text-xs`}>
+                      {t("manage")}
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full min-w-[52rem] text-sm">
               <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
@@ -183,6 +223,7 @@ export default async function AdminAssignmentsPage({ params }: { params: Promise
               </tbody>
             </table>
           </div>
+            </div>
         )}
       </Card>
     </div>

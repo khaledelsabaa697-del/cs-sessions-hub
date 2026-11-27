@@ -50,7 +50,32 @@ export default async function HrStudentDetailPage({ params }: { params: Promise<
             <EmptyState title={t("noStudents")} />
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div className="space-y-4">
+            <div className="space-y-2 md:hidden">
+            {detail.sessions.map((sess) => (
+              <div key={sess.session_id} className="glass-inset flex items-center justify-between gap-3 rounded-xl px-3 py-2">
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-[var(--ink)]">{sess.title}</p>
+                  <p className="text-xs text-[var(--ink-muted)]">{formatDate(sess.session_date, locale, { dateStyle: "medium" })}</p>
+                </div>
+                <div className="shrink-0 text-end">
+                  <span
+                    className={
+                      sess.status === "present"
+                        ? "rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
+                        : sess.excused
+                          ? "rounded-full bg-[var(--glass-inset)] px-2.5 py-0.5 text-[11px] font-medium text-[var(--ink-soft)] "
+                          : "rounded-full bg-rose-50 px-2.5 py-0.5 text-[11px] font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300"
+                    }
+                  >
+                    {sess.excused ? t("excusedLabel") : sess.status}
+                  </span>
+                  {sess.excuse_note ? <p className="mt-1 text-xs text-[var(--ink-muted)]">{sess.excuse_note}</p> : null}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full min-w-[40rem] text-sm">
               <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                 <tr>
@@ -85,6 +110,7 @@ export default async function HrStudentDetailPage({ params }: { params: Promise<
               </tbody>
             </table>
           </div>
+            </div>
         )}
       </Card>
 
