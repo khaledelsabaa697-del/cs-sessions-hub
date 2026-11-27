@@ -218,8 +218,37 @@ export function AdminAttendanceClient({
               <EmptyState title={t("noMarked")} description={t("noMarkedHint")} />
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[30rem] text-sm">
+            <>
+              <div className="space-y-2 md:hidden">
+                {markedStudents.map((student) => (
+                  <form key={student.id} action={removeAction} className="glass-card flex items-center gap-3 rounded-2xl p-2.5 sm:p-3">
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="session_id" value={selectedSession!.id} />
+                    <input type="hidden" name="student_id" value={student.id} />
+                    <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-50 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
+                      {initials(student.full_name)}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
+                      <p className="truncate text-xs text-[var(--ink-muted)]">
+                        {student.username ? `@${student.username} · ` : ""}
+                        {student.student_code}
+                      </p>
+                    </div>
+                    <div className="flex shrink-0 flex-col items-end gap-1">
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${statusClasses[student.status]}`}>
+                        {ts(student.status)}
+                      </span>
+                      <button type="submit" disabled={removeState.status === "success"} className="text-xs font-medium text-rose-600 hover:text-rose-700 dark:text-rose-400 dark:hover:text-rose-300">
+                        {t("remove")}
+                      </button>
+                    </div>
+                    {removeState.status === "error" ? <Alert>{removeState.error}</Alert> : null}
+                  </form>
+                ))}
+              </div>
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full min-w-[30rem] text-sm">
                 <thead className="bg-[var(--glass-inset)] text-xs uppercase tracking-wide text-[var(--ink-muted)] ">
                   <tr>
                     <th scope="col" className="px-5 py-3 text-start font-medium">
@@ -279,7 +308,8 @@ export function AdminAttendanceClient({
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </Card>
       </div>
