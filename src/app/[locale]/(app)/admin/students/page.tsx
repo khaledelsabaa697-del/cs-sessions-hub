@@ -10,7 +10,7 @@ import { Alert, Card, CardHeader, EmptyState, PageHeader, buttonSecondary, input
 import { requireAdmin } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
-import { formatDate, formatNumber, initials } from "@/lib/utils";
+import { cn, formatDate, formatNumber, initials } from "@/lib/utils";
 import type { StudentMetric } from "@/lib/types";
 
 type StudentRow = {
@@ -93,7 +93,7 @@ export default async function AdminStudentsPage({
                 defaultValue={search}
                 maxLength={60}
                 placeholder={t("searchPlaceholder")}
-                className={inputClass}
+                className={cn(inputClass, "min-w-0")}
               />
               <button type="submit" className={`${buttonSecondary} shrink-0`}>
                 {tc("search")}

@@ -263,7 +263,8 @@
     "markedCount": "Marked",
     "openAttendance": "Open attendance",
     "allClear": "All clear",
-    "quickActions": "Quick links"
+    "quickActions": "Quick links",
+    "selectStudent": "Select a student"
   },
   "profile": {
     "title": "Profile",

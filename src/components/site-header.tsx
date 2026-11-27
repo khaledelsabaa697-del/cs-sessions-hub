@@ -21,6 +21,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { Link, usePathname } from "@/i18n/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { Profile } from "@/lib/types";
 import { cn, initials } from "@/lib/utils";
@@ -34,6 +35,8 @@ type NavItem = { href: string; label: string; icon: LucideIcon; exact?: boolean 
 export function SiteHeader({ profile }: { profile: Profile }) {
   const locale = useLocale();
   const pathname = usePathname();
+  const navRef = useRef<HTMLDivElement>(null);
+  const activeRef = useRef<HTMLAnchorElement>(null);
   const t = useTranslations("nav");
   const tc = useTranslations("common");
   const tr = useTranslations("roles");
@@ -78,6 +81,47 @@ export function SiteHeader({ profile }: { profile: Profile }) {
 
   const isActive = (item: NavItem) =>
     item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
+
+  const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const closeMenu = () => {
+    setOpen(false);
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
+  };
+
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!target) return;
+      if (triggerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMenu();
+      }
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    const firstItem = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+    firstItem?.focus();
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
+
+  useEffect(() => {
+    activeRef.current?.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+  }, [pathname]);
 
   return (
     <>
@@ -139,11 +183,21 @@ export function SiteHeader({ profile }: { profile: Profile }) {
             <LocaleSwitcher />
             <ThemeToggle />
 
-            <details className="group relative">
-              <summary
+            <div className="relative">
+              <button
+                ref={triggerRef}
+                type="button"
                 aria-haspopup="menu"
+                aria-expanded={open}
                 aria-label={t("accountMenu")}
-                className="flex cursor-pointer list-none items-center gap-2 rounded-full border border-transparent p-1 transition hover:border-[var(--line)] hover:bg-[var(--glass-inset)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bronze-400 [&::-webkit-details-marker]:hidden"
+                onClick={() => setOpen((value) => !value)}
+                onKeyDown={(event) => {
+                  if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setOpen(true);
+                  }
+                }}
+                className="flex min-h-11 min-w-11 items-center gap-2 rounded-full border border-transparent p-1 transition hover:border-[var(--line)] hover:bg-[var(--glass-inset)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bronze-400 sm:min-h-9 sm:min-w-9"
               >
                 <span className="grid size-8 place-items-center rounded-full bg-gradient-to-br from-bronze-500 to-bronze-700 font-mono text-[10px] font-bold text-white ring-1 ring-inset ring-white/20">
                   {initials(profile.display_name)}
@@ -157,40 +211,71 @@ export function SiteHeader({ profile }: { profile: Profile }) {
                   </span>
                 </span>
                 <ChevronDown
-                  className="hidden size-3.5 text-[var(--ink-muted)] transition group-open:rotate-180 sm:block"
+                  className={cn("hidden size-3.5 text-[var(--ink-muted)] transition sm:block", open && "rotate-180")}
                   aria-hidden="true"
                 />
-              </summary>
+              </button>
 
-              <div className="glass-card absolute end-0 z-50 mt-2 w-64 overflow-hidden rounded-2xl p-1.5">
-                <div className="border-b border-[var(--line)] px-3 pb-2.5 pt-1.5">
-                  <p className="caption-code">{t("signedInAs")}</p>
-                  <p className="mt-1 truncate text-sm font-semibold text-[var(--ink)]">{profile.display_name}</p>
-                  <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-[var(--ink-muted)]">
-                    <span className="truncate">@{profile.username}</span>
-                    <span aria-hidden="true">·</span>
-                    <span className="text-bronze-600 dark:text-bronze-300">{profile.student_code}</span>
-                  </div>
-                </div>
-                <Link
-                  href="/profile"
-                  className="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-[var(--ink-soft)] transition hover:bg-[var(--glass-inset)] hover:text-[var(--ink)]"
+              {open ? (
+                <div
+                  ref={menuRef}
+                  role="menu"
+                  aria-label={t("accountMenu")}
+                  onKeyDown={(event) => {
+                    const items = Array.from(menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? []);
+                    const index = items.indexOf(document.activeElement as HTMLElement);
+                    if (event.key === "Escape") {
+                      event.preventDefault();
+                      closeMenu();
+                    } else if (event.key === "ArrowDown") {
+                      event.preventDefault();
+                      items[(index + 1 + items.length) % items.length]?.focus();
+                    } else if (event.key === "ArrowUp") {
+                      event.preventDefault();
+                      items[(index - 1 + items.length) % items.length]?.focus();
+                    } else if (event.key === "Home") {
+                      event.preventDefault();
+                      items[0]?.focus();
+                    } else if (event.key === "End") {
+                      event.preventDefault();
+                      items[items.length - 1]?.focus();
+                    }
+                  }}
+                  className="absolute end-0 top-full z-[60] mt-2 w-64 max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-[var(--line)] bg-[var(--bg)] p-1.5 shadow-2xl"
                 >
-                  <UserRound className="size-4" aria-hidden="true" />
-                  {t("profile")}
-                </Link>
-                <form action={logoutAction}>
-                  <input type="hidden" name="locale" value={locale} />
-                  <button
-                    type="submit"
-                    className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-start text-sm font-medium text-rose-600 transition hover:bg-rose-500/10 dark:text-rose-300"
+                  <div className="border-b border-[var(--line)] px-3 pb-2.5 pt-1.5">
+                    <p className="caption-code">{t("signedInAs")}</p>
+                    <p className="mt-1 truncate text-sm font-semibold text-[var(--ink)]">{profile.display_name}</p>
+                    <div className="mt-1 flex items-center gap-2 font-mono text-[10px] text-[var(--ink-muted)]">
+                      <span className="truncate">@{profile.username}</span>
+                      <span aria-hidden="true">·</span>
+                      <span className="text-bronze-600 dark:text-bronze-300">{profile.student_code}</span>
+                    </div>
+                  </div>
+                  <Link
+                    href="/profile"
+                    role="menuitem"
+                    onClick={closeMenu}
+                    className="mt-1 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-[var(--ink-soft)] transition hover:bg-[var(--glass-inset)] hover:text-[var(--ink)] focus:bg-[var(--glass-inset)] focus:text-[var(--ink)] focus:outline-none"
                   >
-                    <LogOut className="size-4" aria-hidden="true" />
-                    {t("signOut")}
-                  </button>
-                </form>
-              </div>
-            </details>
+                    <UserRound className="size-4" aria-hidden="true" />
+                    {t("profile")}
+                  </Link>
+                  <form action={logoutAction}>
+                    <input type="hidden" name="locale" value={locale} />
+                    <button
+                      type="submit"
+                      role="menuitem"
+                      onClick={closeMenu}
+                      className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-start text-sm font-medium text-rose-600 transition hover:bg-rose-500/10 focus:bg-rose-500/10 focus:outline-none dark:text-rose-300"
+                    >
+                      <LogOut className="size-4" aria-hidden="true" />
+                      {t("signOut")}
+                    </button>
+                  </form>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </header>
@@ -200,16 +285,19 @@ export function SiteHeader({ profile }: { profile: Profile }) {
         className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--line)] bg-[color-mix(in_oklab,var(--bg)_86%,transparent)] pb-[env(safe-area-inset-bottom)] backdrop-blur-xl lg:hidden"
         aria-label={tc("appName")}
       >
-        <div className="flex items-stretch gap-0.5 overflow-x-auto px-2 py-1.5">
+        <div className="pointer-events-none absolute inset-y-0 start-0 z-10 w-6 bg-gradient-to-e from-[var(--bg)] to-transparent" aria-hidden="true" />
+        <div className="pointer-events-none absolute inset-y-0 end-0 z-10 w-6 bg-gradient-to-s from-[var(--bg)] to-transparent" aria-hidden="true" />
+        <div ref={navRef} className="flex items-stretch gap-0.5 overflow-x-auto px-2 py-1.5 snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {links.map((item) => {
             const Icon = item.icon;
             const active = isActive(item);
             return (
               <Link
+                ref={active ? activeRef : undefined}
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex min-w-14 shrink-0 flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-[9px] font-medium transition",
+                  "relative flex min-w-14 shrink-0 snap-start flex-col items-center gap-0.5 rounded-xl px-2 py-1.5 text-xs font-medium transition",
                   active ? "text-bronze-700 dark:text-bronze-200" : "text-[var(--ink-muted)] hover:text-[var(--ink)]",
                 )}
                 aria-current={active ? "page" : undefined}

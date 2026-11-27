@@ -36,7 +36,7 @@ export function WarningForm({
           {t("colStudent")}
         </label>
         <select id="w-student" name="student_id" defaultValue={defaultStudentId ?? ""} className={inputClass} required>
-          <option value="">—</option>
+          <option value="" disabled>{t("selectStudent")}</option>
           {students.map((s) => (
             <option key={s.id} value={s.id}>
               {s.full_name} ({s.student_code})

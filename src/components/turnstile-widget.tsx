@@ -240,8 +240,8 @@ export function TurnstileWidget({ onVerify, theme = "auto", language, resetKey =
   const visibleError = status === "error" ? (error ?? loadErrorMessage) : error;
 
   return (
-    <div>
-      <div ref={containerRef} className="cf-turnstile" />
+    <div className="max-w-full overflow-hidden">
+      <div ref={containerRef} className="cf-turnstile max-w-full" />
       {visibleError && (
         <div className="mt-1.5 flex flex-wrap items-center gap-2" role="alert">
           <p className="text-xs text-rose-600 dark:text-rose-400">{visibleError}</p>

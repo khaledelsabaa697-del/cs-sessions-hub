@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { cn, initials } from "@/lib/utils";
+import { CheckCircle2, Info, XCircle } from "lucide-react";
 import { CountUp } from "@/components/motion/count-up";
 
 export const inputClass =
   "w-full rounded-xl border border-[var(--line-strong)] bg-[var(--glass-inset)] px-3.5 py-2.5 text-sm text-[var(--ink)] shadow-[inset_0_1px_0_rgb(255_255_255/0.04)] outline-none transition placeholder:text-[var(--ink-muted)] focus:border-bronze-400 focus:ring-4 focus:ring-bronze-500/15 disabled:cursor-not-allowed disabled:opacity-60";
 
-export const labelClass = "mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]";
+export const labelClass = "mb-1.5 block text-xs font-semibold uppercase tracking-[0.14em] text-[var(--ink-muted)]";
 
 export const focusRing = "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bronze-400";
 
@@ -25,7 +26,7 @@ export const buttonGhost = cn(
 );
 
 export const iconButtonClass = cn(
-  "inline-flex size-9 items-center justify-center rounded-lg text-[var(--ink-soft)] transition hover:bg-[var(--glass-inset)] hover:text-[var(--ink)] disabled:opacity-60",
+  "inline-flex size-11 items-center justify-center rounded-lg text-[var(--ink-soft)] transition hover:bg-[var(--glass-inset)] hover:text-[var(--ink)] disabled:opacity-60 sm:size-9",
   focusRing,
 );
 
@@ -136,13 +137,19 @@ export function Alert({ tone = "error", children }: { tone?: "error" | "success"
     success: "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-200",
     info: "border-sky-500/30 bg-sky-500/10 text-sky-800 dark:text-sky-200",
   };
+  const icons = {
+    error: <XCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />,
+    success: <CheckCircle2 className="mt-0.5 size-4 shrink-0" aria-hidden="true" />,
+    info: <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />,
+  };
 
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={cn("rounded-xl border px-3.5 py-2.5 font-mono text-xs leading-relaxed backdrop-blur", tones[tone])}
+      className={cn("flex items-start gap-2 rounded-xl border px-3.5 py-2.5 font-mono text-xs leading-relaxed backdrop-blur", tones[tone])}
     >
-      {children}
+      {icons[tone]}
+      <div className="min-w-0">{children}</div>
     </div>
   );
 }

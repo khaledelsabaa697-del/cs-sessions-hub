@@ -263,7 +263,8 @@
     "markedCount": "مسجل",
     "openAttendance": "فتح الحضور",
     "allClear": "كل شيء واضح",
-    "quickActions": "روابط سريعة"
+    "quickActions": "روابط سريعة",
+    "selectStudent": "اختر الطالب"
   },
   "profile": {
     "title": "الملف الشخصي",

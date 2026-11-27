@@ -79,7 +79,7 @@
   --bg-deep: #e2e9f3;
   --ink: #0b1a2b;
   --ink-soft: #3f5268;
-  --ink-muted: #6b7c91;
+  --ink-muted: #5a6b80;
   --line: rgb(12 36 64 / 0.11);
   --line-strong: rgb(12 36 64 / 0.18);
   --glass: rgb(255 255 255 / 0.72);
@@ -293,8 +293,8 @@
   }
 
   .caption-code {
-    font-size: 0.6875rem;
-    line-height: 1rem;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--ink-muted);

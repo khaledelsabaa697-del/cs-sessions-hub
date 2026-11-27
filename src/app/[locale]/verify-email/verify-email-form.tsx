@@ -192,7 +192,7 @@ export function VerifyEmailForm({ locale, email }: { locale: string; email: stri
 
       <p className="mt-6 text-center text-xs text-[var(--ink-muted)]">
         {t("verifyHelp")}
-        <Link href={`/${locale}/login`} className="ml-1 font-semibold underline underline-offset-2 hover:no-underline">
+        <Link href={`/${locale}/login`} className="ms-1 font-semibold underline underline-offset-2 hover:no-underline">
           {t("backToLogin")}
         </Link>
       </p>

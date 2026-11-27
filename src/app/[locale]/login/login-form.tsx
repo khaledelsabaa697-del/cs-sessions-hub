@@ -86,7 +86,7 @@ export function LoginForm({ locale, next }: { locale: string; next?: string }) {
 
       <p className="mt-6 text-center text-xs text-[var(--ink-muted)]">
         {t("noAccount")}
-        <Link href={`/${locale}/signup`} className="ml-1 font-semibold underline underline-offset-2 hover:no-underline">
+        <Link href={`/${locale}/signup`} className="ms-1 font-semibold underline underline-offset-2 hover:no-underline">
           {t("signUp")}
         </Link>
       </p>

@@ -118,7 +118,7 @@ export function SignupForm({ locale }: { locale: string }) {
             dir="ltr"
             maxLength={72}
             placeholder={t("passwordPlaceholder")}
-            className={`${inputClass} pr-10`}
+            className={`${inputClass} pe-10`}
           />
           <button
             type="button"
@@ -191,7 +191,7 @@ export function SignupForm({ locale }: { locale: string }) {
 
       <p className="mt-6 text-center text-sm text-[var(--ink-soft)] ">
         {t("alreadyHaveAccount")}
-        <Link href={`/${locale}/login`} className="ml-1 font-semibold underline underline-offset-2 hover:no-underline">
+        <Link href={`/${locale}/login`} className="ms-1 font-semibold underline underline-offset-2 hover:no-underline">
           {t("signIn")}
         </Link>
       </p>

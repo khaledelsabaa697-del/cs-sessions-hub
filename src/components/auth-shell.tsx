@@ -148,7 +148,7 @@ export async function AuthShell({
               {children}
             </div>
             <div className="mt-6 text-center font-mono text-[10px] leading-relaxed text-[var(--ink-muted)]">
-              {footer ?? t("footerNote")}
+              {footer === undefined ? t("footerNote") : footer}
             </div>
           </div>
         </div>
