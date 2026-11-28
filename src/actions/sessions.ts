@@ -225,7 +225,7 @@ export async function saveAttendanceAction(
     return { status: "error", error: t("errors.saveFailed") };
   }
 
-  const entries = new Map<string, "present" | "late" | "absent" | "none">();
+  const entries = new Map<string, "present" | "late" | "absent" | "excused" | "none">();
   for (const [key, value] of formData.entries()) {
     if (!key.startsWith("status:")) continue;
     const studentId = idSchema.safeParse(key.slice("status:".length));
@@ -271,7 +271,7 @@ export async function saveAttendanceAction(
   const rows: Array<{
     session_id: string;
     student_id: string;
-    status: "present" | "late" | "absent";
+    status: "present" | "late" | "absent" | "excused";
     marked_by: string;
   }> = [];
   const unmarked: string[] = [];

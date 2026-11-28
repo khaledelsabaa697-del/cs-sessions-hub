@@ -30,7 +30,7 @@ import { formatDate, formatNumber, cairoToday, cn } from "@/lib/utils";
 import { levelFor, rankTierFor, TIER_STYLES } from "@/lib/gamification";
 import type { LeaderboardEntry, PointsBreakdown, WeeklyProgress } from "@/lib/types";
 
-type AttendanceRow = { status: "present" | "absent" | "late" };
+type AttendanceRow = { status: "present" | "absent" | "late" | "excused" };
 type SubmissionRow = {
   assignment_id: string;
   final_score: number | null;

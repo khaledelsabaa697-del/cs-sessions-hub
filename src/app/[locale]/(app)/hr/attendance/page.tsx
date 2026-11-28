@@ -9,7 +9,7 @@ import { Alert, Card, CardHeader, PageHeader, buttonSecondary, inputClass, label
 
 type SessionRow = { id: string; title: string; session_date: string };
 type StudentRow = { id: string; full_name: string; student_code: string };
-type AttendanceRow = { student_id: string; status: "present" | "absent" | "late" };
+type AttendanceRow = { student_id: string; status: "present" | "absent" | "late" | "excused" };
 
 export default async function HrAttendancePage({
   params,

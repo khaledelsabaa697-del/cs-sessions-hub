@@ -82,7 +82,7 @@ export const rotateCodeSchema = z.object({
   minutes: z.coerce.number().int().min(1).max(240),
 });
 
-export const attendanceStatusSchema = z.enum(["present", "late", "absent"]);
+export const attendanceStatusSchema = z.enum(["present", "late", "absent", "excused"]);
 export type AttendanceStatusValue = z.infer<typeof attendanceStatusSchema>;
 
 export const idSchema = z.string().uuid();

@@ -21,7 +21,7 @@ type StudentRow = {
 
 type AttendanceRow = {
   student_id: string;
-  status: "present" | "absent" | "late";
+  status: "present" | "absent" | "late" | "excused";
 };
 
 type QueryResult<T> = { data: T[] | null; error: { message: string } | null };

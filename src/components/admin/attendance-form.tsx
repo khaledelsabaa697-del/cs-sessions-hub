@@ -16,7 +16,7 @@ type Student = {
 };
 
 const initialState: AttendanceSaveState = { status: "idle" };
-const STATUSES = ["present", "late", "absent"] as const;
+const STATUSES = ["present", "late", "absent", "excused"] as const;
 
 export function AttendanceForm({
   locale,
@@ -42,10 +42,11 @@ export function AttendanceForm({
       if (value === "present") totals.present += 1;
       else if (value === "late") totals.late += 1;
       else if (value === "absent") totals.absent += 1;
+      else if (value === "excused") totals.excused = (totals.excused ?? 0) + 1;
       else totals.unmarked += 1;
       return totals;
     },
-    { present: 0, late: 0, absent: 0, unmarked: 0 },
+    { present: 0, late: 0, absent: 0, excused: 0, unmarked: 0 },
   );
   const marked = students.length - counts.unmarked;
 
@@ -79,6 +80,9 @@ export function AttendanceForm({
             </span>
             <span className="rounded-full bg-rose-50 px-2.5 py-1 font-medium text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
               {ts("absent")}: {counts.absent}
+            </span>
+            <span className="rounded-full bg-sky-50 px-2.5 py-1 font-medium text-sky-700 dark:bg-sky-500/10 dark:text-sky-300">
+              {ts("excused")}: {counts.excused}
             </span>
             <span className="rounded-full bg-[var(--glass-inset)] px-2.5 py-1 font-medium text-[var(--ink-soft)] ">
               {t("notMarked")}: {counts.unmarked}

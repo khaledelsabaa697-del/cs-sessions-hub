@@ -24,6 +24,7 @@ const statusClasses: Record<AttendanceStatus | "none", string> = {
     "bg-emerald-50 text-emerald-700 ring-emerald-600/10 dark:bg-emerald-500/10 dark:text-emerald-300 dark:ring-emerald-400/20",
   late: "bg-amber-50 text-amber-700 ring-amber-600/10 dark:bg-amber-500/10 dark:text-amber-300 dark:ring-amber-400/20",
   absent: "bg-rose-50 text-rose-700 ring-rose-600/10 dark:bg-rose-500/10 dark:text-rose-300 dark:ring-rose-400/20",
+  excused: "bg-sky-50 text-sky-700 ring-sky-600/10 dark:bg-sky-500/10 dark:text-sky-300 dark:ring-sky-400/20",
   none: "bg-[var(--glass-inset)] text-[var(--ink-soft)] ring-slate-500/10 dark:ring-slate-400/20",
 };
 
@@ -54,7 +55,7 @@ export default async function StudentAttendancePage({ params }: { params: Promis
   const sessions = sessionsResult.data ?? [];
   const statusBySession = new Map((attendanceResult.data ?? []).map((row) => [row.session_id, row.status]));
 
-  const counts = { present: 0, late: 0, absent: 0 };
+  const counts = { present: 0, late: 0, absent: 0, excused: 0 };
   for (const session of sessions) {
     const status = statusBySession.get(session.id);
     if (status) counts[status] += 1;

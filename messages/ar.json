@@ -60,7 +60,8 @@
   "attendanceStatus": {
     "present": "حاضر",
     "absent": "غائب",
-    "late": "متأخر"
+    "late": "متأخر",
+    "excused": "معذور"
   },
   "auth": {
     "brandTitle": "حصتك في C++، منظّمة.",

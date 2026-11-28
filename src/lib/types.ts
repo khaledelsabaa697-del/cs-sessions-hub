@@ -1,5 +1,5 @@
 export type UserRole = "student" | "teacher" | "admin" | "hr";
-export type AttendanceStatus = "present" | "absent" | "late";
+export type AttendanceStatus = "present" | "absent" | "late" | "excused";
 export type SubmissionStatus =
   | "pending"
   | "queued"
