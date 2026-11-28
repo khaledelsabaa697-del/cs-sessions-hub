@@ -11,7 +11,7 @@ import { initials } from "@/lib/utils";
 type Student = {
   id: string;
   full_name: string;
-  username: string;
+  username?: string;
   student_code: string;
 };
 
@@ -104,7 +104,11 @@ export function AttendanceForm({
                         </span>
                         <div className="min-w-0">
                           <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
-                          <p className="truncate text-xs text-[var(--ink-muted)]">@{student.username}</p>
+                          {student.username ? (
+                            <p className="truncate text-xs text-[var(--ink-muted)]">@{student.username}</p>
+                          ) : (
+                            <p className="truncate text-xs text-[var(--ink-muted)]">{student.student_code}</p>
+                          )}
                         </div>
                       </div>
                     </td>

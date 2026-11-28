@@ -77,7 +77,8 @@ export async function updateSessionAction(
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "admin.session" });
 
-  if (!(await isCurrentUserStaff())) {
+  const profile = await getCurrentProfile();
+  if (!profile || !["admin", "teacher", "hr"].includes(profile.role)) {
     return { status: "error", error: t("errors.forbidden") };
   }
 

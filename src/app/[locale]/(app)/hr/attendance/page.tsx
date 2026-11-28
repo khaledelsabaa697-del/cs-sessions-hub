@@ -4,7 +4,8 @@ import { requireHr } from "@/lib/auth";
 import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
-import { AdminAttendanceClient } from "../../admin/admin-attendance-client";
+import { AttendanceForm } from "@/components/admin/attendance-form";
+import { Alert, Card, CardHeader, PageHeader, buttonSecondary, inputClass, labelClass } from "@/components/ui";
 
 type SessionRow = { id: string; title: string; session_date: string };
 type StudentRow = { id: string; full_name: string; student_code: string };
@@ -22,9 +23,13 @@ export default async function HrAttendancePage({
   setRequestLocale(locale);
 
   await requireHr(locale);
+  const t = await getTranslations("admin.attendance");
+  const ts = await getTranslations("attendanceStatus");
+  const tc = await getTranslations("common");
 
   const { session: sessionIdParam } = await searchParams;
   const supabase = await createClient();
+
   const [sessionsResult, studentsResult] = await Promise.all([
     supabase
       .from("sessions")
@@ -32,52 +37,89 @@ export default async function HrAttendancePage({
       .order("session_date", { ascending: false })
       .limit(100)
       .returns<SessionRow[]>(),
-    // HR has no SELECT on profiles (it contains emails); use the narrow RPC.
     supabase.rpc("hr_list_students"),
   ]);
 
   const sessions = sessionsResult.data ?? [];
   const allStudents = (studentsResult.data ?? []) as StudentRow[];
+
   const selectedSession = sessionIdParam
     ? (sessions.find((s) => s.id === sessionIdParam) ?? null)
     : (sessions[0] ?? null);
 
-  const statusByStudent = new Map<string, "present" | "absent" | "late">();
+  let attendanceResult: { data: AttendanceRow[] | null; error: { message: string } | null } = {
+    data: null,
+    error: null,
+  };
   if (selectedSession) {
-    const attendanceResult = await supabase
+    attendanceResult = await supabase
       .from("attendance")
       .select("student_id, status")
       .eq("session_id", selectedSession.id)
       .returns<AttendanceRow[]>();
-    for (const row of attendanceResult.data ?? []) {
-      statusByStudent.set(row.student_id, row.status);
-    }
   }
 
-  const presentStudents = allStudents
-    .filter((s) => statusByStudent.get(s.id) === "present")
-    .map((s) => ({ ...s, status: "present" as const }));
-  const lateStudents = allStudents
-    .filter((s) => statusByStudent.get(s.id) === "late")
-    .map((s) => ({ ...s, status: "late" as const }));
-  const absentStudents = allStudents
-    .filter((s) => statusByStudent.get(s.id) === "absent")
-    .map((s) => ({ ...s, status: "absent" as const }));
-  const markedStudents = [...presentStudents, ...lateStudents, ...absentStudents];
+  const existing = Object.fromEntries(
+    (attendanceResult.data ?? []).map((row) => [row.student_id, row.status]),
+  ) as Record<string, "present" | "absent" | "late">;
 
-  const errorMessages: string[] = [];
-  if (sessionsResult.error) errorMessages.push(sessionsResult.error.message);
-  if (studentsResult.error) errorMessages.push(studentsResult.error.message);
-  const hasError = errorMessages.length > 0;
+  const students = allStudents.map((student) => ({
+    id: student.id,
+    full_name: student.full_name,
+    username: "",
+    student_code: student.student_code,
+  }));
+
+  const hasError = Boolean(sessionsResult.error || studentsResult.error || attendanceResult.error);
 
   return (
-    <AdminAttendanceClient
-      locale={locale}
-      sessions={sessions}
-      markedStudents={markedStudents}
-      selectedSession={selectedSession}
-      hasError={hasError}
-      errorMessage={process.env.NODE_ENV !== "production" ? errorMessages.join("; ") : undefined}
-    />
+    <div className="space-y-6">
+      <PageHeader
+        title={t("title")}
+        description={t("subtitle")}
+        action={
+          <Link href="/hr" className={buttonSecondary}>
+            {tc("back")}
+          </Link>
+        }
+      />
+
+      {hasError ? <Alert>{t("loadError")}</Alert> : null}
+
+      <Card>
+        <CardHeader title={t("recordTitle")} description={t("recordSubtitle")} />
+        <div className="p-5">
+          <label htmlFor="hr-session-select" className={labelClass}>
+            {t("sessionLabel")}
+          </label>
+          <select
+            id="hr-session-select"
+            className={inputClass}
+            onChange={(event) => {
+              const params = new URLSearchParams(window.location.search);
+              if (event.target.value) params.set("session", event.target.value);
+              else params.delete("session");
+              window.location.href = `?${params.toString()}`;
+            }}
+            value={selectedSession?.id ?? ""}
+          >
+            <option value="">{t("selectSession")}</option>
+            {sessions.map((session) => (
+              <option key={session.id} value={session.id}>
+                {session.title} — {formatDate(session.session_date, locale)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </Card>
+
+      {selectedSession ? (
+        <AttendanceForm locale={locale} sessionId={selectedSession.id} students={students} existing={existing} />
+      ) : (
+        <Card className="p-5">
+          <p className="text-sm text-[var(--ink-muted)]">{t("selectSessionFirst")}</p>
+        </Card>
+      )}
+    </div>
   );
 }
