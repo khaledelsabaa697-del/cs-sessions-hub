@@ -77,8 +77,7 @@ export async function updateSessionAction(
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "admin.session" });
 
-  const profile = await getCurrentProfile();
-  if (!profile || !["admin", "teacher", "hr"].includes(profile.role)) {
+  if (!(await isCurrentUserStaff())) {
     return { status: "error", error: t("errors.forbidden") };
   }
 
@@ -216,7 +215,8 @@ export async function saveAttendanceAction(
   const locale = toLocale(formData.get("locale"));
   const t = await getTranslations({ locale, namespace: "admin.session" });
 
-  if (!(await isCurrentUserStaff())) {
+  const profile = await getCurrentProfile();
+  if (!profile || !["admin", "teacher", "hr"].includes(profile.role)) {
     return { status: "error", error: t("errors.forbidden") };
   }
 
@@ -256,18 +256,38 @@ export async function saveAttendanceAction(
   }
 
   const ids = [...entries.keys()];
-  const { data: validStudents, error: studentsError } = await supabase
-    .from("profiles")
-    .select("id")
-    .eq("role", "student")
-    .in("id", ids);
+  let validStudentIds: string[] = [];
 
-  if (studentsError) {
-    console.error("saveAttendanceAction lookup failed:", studentsError.message);
-    return { status: "error", error: t("errors.saveFailed") };
+  if (profile.role === "hr") {
+    // HR has no SELECT on profiles, so validate through the SECURITY DEFINER
+    // RPC that only exposes id, full_name and student_code for students.
+    const { data: validStudents, error: studentsError } = await supabase.rpc(
+      "hr_find_students",
+      { p_ids: ids, p_codes: null },
+    );
+
+    if (studentsError) {
+      console.error("saveAttendanceAction hr_find_students failed:", studentsError.message);
+      return { status: "error", error: t("errors.saveFailed") };
+    }
+
+    validStudentIds = ((validStudents ?? []) as Array<{ id: string }>).map((row) => row.id);
+  } else {
+    const { data: validStudents, error: studentsError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("role", "student")
+      .in("id", ids);
+
+    if (studentsError) {
+      console.error("saveAttendanceAction lookup failed:", studentsError.message);
+      return { status: "error", error: t("errors.saveFailed") };
+    }
+
+    validStudentIds = (validStudents ?? []).map((row) => row.id);
   }
 
-  const validIds = new Set((validStudents ?? []).map((row) => row.id));
+  const validIds = new Set(validStudentIds);
   const rows: Array<{
     session_id: string;
     student_id: string;
@@ -318,6 +338,8 @@ export async function saveAttendanceAction(
   revalidatePath(`/${locale}/admin/sessions`);
   revalidatePath(`/${locale}/dashboard`);
   revalidatePath(`/${locale}/attendance`);
+  revalidatePath(`/${locale}/hr/attendance`);
+  revalidatePath(`/${locale}/hr/students`);
 
   return { status: "success", message: t("attendanceSaved") };
 }

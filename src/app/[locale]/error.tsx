@@ -9,6 +9,7 @@ export default function LocaleError({ error, reset }: { error: Error & { digest?
 
   useEffect(() => {
     console.error("[Error Boundary] Error caught:", error.message);
+    console.error("[Error Boundary] Digest:", error.digest);
     console.error("[Error Boundary] Stack:", error.stack);
     if (error.cause) console.error("[Error Boundary] Cause:", error.cause);
   }, [error]);

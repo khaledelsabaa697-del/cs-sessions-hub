@@ -5,7 +5,9 @@ import { toLocale } from "@/lib/locale";
 import { createClient } from "@/lib/supabase/server";
 import { formatDate } from "@/lib/utils";
 import { AttendanceForm } from "@/components/admin/attendance-form";
-import { Alert, Card, CardHeader, PageHeader, buttonSecondary, inputClass, labelClass } from "@/components/ui";
+import { HrSessionSelect } from "@/components/hr/hr-session-select";
+import { Alert, Card, CardHeader, PageHeader, buttonSecondary } from "@/components/ui";
+import type { AttendanceStatus } from "@/lib/types";
 
 type SessionRow = { id: string; title: string; session_date: string };
 type StudentRow = { id: string; full_name: string; student_code: string };
@@ -24,8 +26,7 @@ export default async function HrAttendancePage({
 
   await requireHr(locale);
   const t = await getTranslations("admin.attendance");
-  const ts = await getTranslations("attendanceStatus");
-  const tc = await getTranslations("common");
+  const tSession = await getTranslations("admin.session");
 
   const { session: sessionIdParam } = await searchParams;
   const supabase = await createClient();
@@ -39,6 +40,13 @@ export default async function HrAttendancePage({
       .returns<SessionRow[]>(),
     supabase.rpc("hr_list_students"),
   ]);
+
+  if (sessionsResult.error) {
+    console.error("[hr/attendance] sessions query failed:", sessionsResult.error);
+  }
+  if (studentsResult.error) {
+    console.error("[hr/attendance] hr_list_students RPC failed:", studentsResult.error);
+  }
 
   const sessions = sessionsResult.data ?? [];
   const allStudents = (studentsResult.data ?? []) as StudentRow[];
@@ -57,11 +65,14 @@ export default async function HrAttendancePage({
       .select("student_id, status")
       .eq("session_id", selectedSession.id)
       .returns<AttendanceRow[]>();
+    if (attendanceResult.error) {
+      console.error("[hr/attendance] attendance query failed:", attendanceResult.error);
+    }
   }
 
   const existing = Object.fromEntries(
     (attendanceResult.data ?? []).map((row) => [row.student_id, row.status]),
-  ) as Record<string, "present" | "absent" | "late">;
+  ) as Record<string, AttendanceStatus>;
 
   const students = allStudents.map((student) => ({
     id: student.id,
@@ -70,16 +81,21 @@ export default async function HrAttendancePage({
     student_code: student.student_code,
   }));
 
+  const sessionOptions = sessions.map((session) => ({
+    id: session.id,
+    label: `${session.title} — ${formatDate(session.session_date, locale)}`,
+  }));
+
   const hasError = Boolean(sessionsResult.error || studentsResult.error || attendanceResult.error);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title={t("title")}
-        description={t("subtitle")}
+        description={tSession("attendanceSubtitle")}
         action={
           <Link href="/hr" className={buttonSecondary}>
-            {tc("back")}
+            {t("backToAdmin")}
           </Link>
         }
       />
@@ -87,29 +103,14 @@ export default async function HrAttendancePage({
       {hasError ? <Alert>{t("loadError")}</Alert> : null}
 
       <Card>
-        <CardHeader title={t("recordTitle")} description={t("recordSubtitle")} />
+        <CardHeader title={t("title")} description={tSession("attendanceSubtitle")} />
         <div className="p-5">
-          <label htmlFor="hr-session-select" className={labelClass}>
-            {t("sessionLabel")}
-          </label>
-          <select
-            id="hr-session-select"
-            className={inputClass}
-            onChange={(event) => {
-              const params = new URLSearchParams(window.location.search);
-              if (event.target.value) params.set("session", event.target.value);
-              else params.delete("session");
-              window.location.href = `?${params.toString()}`;
-            }}
-            value={selectedSession?.id ?? ""}
-          >
-            <option value="">{t("selectSession")}</option>
-            {sessions.map((session) => (
-              <option key={session.id} value={session.id}>
-                {session.title} — {formatDate(session.session_date, locale)}
-              </option>
-            ))}
-          </select>
+          <HrSessionSelect
+            label={t("sessionLabel")}
+            placeholder={t("selectSession")}
+            sessions={sessionOptions}
+            selectedId={selectedSession?.id ?? null}
+          />
         </div>
       </Card>
 
