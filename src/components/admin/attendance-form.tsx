@@ -96,7 +96,25 @@ export function AttendanceForm({
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="space-y-2 md:hidden">
+            {students.map((student) => (
+              <div key={student.id} className="glass-inset flex items-center gap-3 rounded-xl px-3 py-2">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-primary-50 text-xs font-semibold text-primary-700 dark:bg-primary-500/10 dark:text-primary-300">
+                  {initials(student.full_name)}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-medium text-[var(--ink)]">{student.full_name}</p>
+                  <p className="truncate text-xs text-[var(--ink-muted)]">{student.username ? `@${student.username}` : student.student_code}</p>
+                </div>
+                <label className="sr-only" htmlFor={`status-${student.id}`}>{student.full_name}</label>
+                <select id={`status-${student.id}`} name={`status:${student.id}`} value={statuses[student.id] ?? "none"} onChange={(event) => setStatuses((current) => ({ ...current, [student.id]: event.target.value }))} className={`${inputClass} w-28 py-1.5 text-sm`}>
+                  <option value="none">{t("notMarked")}</option>
+                  {STATUSES.map((status) => (<option key={status} value={status}>{ts(status)}</option>))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <tbody className="divide-y divide-[var(--line)]">
                 {students.map((student) => (
