@@ -89,6 +89,9 @@
   --shadow-card: 0 22px 50px -30px rgb(6 21 32 / 0.38);
   --grid-line: rgb(12 36 64 / 0.055);
   color-scheme: light;
+  /* Opaque surface/foreground for native select popups (glass tokens are translucent). */
+  --select-surface: var(--color-surface-light);
+  --select-foreground: var(--ink);
 }
 
 .dark {
@@ -106,6 +109,8 @@
   --shadow-card: 0 26px 60px -32px rgb(0 0 0 / 0.9);
   --grid-line: rgb(255 255 255 / 0.045);
   color-scheme: dark;
+  --select-surface: var(--color-surface-dark);
+  --select-foreground: var(--ink);
 }
 
 @layer base {
@@ -170,6 +175,15 @@
   select,
   button {
     font: inherit;
+  }
+
+  /* Native dropdown popups are painted by the browser and ignore the
+     translucency of the glass tokens, so give them an opaque surface and the
+     theme's foreground colour in both themes. */
+  select option,
+  select optgroup {
+    background-color: var(--select-surface);
+    color: var(--select-foreground);
   }
 
   * {
